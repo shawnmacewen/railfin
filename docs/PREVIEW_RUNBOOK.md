@@ -28,7 +28,11 @@ Default URL:
 ## Preview routes
 
 - Login page: `http://localhost:3000/login`
-- Editor preview page: `http://localhost:3000/app/editor`
+- Create page (current editor flow host): `http://localhost:3000/app/create`
+- Library scaffold page: `http://localhost:3000/app/library`
+- Campaigns scaffold page: `http://localhost:3000/app/campaigns`
+- Configure scaffold page: `http://localhost:3000/app/configure`
+- Legacy editor path (redirects to `/app/create`): `http://localhost:3000/app/editor`
 
 ## API routes used by preview UI
 

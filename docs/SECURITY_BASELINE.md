@@ -60,3 +60,31 @@ Verification source of truth for middleware guard behavior is **root `middleware
 ## Historical Note (task-00017)
 
 The earlier **BLOCKED** finding for missing `/app/*` guard wiring is resolved by the middleware restoration above.
+
+## task-00042 — Shell/nav security visibility baseline
+
+### Baseline assumptions
+
+- Current shell is treated as a **single authenticated product role** (no in-app role split enforced yet).
+- Navigation visibility is therefore currently aligned with authenticated access, not role-level authorization.
+- Route protection for product surfaces continues to rely on middleware scope for `/app/:path*` plus server-side checks where sensitive actions are introduced.
+
+### Future admin-role notes (`/configure`, `/admin`)
+
+- `/configure` and `/admin` are treated as **future privileged surfaces** and should not be exposed by default to the single-role shell nav.
+- When admin RBAC lands, both nav visibility and route/action authorization must enforce `admin` (or equivalent privileged claim), not just UI hiding.
+- Direct URL access to admin surfaces must fail closed (redirect to safe location or return 403) for non-admin users.
+
+### Access-control matrix (shell pages)
+
+| Surface | Unauthenticated | Authenticated (current single-role) | Authenticated (future non-admin) | Authenticated (future admin) | Guard expectation |
+|---|---|---|---|---|---|
+| `/login` | Allowed | Allowed (typically redirects into app flow) | Allowed | Allowed | Public entry point; sanitize `next` to internal paths only. |
+| `/app/*` | Redirect to `/login?next=...` | Allowed | Allowed | Allowed | Enforced by middleware matcher `/app/:path*`; server checks required for sensitive operations. |
+| `/configure` (planned) | Deny/redirect to login | Not yet exposed as privileged in current baseline | Deny/redirect or 403 | Allowed | Require explicit admin-role guard in middleware/server handlers; nav item visible only to admin. |
+| `/admin` (planned) | Deny/redirect to login | Not yet exposed as privileged in current baseline | Deny/redirect or 403 | Allowed | Require explicit admin-role guard in middleware/server handlers; never rely on client-only visibility control. |
+
+### Verification outcome (task-00042)
+
+- Outcome: **PASS**
+- Type: Documentation baseline alignment (no runtime behavior change introduced in this task)

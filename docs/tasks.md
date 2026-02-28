@@ -262,3 +262,35 @@
   - Refined editor draft-save UX in `src/ui/editor-shell.tsx` with clearer disabled guidance, saving lock, and stronger status feedback handling.
   - Expanded compliance action feedback in `src/ui/compliance-panel.tsx` to include completion status (success/no findings) while preserving existing API contract shape.
   - Applied modern, minimal visual state styling in `src/app/globals.css` (`card`, status variants, disabled treatment) without redesigning layout structure.
+
+## task-00040 — UI — App shell foundation (left nav + header)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00040-app-shell-foundation`
+- Scope delivered:
+  - Added reusable app shell in `src/ui/app-shell.tsx` and mounted it in `src/app/app/layout.tsx`.
+  - Added persistent left navigation items: `Create`, `Library`, `Campaigns`, `Configure`.
+  - Added top header with active page title + env badge placeholder + user menu placeholder.
+  - Wired editor flow under `Create` route via `src/app/app/create/page.tsx`, with redirects from `/app` and `/app/editor` to `/app/create`.
+  - Added minimal UI primitives in `src/ui/primitives.tsx` (`Button`, `Card`, `Badge`, `NavItem`) and baseline shell styling in `src/app/globals.css`.
+
+## task-00041 — DEV — Route/layout wiring for app shell pages
+
+- Status: **Done**
+- Branch: `feat/dev/task-00041-shell-route-wiring`
+- Scope delivered:
+  - Added `/app` shell layout wiring with shared navigation for `create`, `library`, `campaigns`, and `configure`.
+  - Added scaffold pages for `/app/create`, `/app/library`, `/app/campaigns`, and `/app/configure`.
+  - Moved current editor flow host to `/app/create` and kept `/app/editor` as compatibility redirect.
+  - Added top-level route shortcuts (`/create`, `/library`, `/campaigns`, `/configure`) that redirect into guarded `/app/*` routes.
+  - Kept `/app/*` middleware guard compatibility unchanged.
+
+## task-00042 — SEC — Shell/nav security visibility baseline
+
+- Status: **Done**
+- Branch: `chore/sec/task-00042-shell-security-baseline`
+- Scope delivered:
+  - Updated shell/navigation security visibility baseline documentation.
+  - Recorded current single-role assumption for shell nav/page visibility.
+  - Added future role-split notes for admin-only surfaces (`/configure`, `/admin`).
+  - Documented guard expectations for `/app/*` pages and added concise access-control matrix for shell pages.

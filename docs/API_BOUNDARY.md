@@ -54,3 +54,21 @@ Examples:
 Notes:
 - Endpoint is stubbed contract wiring only.
 - No real model invocation behavior is changed in this stage.
+
+## App Shell Route Map (MVP wiring)
+
+The app shell is anchored under guarded `/app/*` routes:
+
+- `/app/create` → current editor flow host (`EditorShell`)
+- `/app/library` → library scaffold placeholder
+- `/app/campaigns` → campaigns scaffold placeholder
+- `/app/configure` → configure scaffold placeholder
+
+Compatibility / convenience routes:
+
+- `/app/editor` → redirects to `/app/create` (legacy preview compatibility)
+- `/create`, `/library`, `/campaigns`, `/configure` → redirect to their `/app/*` equivalents
+
+Guard compatibility note:
+
+- Middleware matcher remains `/app/:path*`; guard behavior is unchanged.

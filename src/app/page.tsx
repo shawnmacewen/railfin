@@ -9,7 +9,16 @@ export default function HomePage() {
           <Link href="/login">/login</Link>
         </li>
         <li>
-          <Link href="/app/editor">/app/editor</Link>
+          <Link href="/create">/create</Link>
+        </li>
+        <li>
+          <Link href="/library">/library</Link>
+        </li>
+        <li>
+          <Link href="/campaigns">/campaigns</Link>
+        </li>
+        <li>
+          <Link href="/configure">/configure</Link>
         </li>
       </ul>
     </main>
