@@ -547,3 +547,14 @@
   - Added fail-closed UUID validation for draft handoff `id` in draft read path before DB access.
   - Added `POST /api/internal/content/draft` route handler wiring while preserving stable `{ ok, data, error, fieldErrors }` contracts.
   - Updated API/security docs to capture controls and behavior.
+
+## task-00081 — DEV — Production draft persistence fix/verify (diagnostics + operator evidence)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00081-prod-draft-persistence-verify`
+- Scope delivered:
+  - Diagnosed primary persistence break: draft-create IDs were non-UUID while draft-read route now fail-closed validates UUID, causing create→read/open flow mismatch.
+  - Updated Supabase draft writer to emit UUID ids (`crypto.randomUUID`) so POST-created ids satisfy GET validation contract.
+  - Improved blocked diagnostics for draft table operations by surfacing safe root-cause hints (missing table vs permission vs code) without exposing secrets.
+  - Expanded `docs/LAUNCH_EVIDENCE.md` with operator-ready production proof runbook and explicit evidence package checklist for URL/SHA/timestamp + POST/GET + table proof.
+  - Verified local runtime env evidence remains unavailable in this workspace context (no `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` set here), so production verification remains operator-blocked.

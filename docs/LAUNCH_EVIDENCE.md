@@ -1,8 +1,8 @@
 # Launch Readiness Evidence
 
-Last updated (UTC): 2026-02-28 17:42
-Prepared by: DEV (task-00060)
-Branch: `chore/dev/task-00060-launch-evidence-capture`
+Last updated (UTC): 2026-02-28 23:58
+Prepared by: DEV (task-00081)
+Branch: `feat/dev/task-00081-prod-draft-persistence-verify`
 
 ## Evidence Checklist (current status)
 
@@ -41,6 +41,29 @@ Branch: `chore/dev/task-00060-launch-evidence-capture`
 - Required proof source:
   - Production smoke test output (curl/Postman/test harness) with request/response captures, and
   - Supabase table row evidence for created draft id.
+
+**Operator verification runbook (production proof capture):**
+
+1. Capture deployment anchor first:
+   - production URL
+   - deployed git SHA
+   - timestamp (UTC)
+2. Create draft:
+   - `curl -sS -X POST "$APP_URL/api/internal/content/draft" -H 'content-type: application/json' -d '{"title":"prod-smoke","body":"task-00081 proof"}'`
+   - Save full JSON response and extract `data.id`.
+3. Read draft back by id:
+   - `curl -sS "$APP_URL/api/internal/content/draft?id=$DRAFT_ID"`
+   - Save full JSON response.
+4. Confirm Supabase table evidence:
+   - Query/filter `public.drafts` by the same `$DRAFT_ID` in Supabase SQL editor/table UI.
+   - Capture screenshot (id/title/body/created_at visible).
+
+**Evidence package must include:**
+
+- Deployed URL + SHA + UTC timestamp in one note/screenshot.
+- POST response (`ok: true`, `data.id` present).
+- GET response (`ok: true`, same `data.id`).
+- Supabase `public.drafts` row proof for same id.
 
 ### 4) AI provider primary/fallback runtime check
 

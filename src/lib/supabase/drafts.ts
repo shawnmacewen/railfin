@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -47,6 +49,37 @@ const REQUIRED_SQL = `create table if not exists public.drafts (
 
 const DEFAULT_LIST_LIMIT = 20;
 const MAX_LIST_LIMIT = 100;
+
+type DraftOperation = "write" | "read" | "list";
+type DraftTableError = { code?: string | null } | null;
+
+function formatErrorContext(error: DraftTableError): string {
+  if (!error) {
+    return "";
+  }
+
+  if (error.code === "42P01") {
+    return " Root cause: public.drafts table is missing in the connected database.";
+  }
+
+  if (error.code === "42501") {
+    return " Root cause: service role lacks required permission on public.drafts.";
+  }
+
+  return error.code ? ` Root cause code: ${error.code}.` : "";
+}
+
+function blockedTableAccess(operation: DraftOperation, error: DraftTableError): DraftPersistenceBlocked {
+  const preposition = operation === "write" ? "to" : "from";
+
+  return {
+    kind: "BLOCKED",
+    error:
+      `Draft persistence blocked: unable to ${operation} ${preposition} public.drafts. Ensure table exists and service role has access.` +
+      formatErrorContext(error),
+    requiredSql: REQUIRED_SQL,
+  };
+}
 
 function mapDraftRow(row: DraftRow): Draft {
   return {
@@ -116,7 +149,7 @@ export async function createDraftInTable(input: {
   }
 
   const payload = {
-    id: `draft_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    id: randomUUID(),
     title: input.title ?? "Untitled Draft",
     body: input.body ?? "",
   };
@@ -130,12 +163,7 @@ export async function createDraftInTable(input: {
   if (error || !data) {
     return {
       ok: false,
-      blocked: {
-        kind: "BLOCKED",
-        error:
-          "Draft persistence blocked: unable to write to public.drafts. Ensure table exists and service role has access.",
-        requiredSql: REQUIRED_SQL,
-      },
+      blocked: blockedTableAccess("write", error),
     };
   }
 
@@ -162,12 +190,7 @@ export async function readDraftFromTable(
   if (error) {
     return {
       ok: false,
-      blocked: {
-        kind: "BLOCKED",
-        error:
-          "Draft persistence blocked: unable to read from public.drafts. Ensure table exists and service role has access.",
-        requiredSql: REQUIRED_SQL,
-      },
+      blocked: blockedTableAccess("read", error),
     };
   }
 
@@ -202,12 +225,7 @@ export async function listDraftsFromTable(
   if (error) {
     return {
       ok: false,
-      blocked: {
-        kind: "BLOCKED",
-        error:
-          "Draft persistence blocked: unable to list from public.drafts. Ensure table exists and service role has access.",
-        requiredSql: REQUIRED_SQL,
-      },
+      blocked: blockedTableAccess("list", error),
     };
   }
 
