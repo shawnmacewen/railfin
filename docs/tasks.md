@@ -294,3 +294,14 @@
   - Recorded current single-role assumption for shell nav/page visibility.
   - Added future role-split notes for admin-only surfaces (`/configure`, `/admin`).
   - Documented guard expectations for `/app/*` pages and added concise access-control matrix for shell pages.
+
+## task-00043 — DEV — AI compliance engine integration (Codex-first, fallback-ready)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00043-ai-compliance-engine`
+- Scope delivered:
+  - Replaced placeholder-only compliance response path with AI-provider-backed compliance generation in `POST /api/internal/compliance/check`.
+  - Implemented Codex-first provider execution with ChatGPT API fallback capability via existing provider abstraction.
+  - Preserved UI findings contract (`severity`, `issue`, `details`, `suggestion`, `location`) with normalization safeguards.
+  - Added safe fallback output when providers fail or time out to keep endpoint behavior backward compatible.
+  - Updated API boundary docs with provider contract and fallback behavior notes.

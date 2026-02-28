@@ -88,3 +88,25 @@ The earlier **BLOCKED** finding for missing `/app/*` guard wiring is resolved by
 
 - Outcome: **PASS**
 - Type: Documentation baseline alignment (no runtime behavior change introduced in this task)
+
+## task-00045 — AI compliance safety/guardrails checklist
+
+### Guardrails (policy-aligned)
+
+- **No legal-approval claims:** AI compliance results must not be labeled or presented as legal approval, legal sign-off, or legal advice. UI copy, logs, and API payloads must use language such as "automated policy check" or "preliminary compliance signal" and require human/legal review where applicable.
+- **Safe failure on model unavailability:** If the model/provider is unavailable, times out, or returns invalid output, the compliance endpoint must fail closed for release decisions (no implicit PASS). Return a clear degraded-state response that blocks auto-approval and instructs retry/escalation to human review.
+- **Sensitive text logging/redaction:** Request/response logging for compliance checks must apply redaction/minimization. Do not persist raw sensitive text when avoidable; prefer metadata, hashes, or truncated excerpts with explicit redaction markers. Access to any retained diagnostic text must be restricted and audited.
+
+### AI compliance endpoint launch go/no-go checks
+
+| Check | Go criteria | No-go trigger |
+|---|---|---|
+| Legal-approval wording control | Endpoint/UI/docs avoid legal-approval or legal-advice claims; human review requirement is explicit. | Any user-visible or internal claim implies legal sign-off by the model/service. |
+| Failure-mode behavior | Model outage/timeout path returns explicit degraded/error state and blocks automated approval decisions. | Outage path defaults to PASS, silently skips checks, or allows release without escalation. |
+| Logging/redaction controls | Sensitive text handling documented and implemented with minimization/redaction and restricted access. | Raw sensitive payloads are logged broadly, retained without controls, or redaction path is undefined. |
+| Operational readiness evidence | Runbook/checklist includes incident owner + escalation path for model/provider failures. | No named owner/escalation, or on-call cannot distinguish degraded vs healthy compliance state. |
+
+### Verification outcome (task-00045)
+
+- Outcome: **PASS**
+- Type: Documentation + launch-gate checklist alignment (no runtime behavior change introduced in this task)

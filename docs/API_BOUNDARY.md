@@ -23,14 +23,15 @@ Notes:
 - `next` is optional and sanitized to internal redirects only (`/` fallback).
 - No real Supabase credential verification or session issuance happens at this stage.
 
-## Compliance Check Contract (MVP)
+## Compliance Check Contract (AI-backed, fallback-safe)
 
-`POST /api/internal/compliance/check` is currently a contract endpoint for UI integration only.
+`POST /api/internal/compliance/check` is an AI-backed endpoint with a Codex-first provider path and ChatGPT API fallback.
 
 Response JSON:
 
 - Success response: `200` with `{ ok: true, findings: ComplianceFinding[] }`
-- Error response: standard non-2xx shape (UI consumes `error`/`message` defensively)
+- Validation error response: `400` with `{ ok: false, error: string }` (for missing content)
+- Provider failures/timeouts: endpoint returns a safe fallback success payload with normalized findings (contract preserved)
 
 `ComplianceFinding` response object fields (exactly):
 
@@ -39,6 +40,14 @@ Response JSON:
 - `details: string`
 - `suggestion: string`
 - `location: string`
+
+### Provider behavior
+
+- Preferred provider path: `codex`
+- Fallback-capable path: `chatgpt-api`
+- Primary provider can be selected via `AI_PROVIDER` (`codex` default)
+- If primary provider fails or times out, the endpoint automatically retries with the secondary provider
+- If all providers fail, endpoint returns safe fallback findings to keep UI response handling stable
 
 ### `location` normalization
 
@@ -50,10 +59,6 @@ Examples:
 
 - `controls/access-control.yaml:12:3`
 - `unknown:0:0` (fallback when source location is missing/invalid)
-
-Notes:
-- Endpoint is stubbed contract wiring only.
-- No real model invocation behavior is changed in this stage.
 
 ## App Shell Route Map (MVP wiring)
 
