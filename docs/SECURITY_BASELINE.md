@@ -137,3 +137,62 @@ Rerun executed against the canonical repository path: `/home/node/railfin`.
 - Overall outcome: **BLOCKED**
 - Blocker class: **Environment readiness**
 - Not a blocker: Missing/incorrect repository code path
+
+## task-00059 — SEC — Final GO/NO-GO recheck after task-00058 landed on main
+
+Recheck executed on latest `main` commit `b7b9097` from canonical path `/home/node/railfin`.
+
+### Final recheck inputs (current env assumptions)
+
+- [x] `task-00058` code is present on main (`src/lib/supabase/drafts.ts`, `src/api/internal/content/draft.ts`).
+- [x] Draft persistence now actively reads required env at runtime (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`).
+- [x] Explicit blocked-mode diagnostics include required SQL for `public.drafts` table creation.
+- [ ] Required runtime env evidence present in current execution environment.
+- [ ] Confirmed deployed DB/table readiness evidence (`public.drafts` reachable with service role).
+- [ ] Named incident owner/escalation evidence for AI-provider degraded state (from task-00057 launch-gate requirement).
+
+### Final launch GO/NO-GO decision
+
+| Gate | Evidence on latest main | Result |
+|---|---|---|
+| Auth/guard baseline | `/app/:path*` middleware guard and login redirect sanitization behavior remain in place from prior PASS checks. | **PASS** |
+| Draft persistence safety/clarity | Runtime now fails explicitly with structured `blocked` diagnostics when env/table prerequisites are missing. | **PASS** |
+| Environment readiness proof | Current runtime shows no required provider/Supabase env vars and no deployment-level proof of `public.drafts` readiness in this check context. | **BLOCKED** |
+| Operational launch ownership | No explicit on-call/incident escalation artifact attached in checked launch docs. | **BLOCKED** |
+
+### Verdict (task-00059)
+
+- **Final decision: NO-GO (BLOCKED)**
+- Reason class: **Environment/operations readiness**, not code-path absence.
+
+### Residual prerequisites to clear NO-GO
+
+1. Provide deploy-time env evidence for:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - AI provider key(s): `CODEX_API_KEY` and/or fallback key path (`OPENAI_API_KEY`/`CHATGPT_API_KEY`)
+2. Confirm `public.drafts` exists and is writable/readable by service role (apply SQL from `src/lib/supabase/drafts.ts` if missing).
+3. Attach named incident owner + escalation path for AI provider degraded mode in launch/runbook artifacts.
+4. Re-run launch gate once items (1)-(3) are evidenced in target runtime.
+
+## task-00061 — SEC — Deterministic GO/NO-GO policy (evidence model)
+
+Decision source of truth: `docs/LAUNCH_EVIDENCE.md`.
+
+### Deterministic launch decision model
+
+- **GO** only when **all** evidence fields in `docs/LAUNCH_EVIDENCE.md` are marked `Verified: YES`.
+- **NO-GO** when **any Critical: YES** field in `docs/LAUNCH_EVIDENCE.md` is unverified (`Verified: NO` or blank).
+- If any non-critical field exists and is unverified, decision remains **NO-GO** until explicitly waived and documented by release authority.
+
+### Required incident ownership fields (must be filled before GO)
+
+- Incident owner name:
+- Incident owner contact:
+- Escalation backup name:
+- Escalation backup contact:
+
+### Verification outcome (task-00061)
+
+- Outcome: **PASS** (policy/documentation update)
+- Type: Deterministic decision policy + evidence ledger contract alignment

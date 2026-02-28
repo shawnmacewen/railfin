@@ -347,3 +347,32 @@
   - Added explicit BLOCKED output with exact env names + required SQL when runtime env/table access is unavailable.
   - Preserved API contract shape for UI (`ok`, `data`, `error`) while adding `blocked` metadata only for blocked-mode diagnostics.
   - Updated `docs/API_BOUNDARY.md` to reflect final table-backed draft persistence status.
+
+## task-00059 — SEC — Final GO/NO-GO recheck after task-00058 landed on main
+
+- Status: **Done**
+- Branch: `chore/sec/task-00059-final-go-recheck`
+- Scope delivered:
+  - Re-evaluated launch GO/NO-GO against latest `main` (`b7b9097`) from canonical path `/home/node/railfin`.
+  - Confirmed task-00058 runtime behavior now hard-requires Supabase env (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and table access (`public.drafts`) with explicit BLOCKED diagnostics when missing.
+  - Recorded final security baseline decision and residual launch prerequisites in `docs/SECURITY_BASELINE.md`.
+
+## task-00061 — SEC — Go/No-Go policy update using evidence model
+
+- Status: **Done**
+- Branch: `chore/sec/task-00061-go-nogo-evidence-model`
+- Scope delivered:
+  - Updated security baseline with deterministic launch decision model tied to `docs/LAUNCH_EVIDENCE.md`.
+  - Defined explicit GO condition (all evidence verified) and NO-GO condition (any critical evidence unverified).
+  - Added explicit incident owner/escalation placeholders (owner name/contact + backup name/contact).
+  - Added canonical launch evidence ledger template at `docs/LAUNCH_EVIDENCE.md`.
+
+## task-00060 — DEV — Launch-readiness evidence capture (runtime/env/db)
+
+- Status: **Done**
+- Branch: `chore/dev/task-00060-launch-evidence-capture`
+- Scope delivered:
+  - Added `docs/LAUNCH_EVIDENCE.md` with concrete launch-evidence checklist fields for deployment/runtime verification.
+  - Captured current local verification status and explicitly marked non-local proof items as **PENDING** (not blocked).
+  - Added a compact operator checklist section for fast fill-in by release operator (Rolly).
+  - Documented exact proof sources required to close each pending evidence item.
