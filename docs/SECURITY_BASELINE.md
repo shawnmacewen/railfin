@@ -110,3 +110,30 @@ The earlier **BLOCKED** finding for missing `/app/*` guard wiring is resolved by
 
 - Outcome: **PASS**
 - Type: Documentation + launch-gate checklist alignment (no runtime behavior change introduced in this task)
+
+## task-00057 — RLS launch-go verification rerun after path repair
+
+Rerun executed against the canonical repository path: `/home/node/railfin`.
+
+### Rerun checklist
+
+- [x] Canonical path confirmed (`/home/node/railfin`)
+- [x] Launch-go code-path artifacts confirmed present (`middleware.ts`, `src/app/api/internal/compliance/check/route.ts`, `src/ai/providers/*`)
+- [x] Prior path-confusion class eliminated (no reliance on missing `src/middleware.ts` for this decision)
+- [x] Provider-chain failure mode verified in code (safe fallback finding returned when providers fail)
+- [ ] Environment readiness evidence captured in this runtime (provider credentials + named incident owner/escalation)
+
+### GO/NO-GO rerun matrix (task-00057)
+
+| Check | Current evidence (canonical path) | Result | Rationale |
+|---|---|---|---|
+| Legal-approval wording control | Guardrail documented in this baseline; UI/legal-disclaimer language previously verified in hosted smoke rerun context. | **PASS** | Current docs/code context does not present model output as legal sign-off. |
+| Failure-mode behavior | `src/app/api/internal/compliance/check/route.ts` returns safe fallback finding when provider chain throws. | **PASS** | Degraded path is explicit and non-silent; no missing-code-path blocker. |
+| Logging/redaction controls | Guardrail documented at policy level; no contradictory broad raw-payload logger found in current checked files. | **PASS (docs/code baseline)** | Baseline control definition remains intact in canonical code/doc context. |
+| Operational readiness evidence | Runtime env in this rerun has no visible provider credential variables (`CODEX_API_KEY`/`OPENAI_API_KEY`/`CHATGPT_API_KEY`) and no named on-call escalation artifact in checked launch docs. | **BLOCKED (environment)** | Blocker is deployment environment readiness evidence, not repository path/code absence. |
+
+### Rerun outcome (task-00057)
+
+- Overall outcome: **BLOCKED**
+- Blocker class: **Environment readiness**
+- Not a blocker: Missing/incorrect repository code path

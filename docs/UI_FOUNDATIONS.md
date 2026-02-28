@@ -91,3 +91,25 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 - App favicon/icon is provided via `src/app/icon.png` (Next app-router icon file convention).
 - Shell top-left branding in `src/ui/app-shell.tsx` now renders the Railfin logo + wordmark linking to `/app/create`.
 - Supporting minimal shell brand styles are in `src/app/globals.css` (`.rf-brand`, `.rf-brand-logo`).
+
+## Hosted Smoke UX Verification Rerun (task-00056)
+
+Rerun completed after hosted path repair, verifying current route/component contracts without layout redesign.
+
+- Verified route/component wiring:
+  - `/login` and `/preview/login` render `LoginForm`
+  - `/app/create` and `/preview/editor` render `EditorShell` (which mounts `CompliancePanel`)
+- Re-verified login UX assumptions (`src/ui/login.tsx` + `src/app/auth/login/route.ts`):
+  - submit/loading/error states present
+  - internal-only `next` handling retained
+  - redirect contract remains `payload.redirectTo -> safe next -> /`
+- Re-verified create/save UX assumptions (`src/ui/editor-shell.tsx`):
+  - save disabled for empty content
+  - explicit saving/success/error feedback remains intact
+- Re-verified compliance UX assumptions (`src/ui/compliance-panel.tsx`):
+  - action loading/error states present
+  - findings grouped by severity and rendered as cards
+  - legal disclaimer rendering present: **"AI-backed compliance insights are guidance, not legal approval."**
+- Confirmed provider/fallback behavior (`src/app/api/internal/compliance/check/route.ts`):
+  - provider chain remains Codex-first with ChatGPT API fallback
+  - safe fallback finding is returned when providers fail/time out

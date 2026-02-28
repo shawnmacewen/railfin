@@ -326,3 +326,24 @@
   - Confirmed `/app` continues to redirect to `/app/create`.
   - Preserved existing middleware/auth behavior for `/app/*` routes.
   - Updated preview runbook to reflect default landing and redirect behavior.
+
+## task-00055 — DEV — Re-run Supabase/Vercel env runtime verification after path repair
+
+- Status: **Done**
+- Branch: `fix/dev/task-00055-rerun-supabase-runtime-verify`
+- Scope delivered:
+  - Re-ran repository/runtime verification from canonical path (`/home/node/railfin`) and confirmed app build path is healthy after repair.
+  - Re-checked Supabase env presence handling: no runtime `SUPABASE_*` env consumption is currently wired in server auth/content paths.
+  - Re-checked draft persistence path: current internal draft path is in-memory `Map`-backed (`draftStore`), not table-backed persistence.
+  - Confirmed expected `env + table` state is still unmet; blocked-mode rationale remains valid for Supabase-runtime verification stage.
+
+## task-00058 — DEV — Unblock Supabase runtime wiring + table-backed drafts
+
+- Status: **Done**
+- Branch: `fix/dev/task-00058-unblock-supabase-runtime`
+- Scope delivered:
+  - Replaced in-memory draft storage in `src/api/internal/content/draft.ts` with Supabase table-backed create/read operations.
+  - Added runtime Supabase wiring in `src/lib/supabase/drafts.ts` that actively reads `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`.
+  - Added explicit BLOCKED output with exact env names + required SQL when runtime env/table access is unavailable.
+  - Preserved API contract shape for UI (`ok`, `data`, `error`) while adding `blocked` metadata only for blocked-mode diagnostics.
+  - Updated `docs/API_BOUNDARY.md` to reflect final table-backed draft persistence status.

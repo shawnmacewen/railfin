@@ -1,42 +1,27 @@
-type Draft = {
-  id: string;
-  title: string;
-  body: string;
-  createdAt: string;
-};
+import {
+  createDraftInTable,
+  readDraftFromTable,
+} from "@/lib/supabase/drafts";
 
-const draftStore = new Map<string, Draft>();
-
-function makeDraftId(): string {
-  return `draft_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
-export function createDraft(input: { title?: string; body?: string }): Draft {
-  const draft: Draft = {
-    id: makeDraftId(),
-    title: input.title ?? "Untitled Draft",
-    body: input.body ?? "",
-    createdAt: new Date().toISOString(),
-  };
-
-  draftStore.set(draft.id, draft);
-  return draft;
-}
-
-export function readDraft(id: string): Draft | null {
-  return draftStore.get(id) ?? null;
-}
-
-export function internalContentDraft(request: {
+export async function internalContentDraft(request: {
   method: "GET" | "POST";
   id?: string;
   body?: { title?: string; body?: string };
 }) {
   if (request.method === "POST") {
-    const draft = createDraft(request.body ?? {});
+    const created = await createDraftInTable(request.body ?? {});
+
+    if (!created.ok) {
+      return {
+        ok: false,
+        error: created.blocked.error,
+        blocked: created.blocked,
+      };
+    }
+
     return {
       ok: true,
-      data: draft,
+      data: created.draft,
     };
   }
 
@@ -47,8 +32,17 @@ export function internalContentDraft(request: {
     };
   }
 
-  const draft = readDraft(request.id);
-  if (!draft) {
+  const found = await readDraftFromTable(request.id);
+
+  if (!found.ok) {
+    return {
+      ok: false,
+      error: found.blocked.error,
+      blocked: found.blocked,
+    };
+  }
+
+  if (!found.draft) {
     return {
       ok: false,
       error: "Draft not found",
@@ -57,6 +51,6 @@ export function internalContentDraft(request: {
 
   return {
     ok: true,
-    data: draft,
+    data: found.draft,
   };
 }

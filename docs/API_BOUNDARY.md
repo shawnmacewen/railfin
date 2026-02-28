@@ -77,3 +77,39 @@ Compatibility / convenience routes:
 Guard compatibility note:
 
 - Middleware matcher remains `/app/:path*`; guard behavior is unchanged.
+
+## Draft persistence contract (`POST/GET /api/internal/content/draft`)
+
+Draft persistence is table-backed via `public.drafts` and runtime-wired Supabase env access in `src/lib/supabase/drafts.ts`.
+
+### Runtime env requirements (actively read)
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+### Required SQL
+
+```sql
+create table if not exists public.drafts (
+  id text primary key,
+  title text not null,
+  body text not null default '',
+  created_at timestamptz not null default timezone('utc', now())
+);
+```
+
+### Response contract (UI-stable)
+
+- Create success (`POST`): `{ ok: true, data: { id, title, body, createdAt } }`
+- Read success (`GET`): `{ ok: true, data: { id, title, body, createdAt } }`
+- Validation/not-found errors remain:
+  - `{ ok: false, error: "Missing draft id" }`
+  - `{ ok: false, error: "Draft not found" }`
+
+### Explicit BLOCKED output
+
+If runtime env is missing or table access fails, endpoint returns:
+
+- `{ ok: false, error: string, blocked: { kind: "BLOCKED", error: string, missingEnv?: string[], requiredSql: string } }`
+
+This keeps top-level `ok/error` behavior intact for UI while surfacing exact unblock requirements.
