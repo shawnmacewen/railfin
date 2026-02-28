@@ -1,0 +1,14 @@
+.env*
+!.env.example
+
+# OpenClaw/local runtime artifacts
+.openclaw/
+
+# Local assistant bootstrap/persona docs (not product source)
+AGENTS.md
+BOOTSTRAP.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md
