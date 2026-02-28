@@ -89,6 +89,37 @@ The earlier **BLOCKED** finding for missing `/app/*` guard wiring is resolved by
 - Outcome: **PASS**
 - Type: Documentation baseline alignment (no runtime behavior change introduced in this task)
 
+## task-00064 — SEC — Library/configure access-control check
+
+Verification source of truth:
+- `middleware.ts` (`matcher: ['/app/:path*']`, cookie-based auth gate)
+- `src/ui/app-shell.tsx` (`NAV_ITEMS` includes both `Library` and `Configure`)
+- `src/app/app/library/page.tsx` and `src/app/app/configure/page.tsx` (placeholder pages with no role checks)
+
+### Access-check matrix (current role model)
+
+| Route | Unauthenticated | Authenticated (current single-role) | Role-specific restriction present now? | Result |
+|---|---|---|---|---|
+| `/app/library` | Redirect to `/login?next=...` via middleware | Allowed | No (not needed for current baseline) | **PASS** |
+| `/app/configure` | Redirect to `/login?next=...` via middleware | Allowed | **No** (no RBAC split yet) | **PASS (with risk)** |
+
+### Risks observed
+
+- **Risk:** `/app/configure` is currently reachable by any authenticated user because the app is still operating in a single-role model.
+- **Impact:** If privileged configuration actions are added before server-side RBAC is enforced, non-admin authenticated users could gain unintended access.
+
+### Mitigations required
+
+1. Keep `/app/configure` limited to non-sensitive placeholder content until RBAC is implemented.
+2. Add explicit role/claim enforcement for `/app/configure` in server-authoritative guards (middleware and/or route handlers) before shipping privileged actions.
+3. Gate navigation visibility for `Configure` by role once admin/non-admin split is introduced; do not rely on client-only hiding.
+4. Add negative tests proving non-admin authenticated access receives deny behavior (redirect or 403).
+
+### Verification outcome (task-00064)
+
+- Outcome: **PASS** (current behavior matches documented single-role baseline)
+- Residual risk: **OPEN** (future privileged surface exposure risk until RBAC guard is implemented)
+
 ## task-00045 — AI compliance safety/guardrails checklist
 
 ### Guardrails (policy-aligned)

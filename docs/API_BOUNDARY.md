@@ -98,12 +98,28 @@ create table if not exists public.drafts (
 );
 ```
 
+### Request/query contract
+
+- `POST /api/internal/content/draft`
+  - Body: `{ title?: string, body?: string }`
+  - Creates one persisted draft.
+- `GET /api/internal/content/draft?id=<draftId>`
+  - Returns one draft by id.
+- `GET /api/internal/content/draft?q=<query>&limit=<n>&offset=<n>`
+  - Lists persisted drafts with optional basic search and pagination.
+  - `q` searches `title` and `body` (case-insensitive partial match).
+  - `limit` defaults to `20`, minimum `1`, maximum `100`.
+  - `offset` defaults to `0`, minimum `0`.
+
 ### Response contract (UI-stable)
 
-- Create success (`POST`): `{ ok: true, data: { id, title, body, createdAt } }`
-- Read success (`GET`): `{ ok: true, data: { id, title, body, createdAt } }`
-- Validation/not-found errors remain:
-  - `{ ok: false, error: "Missing draft id" }`
+- Create success (`POST`):
+  - `{ ok: true, data: { id, title, body, createdAt } }`
+- Read success (`GET` with `id`):
+  - `{ ok: true, data: { id, title, body, createdAt } }`
+- List/search success (`GET` without `id`):
+  - `{ ok: true, data: { items: Draft[], total: number, limit: number, offset: number, q: string } }`
+- Not-found (`GET` with unknown `id`):
   - `{ ok: false, error: "Draft not found" }`
 
 ### Explicit BLOCKED output
@@ -113,3 +129,20 @@ If runtime env is missing or table access fails, endpoint returns:
 - `{ ok: false, error: string, blocked: { kind: "BLOCKED", error: string, missingEnv?: string[], requiredSql: string } }`
 
 This keeps top-level `ok/error` behavior intact for UI while surfacing exact unblock requirements.
+
+## Draft library list contract (`GET /api/internal/content/list`)
+
+Library listing is wired to table-backed draft persistence (`public.drafts`) and supports simple search and pagination parameters.
+
+### Query params
+
+- `q` (optional): case-insensitive search over `title` and `body`
+- `limit` (optional): requested page size (normalized server-side)
+- `offset` (optional): starting index (normalized server-side)
+
+### Response contract
+
+- Success (`200`):
+  - `{ ok: true, data: { items: Draft[], total: number, limit: number, offset: number, q: string } }`
+- BLOCKED/runtime error (`500`):
+  - `{ ok: false, error: string, blocked: { kind: "BLOCKED", error: string, missingEnv?: string[], requiredSql: string } }`

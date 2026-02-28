@@ -113,3 +113,16 @@ Rerun completed after hosted path repair, verifying current route/component cont
 - Confirmed provider/fallback behavior (`src/app/api/internal/compliance/check/route.ts`):
   - provider chain remains Codex-first with ChatGPT API fallback
   - safe fallback finding is returned when providers fail/time out
+
+## Library UX behavior (task-00063)
+
+- `src/app/app/library/page.tsx` now renders a usable library UI (`LibraryPageContent`) instead of placeholder copy.
+- `src/ui/library-page.tsx` behavior:
+  - fetches drafts from `GET /api/internal/content/list`
+  - includes search input (`type="search"`) and refetches when query changes
+  - shows explicit **loading**, **error**, and **empty** states
+  - renders draft list cards (title, created timestamp, body excerpt) on success
+- Empty-state copy distinguishes between:
+  - no drafts at all
+  - no search matches for current query
+- Styling for list/card presentation is added in `src/app/globals.css` under `rf-library-*` classes.

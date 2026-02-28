@@ -376,3 +376,14 @@
   - Captured current local verification status and explicitly marked non-local proof items as **PENDING** (not blocked).
   - Added a compact operator checklist section for fast fill-in by release operator (Rolly).
   - Documented exact proof sources required to close each pending evidence item.
+
+## task-00063 — UI — Library page implementation (from placeholder to usable)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00063-library-page-usable`
+- Scope delivered:
+  - Replaced `/app/library` placeholder with a usable library page that fetches and renders draft rows.
+  - Added search input and list filtering via internal list endpoint query parameter (`q`).
+  - Added explicit loading, empty, and error states for resilient UX.
+  - Wired internal list endpoint route contract (`GET /api/internal/content/list`) for UI consumption.
+  - Updated UI/API docs with the new library UX and endpoint behavior.

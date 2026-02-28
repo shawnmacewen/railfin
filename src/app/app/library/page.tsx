@@ -1,5 +1,5 @@
-import { Card } from "../../../ui/primitives";
+import { LibraryPageContent } from "@/ui/library-page";
 
 export default function LibraryPage() {
-  return <Card>Library placeholder</Card>;
+  return <LibraryPageContent />;
 }

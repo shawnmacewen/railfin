@@ -22,6 +22,20 @@ export type DraftPersistenceBlocked = {
   requiredSql?: string;
 };
 
+export type DraftListQuery = {
+  q?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type DraftListResult = {
+  items: Draft[];
+  total: number;
+  limit: number;
+  offset: number;
+  q: string;
+};
+
 const REQUIRED_ENV = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 const REQUIRED_SQL = `create table if not exists public.drafts (
@@ -31,12 +45,33 @@ const REQUIRED_SQL = `create table if not exists public.drafts (
   created_at timestamptz not null default timezone('utc', now())
 );`;
 
+const DEFAULT_LIST_LIMIT = 20;
+const MAX_LIST_LIMIT = 100;
+
 function mapDraftRow(row: DraftRow): Draft {
   return {
     id: row.id,
     title: row.title,
     body: row.body,
     createdAt: row.created_at,
+  };
+}
+
+function normalizeListQuery(query: DraftListQuery): Required<DraftListQuery> {
+  const normalizedQ = (query.q ?? "").trim();
+  const normalizedLimit = Math.min(
+    MAX_LIST_LIMIT,
+    Math.max(1, Number.isFinite(query.limit) ? Math.floor(query.limit as number) : DEFAULT_LIST_LIMIT),
+  );
+  const normalizedOffset = Math.max(
+    0,
+    Number.isFinite(query.offset) ? Math.floor(query.offset as number) : 0,
+  );
+
+  return {
+    q: normalizedQ,
+    limit: normalizedLimit,
+    offset: normalizedOffset,
   };
 }
 
@@ -139,6 +174,52 @@ export async function readDraftFromTable(
   return {
     ok: true,
     draft: data ? mapDraftRow(data as DraftRow) : null,
+  };
+}
+
+export async function listDraftsFromTable(
+  query: DraftListQuery,
+): Promise<{ ok: true; result: DraftListResult } | { ok: false; blocked: DraftPersistenceBlocked }> {
+  const draftClient = getDraftClientOrBlocked();
+  if (!draftClient.ok) {
+    return { ok: false, blocked: draftClient.blocked };
+  }
+
+  const normalized = normalizeListQuery(query);
+
+  let statement = draftClient.client
+    .from("drafts")
+    .select("id, title, body, created_at", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(normalized.offset, normalized.offset + normalized.limit - 1);
+
+  if (normalized.q) {
+    statement = statement.or(`title.ilike.%${normalized.q}%,body.ilike.%${normalized.q}%`);
+  }
+
+  const { data, error, count } = await statement;
+
+  if (error) {
+    return {
+      ok: false,
+      blocked: {
+        kind: "BLOCKED",
+        error:
+          "Draft persistence blocked: unable to list from public.drafts. Ensure table exists and service role has access.",
+        requiredSql: REQUIRED_SQL,
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    result: {
+      items: (data ?? []).map((row) => mapDraftRow(row as DraftRow)),
+      total: count ?? 0,
+      limit: normalized.limit,
+      offset: normalized.offset,
+      q: normalized.q,
+    },
   };
 }
 
