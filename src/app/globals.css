@@ -66,6 +66,9 @@ button:disabled {
 }
 
 .rf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -73,6 +76,10 @@ button:disabled {
   color: #454d66;
   margin-bottom: 1rem;
   padding: 0 0.4rem;
+}
+
+.rf-brand-logo {
+  border-radius: 0.35rem;
 }
 
 .rf-nav-list {

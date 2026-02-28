@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { CodexProvider } from "@/ai/providers/CodexProvider";
-import { ChatGPTApiProvider } from "@/ai/providers/ChatGPTApiProvider";
-import { getAIProviderFromEnv, type AIProviderName } from "@/config/aiProvider";
+import { CodexProvider } from "../../../../../ai/providers/CodexProvider";
+import { ChatGPTApiProvider } from "../../../../../ai/providers/ChatGPTApiProvider";
+import { getAIProviderFromEnv, type AIProviderName } from "../../../../../config/aiProvider";
 
 type RawFinding = {
   severity?: string;

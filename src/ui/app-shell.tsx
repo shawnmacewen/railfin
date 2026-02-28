@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Badge, Button, NavItem } from "./primitives";
@@ -23,7 +25,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="rf-shell">
       <aside className="rf-sidebar" aria-label="Primary navigation">
-        <div className="rf-brand">Railfin</div>
+        <Link href="/app/create" className="rf-brand" aria-label="Railfin home">
+          <Image
+            src="/brand/railfin-v1.png"
+            alt="Railfin"
+            width={28}
+            height={28}
+            className="rf-brand-logo"
+            priority
+          />
+          <span>Railfin</span>
+        </Link>
         <nav className="rf-nav-list">
           {NAV_ITEMS.map((item) => (
             <NavItem

@@ -84,3 +84,10 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
   - `Badge`
   - `NavItem`
 - These are intentionally thin wrappers for consistency and future token/theme expansion without introducing a redesign.
+
+## Branding (task-00046)
+
+- Railfin v1 brand asset is stored at `public/brand/railfin-v1.png`.
+- App favicon/icon is provided via `src/app/icon.png` (Next app-router icon file convention).
+- Shell top-left branding in `src/ui/app-shell.tsx` now renders the Railfin logo + wordmark linking to `/app/create`.
+- Supporting minimal shell brand styles are in `src/app/globals.css` (`.rf-brand`, `.rf-brand-logo`).

@@ -305,3 +305,24 @@
   - Preserved UI findings contract (`severity`, `issue`, `details`, `suggestion`, `location`) with normalization safeguards.
   - Added safe fallback output when providers fail or time out to keep endpoint behavior backward compatible.
   - Updated API boundary docs with provider contract and fallback behavior notes.
+
+## task-00046 — UI — Railfin v1 branding asset + top-left logo + favicon
+
+- Status: **Done**
+- Branch: `feat/ui/task-00046-logo-favicon-shell-branding`
+- Scope delivered:
+  - Added Railfin v1 branding asset to `public/brand/railfin-v1.png`.
+  - Added app icon file at `src/app/icon.png` (Next app-router icon convention).
+  - Updated shell branding in `src/ui/app-shell.tsx` to render the Railfin logo in the top-left nav area.
+  - Updated shell styling in `src/app/globals.css` for a clean minimal logo + wordmark treatment.
+  - Added branding note to `docs/UI_FOUNDATIONS.md`.
+
+## task-00047 — DEV — Set default app route to Create dashboard
+
+- Status: **Done**
+- Branch: `feat/dev/task-00047-default-route-to-create`
+- Scope delivered:
+  - Updated root route `/` to redirect to `/app/create`.
+  - Confirmed `/app` continues to redirect to `/app/create`.
+  - Preserved existing middleware/auth behavior for `/app/*` routes.
+  - Updated preview runbook to reflect default landing and redirect behavior.

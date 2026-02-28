@@ -23,10 +23,12 @@ npm run dev
 
 Default URL:
 
-- `http://localhost:3000`
+- `http://localhost:3000` (redirects to `/app/create`; unauthenticated users are then redirected to `/login?next=%2Fapp%2Fcreate` by middleware)
 
 ## Preview routes
 
+- Root: `http://localhost:3000/` (redirects to `/app/create`)
+- App root: `http://localhost:3000/app` (redirects to `/app/create`)
 - Login page: `http://localhost:3000/login`
 - Create page (current editor flow host): `http://localhost:3000/app/create`
 - Library scaffold page: `http://localhost:3000/app/library`
