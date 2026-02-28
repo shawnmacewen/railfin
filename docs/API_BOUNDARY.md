@@ -20,6 +20,7 @@ Internal service endpoints for trusted, non-public use (e.g., internal orchestra
 
 ### Merge Smoke Retry Notes
 - task-00012: docs-only merge-flow smoke retry recorded on branch `chore/dev/task-00012-merge-smoke-retry` to validate branch, commit, and push path.
+- Retry marker: 2026-02-28 UTC.
 
 ## `/api/v1/*`
 External API surface intended for clients and integrations.

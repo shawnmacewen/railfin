@@ -27,6 +27,7 @@
 - Scope completed:
   - Retried merge-flow smoke path with docs-only change set
   - Updated `docs/API_BOUNDARY.md` with merge smoke retry note
+  - Confirmed retry marker note for traceability
 
 ## task-00007 — UI — Login screen + redirect UX baseline (M1 Block C)
 
