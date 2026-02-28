@@ -1,5 +1,120 @@
 # Tasks
 
+## task-00000 — DEV — Supabase wiring + internal draft endpoint scaffold
+
+- Status: **Done**
+- Branch: `feat/dev/task-00000-supabase-wireup`
+- Scope delivered:
+  - Added initial Supabase server scaffold
+  - Added internal draft endpoint scaffold
+  - Added initial API boundary notes
+
+## task-00001 — UI — Editor draft flow shell
+
+- Status: **Done**
+- Branch: `feat/ui/task-00001-editor-draft-flow`
+- Scope delivered:
+  - Added editor shell with content selector, prompt input, draft area, and save button placeholder
+  - Updated UI foundations docs
+
+## task-00002 — SEC — Auth baseline hardening pass
+
+- Status: **Done**
+- Branch: `chore/sec/task-00002-auth-guard-baseline`
+- Scope delivered:
+  - Added/updated security baseline notes and env hygiene checks
+  - Established initial secret-handling checklist
+
+## task-00003 — DEV — Internal generation endpoint scaffold
+
+- Status: **Done**
+- Branch: `feat/dev/task-00003-internal-generate-stub`
+- Scope delivered:
+  - Added internal content generation stub endpoint
+  - Documented provider-abstraction intent (Codex-first, fallback-ready)
+
+## task-00004 — UI — Save Draft wiring to internal endpoint
+
+- Status: **Done**
+- Branch: `feat/ui/task-00004-save-draft-wireup`
+- Scope delivered:
+  - Wired save draft action to internal draft endpoint
+  - Added saving/success/error UI states
+
+## task-00005 — SEC — Middleware reintroduce + auth guard notes
+
+- Status: **Done**
+- Branch: `chore/sec/task-00005-middleware-guard`
+- Scope delivered:
+  - Reintroduced middleware guard skeleton for `/app/*`
+  - Synced security docs to implemented behavior
+
+## task-00006 — SEC — Supabase auth baseline flow
+
+- Status: **Done**
+- Branch: `feat/sec/task-00006-supabase-auth-baseline`
+- Scope delivered:
+  - Added auth flow contract docs (`/login`, `/app/*`, `next` behavior)
+  - Updated security baseline for auth expectations
+
+## task-00007 — UI — Login screen + redirect UX baseline
+
+- Status: **Done**
+- Branch: `feat/ui/task-00007-login-redirect-baseline`
+- Scope delivered:
+  - Added baseline login screen
+  - Added safe redirect handling for `next`
+
+## task-00008 — DEV — Internal compliance-check stub endpoint
+
+- Status: **Done**
+- Branch: `feat/dev/task-00008-internal-compliance-stub`
+- Scope delivered:
+  - Added internal compliance check stub endpoint
+  - Standardized findings output shape for UI use
+
+## task-00009 — DEV — Merge-flow smoke test (first pass)
+
+- Status: **Done**
+- Branch: `chore/dev/task-00009-merge-smoke-doc-touch`
+- Scope delivered:
+  - Verified git repo state and identified initial missing `origin` blocker
+
+## task-00010 — UI — Merge-flow smoke test (first pass)
+
+- Status: **Done**
+- Branch: `chore/ui/task-00010-merge-smoke-doc-touch`
+- Scope delivered:
+  - Verified merge-path prerequisites and surfaced missing remote condition
+
+## task-00011 — SEC — Merge-flow smoke test (first pass)
+
+- Status: **Done**
+- Branch: `chore/sec/task-00011-merge-smoke-doc-touch`
+- Scope delivered:
+  - Verified merge-path prerequisites and surfaced missing remote condition
+
+## task-00012 — DEV — Merge-flow smoke retry
+
+- Status: **Done**
+- Branch: `chore/dev/task-00012-merge-smoke-retry`
+- Scope delivered:
+  - Docs-only branch/commit/push smoke passed after remote fix
+
+## task-00013 — UI — Merge-flow smoke retry
+
+- Status: **Done**
+- Branch: `chore/ui/task-00013-merge-smoke-retry`
+- Scope delivered:
+  - Docs-only branch/commit/push smoke passed after remote fix
+
+## task-00014 — SEC — Merge-flow smoke retry
+
+- Status: **Done**
+- Branch: `chore/sec/task-00014-merge-smoke-retry`
+- Scope delivered:
+  - Docs-only branch/commit/push smoke passed after remote fix
+
 ## task-00015 — DEV — Supabase session helper wiring (MVP integration block)
 
 - Status: **Done**
@@ -137,3 +252,13 @@
     - `src/ui/editor-shell.tsx`
     - `src/ui/compliance-panel.tsx`
   - Verified editor preview route includes draft save controls plus compliance panel/findings area through existing `EditorShell` + `CompliancePanel` composition
+
+## task-00032 — UI — Login/editor UX state polish (minimal production-ready)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00032-login-editor-ux-polish`
+- Scope delivered:
+  - Polished login UX state handling in `src/ui/login.tsx` with explicit loading/success/error messaging, busy disable behavior, and inline status semantics.
+  - Refined editor draft-save UX in `src/ui/editor-shell.tsx` with clearer disabled guidance, saving lock, and stronger status feedback handling.
+  - Expanded compliance action feedback in `src/ui/compliance-panel.tsx` to include completion status (success/no findings) while preserving existing API contract shape.
+  - Applied modern, minimal visual state styling in `src/app/globals.css` (`card`, status variants, disabled treatment) without redesigning layout structure.
