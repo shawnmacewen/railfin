@@ -18,6 +18,15 @@
   - Updated task tracker state for merge-flow smoke retry completion
   - Added merge smoke retry notes to `docs/UI_FOUNDATIONS.md`
 
+## task-00012 — DEV — Merge-flow smoke retry (branch+commit+push)
+
+- Status: Done
+- Previous status: In Progress
+- Branch: `chore/dev/task-00012-merge-smoke-retry`
+- Scope completed:
+  - Retried merge-flow smoke path with docs-only change set
+  - Updated `docs/API_BOUNDARY.md` with merge smoke retry note
+
 ## task-00007 — UI — Login screen + redirect UX baseline (M1 Block C)
 
 - Status: Done
