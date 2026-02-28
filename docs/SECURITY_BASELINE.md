@@ -25,6 +25,7 @@
 - Merge-flow smoke retry completed for task-00014 as a docs-only change.
 - No application logic, auth behavior, or secret-handling rules were modified in this retry.
 - Purpose: validate branch + commit + push flow for SEC process hygiene.
+- Retry marker: 2026-02-28 UTC docs-only verification update.
 
 ## Environment hygiene validation
 

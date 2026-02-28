@@ -8,6 +8,7 @@
 - Scope completed:
   - Updated `docs/tasks.md` status for task-00014 from In Progress to Done
   - Added merge-flow smoke retry note to `docs/SECURITY_BASELINE.md` under "Merge Smoke Retry Notes"
+  - Recorded SEC merge-flow retry verification on the dedicated task branch
 
 ## task-00013 — UI — Merge-flow smoke retry
 
