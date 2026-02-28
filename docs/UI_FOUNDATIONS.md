@@ -24,11 +24,15 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 
 - `/login?next=...` remains middleware-compatible: client forwards `next` only when present and only if it is an internal path (`/` prefix), otherwise it falls back to `/`.
 
-## Compliance Panel (MVP)
+## Compliance Panel (MVP + AI insights UX)
 
 - `src/ui/compliance-panel.tsx` wires the `Run Compliance Check` action to `POST /api/internal/compliance/check` (internal stub endpoint contract).
-- UI handles loading/error states and renders findings using the API shape fields: `severity`, `issue`, `details`, `suggestion`, `location`.
-- Behavior is intentionally minimal and contract-first (no styling overhaul in this task).
+- Existing loading/error flow is preserved (`Running Compliance Check...`, inline `role="alert"` on failure).
+- Findings are now grouped by normalized severity (`critical`, `high`, `medium`, `low`, `unknown`) and rendered as grouped cards.
+- Severity is surfaced with clear visual badges (`.rf-severity-badge` variants) for fast scan/readability.
+- Each finding includes a concise **Remediation Hint** (trimmed from `suggestion` with safe fallback guidance).
+- UI includes explicit compliance disclaimer: **"AI-backed compliance insights are guidance, not legal approval."**
+- No shell/layout redesign: app shell and existing editor flow remain intact.
 
 ## Editor Integration Note
 
