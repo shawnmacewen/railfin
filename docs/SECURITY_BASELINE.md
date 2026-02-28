@@ -227,3 +227,248 @@ Decision source of truth: `docs/LAUNCH_EVIDENCE.md`.
 
 - Outcome: **PASS** (policy/documentation update)
 - Type: Deterministic decision policy + evidence ledger contract alignment
+
+## task-00067 — SEC — Final launch-go recheck against latest main commit
+
+Recheck executed against latest `main` baseline commit `5a90d76` from canonical path `/home/node/railfin`.
+
+### Deterministic model rerun (source of truth)
+
+Policy source: `task-00061` deterministic model in this document.
+Evidence source: `docs/LAUNCH_EVIDENCE.md`.
+
+- Rule: **GO** only if all evidence items are verified.
+- Current evidence state: all four launch evidence checklist items remain **Not Verified**.
+- Deterministic outcome: **NO-GO**.
+
+### Final verdict (concise)
+
+- **Final decision: NO-GO (BLOCKED)**
+- Blocker class: **Missing launch evidence inputs only** (no code-path blocker identified in this rerun).
+
+### Remaining missing evidence inputs (deduplicated)
+
+1. Production deployment proof (Vercel URL + deployed commit SHA + deploy timestamp).
+2. Runtime env proof for required vars (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and configured AI provider key path).
+3. Production draft persistence proof (`POST` create + `GET` read success, backed by `public.drafts`).
+4. AI provider runtime proof (primary path success and fallback-path execution evidence).
+
+## task-00070 — SEC — Configure policy persistence + library handoff access check
+
+Verification scope:
+- Configure policy route: `src/app/api/internal/configure/policy/route.ts` + `src/api/internal/configure/policy.ts`
+- Library flow surface: `src/ui/library-page.tsx` and create route host `src/app/app/create/page.tsx`
+- Global guard context: `middleware.ts` (`/app/:path*` only)
+
+### Risk-check checklist
+
+- [x] Input validation present for configure writes (`policyText` required; empty/whitespace rejected).
+- [x] Policy persistence mode is explicit (`placeholder-memory`) and clearly non-durable in response metadata.
+- [x] Library listing UI remains read-only in current implementation (no server-side mutate action exposed from list rows).
+- [ ] Server-authoritative authz is enforced for `/api/internal/configure/policy` and any future library→create handoff fetch/mutate route.
+- [ ] Future handoff param contract is constrained to internal identifiers and reject-by-default for malformed/unknown IDs.
+
+### Security implications observed
+
+1. **Configure policy API is not middleware-protected by `/app/:path*` matcher scope.**
+   - Current risk: endpoint can be reached outside page-nav gating unless route-level auth is added.
+   - Mitigation: require server-side session/role check in handler (or expand middleware scope safely) before privileged policy behavior is shipped.
+
+2. **Current configure persistence is in-memory placeholder, not durable storage.**
+   - Current risk: policy resets on process restart; operational integrity risk (not direct secret-exfil class by itself).
+   - Mitigation: move to durable store with audit fields (`updatedBy`, timestamp, version) and retain strict validation/length limits.
+
+3. **Library→create handoff route must be treated as untrusted input boundary when introduced/expanded.**
+   - Current risk class (forward-looking): IDOR/data-leak if handoff identifier can load drafts without server ownership/auth checks.
+   - Mitigation: enforce server-side draft access checks, allowlist handoff params, and fail closed (`404/403`) on invalid or unauthorized access.
+
+### Verification outcome (task-00070)
+
+- Outcome: **PASS (with open hardening items)**
+- Residual risk: **OPEN** until route-level authz and fail-closed handoff checks are implemented server-side.
+
+## task-00073 — SEC — Final production GO gate after 00071/00072
+
+Deterministic model source: task-00061 policy in this document.
+Evidence source: `docs/LAUNCH_EVIDENCE.md`.
+
+### Final gate rerun evidence
+
+- Build rerun from canonical path `/home/node/railfin` succeeded after clean build artifact reset (`rm -rf .next && npm run build`).
+- Current route/build surface includes integrated app and UX routes (`/app/create`, `/app/library`, `/app/configure`, `/preview/editor`) and internal APIs (`/api/internal/content/draft`, `/api/internal/content/list`, `/api/internal/configure/policy`, `/api/internal/compliance/check`).
+- Deterministic decision rule remains unchanged: any unverified critical launch evidence item => **NO-GO**.
+
+### Final GO/NO-GO decision (task-00073)
+
+- **Decision: NO-GO**
+- **Reason class: Evidence gaps only (no additional code/build blocker identified in this rerun).**
+
+Concrete remaining evidence gaps:
+1. Production deployment proof (Vercel URL, deployed commit SHA, deploy timestamp).
+2. Production runtime env proof for required vars (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and configured AI provider path).
+3. Production draft create/read proof on `public.drafts` (`POST /api/internal/content/draft` + `GET /api/internal/content/draft?id=<id>` success evidence).
+4. AI provider runtime proof showing both primary execution and fallback execution evidence.
+
+### Verification outcome (task-00073)
+
+- Outcome: **PASS** (security gate rerun completed deterministically)
+- Launch verdict: **NO-GO** pending only the four evidence artifacts above.
+
+## task-00076 — SEC — Policy-context privacy/safety review
+
+Review scope:
+- `src/app/api/internal/configure/policy/route.ts`
+- `src/api/internal/configure/policy.ts`
+- `src/ui/configure-page.tsx`
+- `src/ui/editor-shell.tsx`
+
+### Policy text handling path (reviewed)
+
+1. Client sends/loads policy text via `GET/POST /api/internal/configure/policy`.
+2. Route forwards parsed JSON body (`policyText`) to `saveConfigurePolicy`.
+3. Persistence layer stores `policy_text` in `public.configure_policy` (Supabase).
+4. Success responses return full `policyText`, `updatedAt`, and `version` to caller.
+
+### Exposure/logging risk findings
+
+- No direct raw policy logging was found in reviewed code paths (no `console.*` logging of `policyText` in route/service/UI files).
+- Sensitive policy text is still high-value and can contain internal/legal guidance; leakage risk remains if broad endpoint access or future verbose logging is introduced.
+- Current route contract returns full policy text; this is acceptable for editor UX but increases sensitivity of transport/caching surfaces.
+- Explicit `no-store` cache-control is not currently enforced in route response contract documentation for policy reads/writes.
+
+### Mitigations (required baseline controls)
+
+1. **Log minimization + redaction (must):**
+   - Never log raw `policyText` (request or response body) at info/warn/error levels.
+   - If diagnostics are required, log only metadata (request id, content length, version, hash prefix).
+   - Redact sensitive fragments in any exception path before emitting logs.
+
+2. **Transport/cache hardening (must):**
+   - Treat configure policy responses as sensitive and set/maintain `Cache-Control: no-store` semantics on API responses.
+   - Client fetches for policy context should use non-cacheable request mode for fresh, non-persisted retrieval in shared/browser caches.
+
+3. **Error hygiene (must):**
+   - Keep error payloads generic; do not echo submitted policy text or model-context snippets in failure responses.
+   - Preserve structured blocked diagnostics (env/table requirements) without including user-provided policy body.
+
+4. **Data minimization (should):**
+   - Enforce max policy length and reject oversized payloads to reduce accidental secret dumps.
+   - Consider storing policy revisions with metadata-only audit trail and restricted read access to full text.
+
+### task-00076 checklist snippet
+
+- [x] Reviewed route/service/UI policy text handling path for exposure vectors.
+- [x] Confirmed no direct raw policy logging in reviewed files.
+- [x] Added baseline mitigations for redaction/minimization and diagnostics hygiene.
+- [x] Added baseline mitigations for cache-control and sensitive response handling.
+
+### Verification outcome (task-00076)
+
+- Outcome: **PASS (with hardening actions tracked in baseline controls)**
+- Residual risk: **OPEN** until explicit no-store/cache + max-length controls are enforced in runtime implementation.
+
+## task-00080 — DEV — Sensitive internal route hardening (cache + validation)
+
+Verification scope:
+- `src/app/api/internal/configure/policy/route.ts`
+- `src/api/internal/configure/policy.ts`
+- `src/app/api/internal/content/draft/route.ts`
+
+### Controls added
+
+- Added explicit `Cache-Control: no-store` on sensitive internal responses for:
+  - `GET/POST /api/internal/configure/policy`
+  - `GET/POST /api/internal/content/draft`
+- Added conservative max-length validation for configure policy text:
+  - `policyText` hard limit: `8000` characters (`CONFIGURE_POLICY_MAX_LENGTH`)
+  - Oversized payloads fail with `400` and `fieldErrors` contract.
+- Tightened draft handoff ID validation:
+  - `GET /api/internal/content/draft?id=...` now rejects malformed/non-UUID IDs with `400` before DB access.
+
+### Outcome
+
+- Outcome: **PASS**
+- Residual blockers: **None identified in scope**
+
+## task-00079 — SEC — MVP RC1 final gate template + residual risks register
+
+Deterministic policy source: task-00061 in this document.
+Evidence source of truth: `docs/LAUNCH_EVIDENCE.md`.
+Residual-risk ledger source: `docs/MVP_RISK_REGISTER.md`.
+Canonical path: `/home/node/railfin`.
+
+### MVP RC1 final gate template (security)
+
+Use this template for every RC1 gate decision.
+
+- Gate window UTC:
+- Evaluator (SEC):
+- Release operator (COO):
+- Candidate commit SHA:
+- Environment target (prod/staging):
+- Evidence doc version/hash:
+
+#### Gate checks (must complete)
+
+1. **Launch evidence completeness (critical):** all critical fields in `docs/LAUNCH_EVIDENCE.md` are `Verified: YES`.
+2. **Residual risk register review:** all open residual risks in `docs/MVP_RISK_REGISTER.md` have named owners and explicit status (`Open`, `Accepted`, or `Mitigated`).
+3. **Operational ownership:** incident owner and escalation backup fields are filled and current.
+4. **Fail-closed behavior:** no critical endpoint has silent-success behavior under dependency failure.
+
+#### Gate decision rule
+
+- **GO** only if all critical evidence is verified and any remaining non-critical risks are explicitly accepted under ACK policy v1.
+- **NO-GO** if any critical evidence item is unverified, ownerless, or contradicted by runtime proof.
+
+### ACK policy v1 (required release acknowledgment)
+
+The following acknowledgments are required for RC1 gate closure:
+
+- **SEC ACK:** Security evaluator confirms gate result and residual-risk posture.
+- **COO ACK:** Release operator confirms evidence completeness and accepts documented residual non-critical risks.
+- **ENG ACK:** Engineering confirms technical mitigations/status for listed residual risks.
+
+Minimum ACK payload fields:
+
+- `ackPolicyVersion`: `v1`
+- `decision`: `GO` or `NO-GO`
+- `commitSha`:
+- `evidenceRef`: `docs/LAUNCH_EVIDENCE.md`
+- `riskRegisterRef`: `docs/MVP_RISK_REGISTER.md`
+- `secAckBy` + timestamp UTC
+- `cooAckBy` + timestamp UTC
+- `engAckBy` + timestamp UTC
+- `exceptions` (optional; must include owner + expiry)
+
+### COO handoff payload (RC1)
+
+```yaml
+handoffType: RC1_SECURITY_GATE
+canonicalPath: /home/node/railfin
+ackPolicyVersion: v1
+decision: <GO|NO-GO>
+candidateCommit: <sha>
+evidenceRef: docs/LAUNCH_EVIDENCE.md
+riskRegisterRef: docs/MVP_RISK_REGISTER.md
+criticalEvidenceOutstanding:
+  - <item-or-empty>
+residualRisksOpen:
+  - <risk-id-or-empty>
+requiredActionsBeforeGo:
+  - <action-or-empty>
+ownerAcks:
+  sec:
+    by: <name>
+    atUtc: <timestamp>
+  coo:
+    by: <name>
+    atUtc: <timestamp>
+  eng:
+    by: <name>
+    atUtc: <timestamp>
+```
+
+### Verification outcome (task-00079)
+
+- Outcome: **PASS**
+- Result type: Template + governance artifact update (no runtime code-path change)

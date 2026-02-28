@@ -41,6 +41,12 @@ Response JSON:
 - `suggestion: string`
 - `location: string`
 
+### Evaluation context path
+
+- Before provider execution, compliance check resolves the latest saved Configure policy text from `GET` parity source (`public.configure_policy` via internal configure policy module).
+- The resolved policy text is included in the provider prompt under `Latest configure policy guidance`.
+- If policy retrieval is unavailable/blocked, compliance check degrades safely by using empty guidance text and preserves the response contract.
+
 ### Provider behavior
 
 - Preferred provider path: `codex`
@@ -59,6 +65,62 @@ Examples:
 
 - `controls/access-control.yaml:12:3`
 - `unknown:0:0` (fallback when source location is missing/invalid)
+
+## Configure policy contract (`GET/POST /api/internal/configure/policy`)
+
+Configure policy text is exposed via an internal endpoint pair designed for stable UI integration.
+
+### Endpoints
+
+- `GET /api/internal/configure/policy`
+  - Returns the current policy text payload.
+- `POST /api/internal/configure/policy`
+  - Saves policy text and returns the persisted record shape.
+
+### Request contract
+
+- `POST` body:
+  - `{ policyText?: string }`
+
+Validation behavior:
+
+- Empty or missing `policyText` returns `400` with:
+  - `{ ok: false, error: "Validation failed", fieldErrors: [{ field: "policyText", message: "Policy text is required" }] }`
+- Oversized `policyText` (> `8000` chars) returns `400` with:
+  - `{ ok: false, error: "Validation failed", fieldErrors: [{ field: "policyText", message: "Policy text must be 8000 characters or fewer" }] }`
+
+Sensitive-response caching behavior:
+
+- `GET/POST /api/internal/configure/policy` responses include `Cache-Control: no-store`.
+
+### Response contract (UI-stable)
+
+Success (`GET` and `POST`):
+
+- `{ ok: true, data: { policyText: string, updatedAt: string, version: number }, meta: { persistence: "supabase-table", note: string } }`
+
+Blocked mode (`GET` or `POST`, when persistence runtime/table access is unavailable):
+
+- `{ ok: false, error: string, blocked: { kind: "BLOCKED", error: string, todo: string, missingEnv?: string[], requiredSql?: string } }`
+
+### Current persistence mode
+
+- Configure policy is persisted in Supabase table `public.configure_policy` (singleton row keyed by `scope="default"`).
+- Runtime env required by endpoint:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+- If env/table access is unavailable, endpoint returns explicit BLOCKED payload while preserving top-level UI contract shape (`ok`, `data`, `error`).
+
+### Required SQL
+
+```sql
+create table if not exists public.configure_policy (
+  scope text primary key,
+  policy_text text not null default '',
+  updated_at timestamptz not null default timezone('utc', now()),
+  version integer not null default 1
+);
+```
 
 ## App Shell Route Map (MVP wiring)
 
@@ -105,6 +167,7 @@ create table if not exists public.drafts (
   - Creates one persisted draft.
 - `GET /api/internal/content/draft?id=<draftId>`
   - Returns one draft by id.
+  - `draftId` is fail-closed validated as UUID before DB access; malformed values return `400` validation error.
 - `GET /api/internal/content/draft?q=<query>&limit=<n>&offset=<n>`
   - Lists persisted drafts with optional basic search and pagination.
   - `q` searches `title` and `body` (case-insensitive partial match).
@@ -121,6 +184,10 @@ create table if not exists public.drafts (
   - `{ ok: true, data: { items: Draft[], total: number, limit: number, offset: number, q: string } }`
 - Not-found (`GET` with unknown `id`):
   - `{ ok: false, error: "Draft not found" }`
+
+Sensitive-response caching behavior:
+
+- `GET/POST /api/internal/content/draft` responses include `Cache-Control: no-store`.
 
 ### Explicit BLOCKED output
 

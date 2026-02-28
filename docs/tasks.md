@@ -387,3 +387,163 @@
   - Added explicit loading, empty, and error states for resilient UX.
   - Wired internal list endpoint route contract (`GET /api/internal/content/list`) for UI consumption.
   - Updated UI/API docs with the new library UX and endpoint behavior.
+
+## task-00065 — UI — Configure page usable baseline
+
+- Status: **Done**
+- Branch: `feat/ui/task-00065-configure-page-usable`
+- Scope delivered:
+  - Replaced `/app/configure` placeholder with a usable Configure screen in `src/ui/configure-page.tsx`.
+  - Added free-text policy guidance input area with controlled state.
+  - Added provider status placeholders for Codex primary + fallback provider.
+  - Added Save/Cancel UX states with dirty-state disable rules and user feedback messaging.
+  - Updated UI foundations docs with Configure UX behavior and styling notes.
+
+## task-00066 — DEV — Configure policy endpoint contract (internal)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00066-configure-policy-contract`
+- Scope delivered:
+  - Added internal configure policy endpoint route scaffold at `GET/POST /api/internal/configure/policy`.
+  - Added stable, UI-friendly response shape with `ok`, `data`, and validation-friendly `fieldErrors` support.
+  - Added safe placeholder persistence mode (`placeholder-memory`) with explicit TODO note for persistent backend follow-up.
+  - Updated API boundary documentation with endpoint contract, success/error payloads, and blocked-mode shape.
+
+## task-00067 — SEC — Final launch-go recheck against latest main commit
+
+- Status: **Done**
+- Branch: `chore/sec/task-00067-final-go-recheck-after-5a90d76`
+- Scope delivered:
+  - Re-ran deterministic launch GO/NO-GO model from `docs/SECURITY_BASELINE.md` + `docs/LAUNCH_EVIDENCE.md` against latest `main` baseline commit `5a90d76` from canonical path `/home/node/railfin`.
+  - Confirmed final decision remains **NO-GO** because required launch evidence fields are still unverified in `docs/LAUNCH_EVIDENCE.md`.
+  - Reduced residual blockers to only missing evidence inputs (no duplicate blocker classes).
+  - Updated `docs/SECURITY_BASELINE.md` with concise final verdict and remaining required evidence inputs.
+
+## task-00069 — UI — Library to Create handoff (open/edit draft flow)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00069-library-open-draft-flow`
+- Scope delivered:
+  - Added draft-level action in Library list to open a saved draft directly in Create via query handoff (`/app/create?draftId=<id>`).
+  - Added internal draft read endpoint route `GET /api/internal/content/draft?id=<id>` for Create-side loading.
+  - Updated editor flow to consume `draftId`, fetch the draft body, and hydrate editor content without changing existing save/compliance behavior.
+  - Updated UI foundations docs with the Library → Create handoff contract.
+
+## task-00068 — DEV — Persist configure policy beyond placeholder memory
+
+- Status: **Done**
+- Branch: `feat/dev/task-00068-configure-policy-persistence`
+- Scope delivered:
+  - Replaced configure policy endpoint placeholder-memory storage with Supabase-backed persistence path (`public.configure_policy`).
+  - Added explicit BLOCKED contract when required runtime env or table access is unavailable, including env/sql unblock details.
+  - Preserved stable GET/POST response shape used by Configure UI (`ok`, `data`, `error`, `meta`, validation `fieldErrors`).
+  - Updated API boundary documentation with final configure policy persistence/runtime requirements.
+
+## task-00070 — SEC — Configure policy persistence + library handoff access check
+
+- Status: **Done**
+- Branch: `chore/sec/task-00070-configure-library-access-check`
+- Scope delivered:
+  - Verified security implications for configure policy persistence route (`GET/POST /api/internal/configure/policy`) including access-control and validation behavior.
+  - Verified library→create handoff route risk profile and documented fail-closed expectations for handoff parameters and server-side draft ownership checks.
+  - Updated `docs/SECURITY_BASELINE.md` with concise risk checklist, current outcome, and required mitigations before privileged rollout.
+
+## task-00071 — DEV — Fix useSearchParams suspense/build issues and stabilize editor routes
+
+- Status: **Done**
+- Branch: `fix/dev/task-00071-suspense-route-stability`
+- Scope delivered:
+  - Stabilized editor route rendering by ensuring `EditorShell` (which uses `useSearchParams`) is mounted behind React `Suspense` boundaries in both `/app/create` and `/preview/editor` page hosts.
+  - Re-validated route behavior for create/preview editor hosts and preserved legacy `/app/editor` redirect compatibility.
+  - Verified clean production build from canonical path with `npm run build` after refreshing stale local build artifacts.
+  - Updated `docs/PREVIEW_RUNBOOK.md` with explicit Suspense/search-params route note for preview operators.
+
+## task-00073 — SEC — Final production GO gate after 00071/00072
+
+- Status: **Done**
+- Branch: `chore/sec/task-00073-final-production-go-gate`
+- Scope delivered:
+  - Ran deterministic launch decision model from `docs/SECURITY_BASELINE.md` (task-00061 policy) against current `docs/LAUNCH_EVIDENCE.md` state.
+  - Re-ran production build verification after route/build/UX integration and captured successful clean build evidence from canonical path `/home/node/railfin`.
+  - Issued final gate verdict with only concrete residual evidence gaps.
+  - Updated `docs/SECURITY_BASELINE.md` with final production gate decision snippet.
+
+## task-00072 — UI — Configure page + create flow UX integration polish
+
+- Status: **Done**
+- Branch: `feat/ui/task-00072-configure-create-ux-integration`
+- Scope delivered:
+  - Added clear, always-visible draft save status messaging in Create flow (`Draft save status: ...`).
+  - Added Configure policy freshness indicator to Create flow via `GET /api/internal/configure/policy` (`Policy last updated: ...` when available).
+  - Preserved existing Compliance Panel rendering and Library→Create draft handoff behavior.
+  - Updated UI foundations documentation with the Configure→Create integration contract.
+
+## task-00074 — DEV — Connect configure policy to compliance request context
+
+- Status: **Done**
+- Branch: `feat/dev/task-00074-policy-to-compliance-context`
+- Scope delivered:
+  - Updated compliance endpoint (`POST /api/internal/compliance/check`) to resolve the latest saved configure policy text before provider execution.
+  - Included latest configure policy guidance in the AI evaluation context path (`Latest configure policy guidance` segment in prompt).
+  - Preserved compliance response contract and fallback behavior (`{ ok, findings }` shape unchanged).
+  - Updated API boundary documentation for configure-policy→compliance context wiring.
+
+## task-00075 — UI — Surface active policy context in create/compliance UX
+
+- Status: **Done**
+- Branch: `feat/ui/task-00075-policy-context-ux`
+- Scope delivered:
+  - Added concise `Active policy context` indicator in the Create/compliance area based on configure policy metadata already loaded in Create flow.
+  - Kept existing compliance-check flow and findings rendering behavior unchanged.
+  - Preserved Library→Create draft handoff behavior (`draftId` query hydration) unchanged.
+  - Updated `docs/UI_FOUNDATIONS.md` with the active policy context UX contract.
+
+## task-00076 — SEC — Policy-context privacy/safety review
+
+- Status: **Done**
+- Branch: `chore/sec/task-00076-policy-context-safety`
+- Scope delivered:
+  - Reviewed configure policy text handling path (`/api/internal/configure/policy` route + persistence layer) for sensitive-content exposure and logging risk.
+  - Added explicit security baseline mitigations for policy text minimization, redaction, caching controls, and diagnostics hygiene.
+  - Captured implementation checklist for fail-closed handling of sensitive policy context in docs.
+
+## task-00078 — UI — MVP RC1 visual consistency pass across Create/Library/Configure
+
+- Status: **Done**
+- Branch: `feat/ui/task-00078-mvp-rc1-visual-consistency`
+- Scope delivered:
+  - Applied a light consistency pass for page headers across Create, Library, and Configure using shared `rf-page-*` heading styles.
+  - Standardized status/feedback presentation using shared `rf-status` variants (`muted`, `success`, `error`) in Create, Library, and Configure views.
+  - Kept existing functionality intact for draft handoff/loading, configure policy save/cancel flows, and compliance interactions.
+  - Updated UI foundations with RC1 consistency notes and explicit scope constraints.
+
+## task-00077 — DEV — MVP RC1 endpoint stabilization + acceptance checklist wiring
+
+- Status: **Done**
+- Branch: `feat/dev/task-00077-mvp-rc1-stabilization`
+- Scope delivered:
+  - Verified endpoint contracts used by login/create/library/configure/compliance against current route handlers and UI consumers.
+  - Added unified RC1 endpoint acceptance section in `docs/MVP_RC1_CHECKLIST.md` with concrete pass criteria and command/check references.
+  - Confirmed canonical workspace path for operator execution is `/home/node/railfin`.
+  - Kept implementation docs-focused and contract-alignment-first (no behavior-changing code-path edits required).
+
+## task-00079 — SEC — MVP RC1 final gate template + residual risks register
+
+- Status: **Done**
+- Branch: `chore/sec/task-00079-mvp-rc1-gate-template`
+- Scope delivered:
+  - Added RC1 final security gate template in `docs/SECURITY_BASELINE.md`, explicitly tied to `docs/LAUNCH_EVIDENCE.md`.
+  - Added ACK policy v1 section for release acknowledgment and approval accountability.
+  - Added residual-risk register document at `docs/MVP_RISK_REGISTER.md` with owners, evidence links, and mitigation/acceptance status.
+  - Included COO handoff payload template for launch-operator transfer at RC1 gate time.
+
+## task-00080 — DEV — Sensitive internal route hardening (cache + validation)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00080-sensitive-route-hardening`
+- Scope delivered:
+  - Added explicit `Cache-Control: no-store` headers on sensitive internal responses for configure policy and content draft route handlers.
+  - Added conservative `policyText` max-length validation (`CONFIGURE_POLICY_MAX_LENGTH = 8000`) with `400` + `fieldErrors` contract.
+  - Added fail-closed UUID validation for draft handoff `id` in draft read path before DB access.
+  - Added `POST /api/internal/content/draft` route handler wiring while preserving stable `{ ok, data, error, fieldErrors }` contracts.
+  - Updated API/security docs to capture controls and behavior.
