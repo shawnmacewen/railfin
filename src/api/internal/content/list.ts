@@ -1,4 +1,4 @@
-import { listDraftsFromTable } from "@/lib/supabase/drafts";
+import { listDraftsFromTable } from "../../../lib/supabase/drafts";
 
 export async function internalContentList(request: {
   q?: string;

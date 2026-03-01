@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { internalContentList } from "@/api/internal/content/list";
+import { internalContentList } from "../../../../../api/internal/content/list";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

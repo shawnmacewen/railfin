@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { internalContentDraft } from "@/api/internal/content/draft";
+import { internalContentDraft } from "../../../../../api/internal/content/draft";
 
 type DraftPostBody = {
   title?: string;

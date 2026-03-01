@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import {
   getCurrentConfigurePolicy,
   saveConfigurePolicy,
-} from "@/api/internal/configure/policy";
+} from "../../../../../api/internal/configure/policy";
 
 type ConfigurePolicyPostBody = {
   policyText?: string;

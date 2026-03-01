@@ -2,7 +2,7 @@ import {
   createDraftInTable,
   listDraftsFromTable,
   readDraftFromTable,
-} from "@/lib/supabase/drafts";
+} from "../../../lib/supabase/drafts";
 
 export async function internalContentDraft(request: {
   method: "GET" | "POST";

@@ -623,3 +623,14 @@
   - Updated `docs/SECURITY_BASELINE.md` with safety-boundary requirements for contract/prompt/schema separation.
   - Added minimal follow-up implementation checklist for Generate/Compliance contract hardening and failover tests.
   - Captured merge guidance context for task-00086 commit `945b712` in task handoff/reporting.
+
+## task-00088 — DEV — Merge task-00086 + task-00087 into main
+
+- Status: **Done**
+- Branch: `task-00088-merge`
+- Scope delivered:
+  - Created isolated merge worktree from `origin/main` and cherry-picked task-00086 (`945b712`) and task-00087 (`0674319`).
+  - Resolved conflicts in `src/ui/compliance-panel.tsx` and docs files while preserving compliance request payload wiring (`content`, optional `contentType`/`policySet`) and task-00087 AI contract/security documentation updates.
+  - Reconciled `docs/tasks.md` ledger so task entries 00086, 00087, and 00088 are coherent and marked done.
+  - Ran `npm run build` in the merge worktree and confirmed success before publishing.
+  - Pushed merged result to `origin/main`.
