@@ -558,3 +558,14 @@
   - Improved blocked diagnostics for draft table operations by surfacing safe root-cause hints (missing table vs permission vs code) without exposing secrets.
   - Expanded `docs/LAUNCH_EVIDENCE.md` with operator-ready production proof runbook and explicit evidence package checklist for URL/SHA/timestamp + POST/GET + table proof.
   - Verified local runtime env evidence remains unavailable in this workspace context (no `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` set here), so production verification remains operator-blocked.
+
+## task-00082 — DEV/UI — Rewire Create Save Draft to internal draft API
+
+- Status: **Done**
+- Branch: `feat/dev/task-00082-save-draft-api-rewire`
+- Scope delivered:
+  - Replaced mocked Create save behavior in `src/ui/editor-shell.tsx` (timeout/local success) with real `POST /api/internal/content/draft` request.
+  - Preserved existing save UX semantics (saving/saved/error status copy and save-button disable behavior).
+  - Added robust save response parsing with meaningful error extraction (`fieldErrors`/`error`) and success feedback that includes draft title/id hints when returned.
+  - Kept existing draft load via `draftId` and configure-policy metadata context behavior unchanged.
+  - Updated UI foundations docs to reflect restored API wiring for Save Draft.

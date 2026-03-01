@@ -126,3 +126,77 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - no drafts at all
   - no search matches for current query
 - Styling for list/card presentation is added in `src/app/globals.css` under `rf-library-*` classes.
+
+## Configure UX behavior (task-00065)
+
+- `src/app/app/configure/page.tsx` now renders `ConfigurePageContent` from `src/ui/configure-page.tsx` instead of placeholder text.
+- Configure screen includes:
+  - provider status placeholders for **Codex (Primary)** and **Fallback Provider**
+  - free-text **Policy guidance** textarea for operator-entered policy instructions
+  - Save/Cancel action row with dirty-state guards (`disabled` unless changes exist)
+- Save/Cancel UX state contract:
+  - Save enters `saving` state (`Saving...`, `aria-busy`) and ends with success/error feedback message
+  - Cancel restores last saved policy text and shows discard feedback
+  - No-op save attempt (no dirty changes) returns explicit `No changes to save.` feedback
+- Styling follows existing app-shell design-system conventions using existing primitives (`Card`, `Button`, `Badge`) plus scoped `rf-configure-*` classes in `src/app/globals.css`.
+
+## Library → Create handoff (task-00069)
+
+- Library rows now include **Open in Create** action linking to `/app/create?draftId=<id>`.
+- Create editor (`src/ui/editor-shell.tsx`) reads `draftId` from query params and fetches `GET /api/internal/content/draft?id=<id>`.
+- On successful load, editor content hydrates with the selected draft body and surfaces status text (`Opened draft: <title>`).
+- Existing editor save/compliance behavior remains intact (same save button states and compliance panel composition).
+
+## Configure → Create UX integration polish (task-00072)
+
+- Create flow (`src/ui/editor-shell.tsx`) now surfaces a persistent save-state line above the editor form:
+  - `Draft save status: Not saved yet.`
+  - `Draft save status: Saving…`
+  - `Draft save status: Saved.`
+  - `Draft save status: Save failed.`
+- Create flow also reads configure policy metadata from `GET /api/internal/configure/policy` and shows:
+  - `Policy last updated: <localized timestamp>` when `updatedAt` is available
+  - `Policy last updated: unavailable` when metadata is missing/unreachable
+- Integration constraints preserved:
+  - Compliance panel remains mounted in Create flow (`<CompliancePanel />` unchanged)
+  - Library handoff via `draftId` query parameter remains the same and still hydrates editor body/title
+
+## Active policy context in compliance area (task-00075)
+
+- Compliance area now shows a concise policy-context line directly above the compliance disclaimer:
+  - `Active policy context: Configure policy updated <localized timestamp>.`
+  - fallback: `Active policy context: No configure policy metadata available.`
+- The context line is sourced from the same configure-policy metadata already loaded in Create flow (`GET /api/internal/configure/policy`), avoiding additional endpoint calls.
+- Existing behavior is preserved:
+  - Compliance run action and findings rendering are unchanged.
+  - Library→Create handoff (`draftId` query load) remains unchanged.
+
+## RC1 visual consistency pass (task-00078)
+
+- Scope: light consistency pass only (no functional or route contract changes).
+- Shared page-heading treatment across Create/Library/Configure now uses:
+  - `.rf-page-header`
+  - `.rf-page-title`
+  - `.rf-page-subtitle`
+- Shared status/feedback treatment across the same views now uses:
+  - `.rf-status`
+  - `.rf-status-muted`
+  - `.rf-status-success`
+  - `.rf-status-error`
+- RC1 constraints:
+  - Preserve existing behavior for Library→Create handoff (`draftId`), Configure save/cancel flow, and compliance run/findings flow.
+  - Keep changes lightweight and visual-consistency-focused (spacing, header rhythm, status presentation).
+
+## Create save-draft API wiring restored (task-00082)
+
+- `src/ui/editor-shell.tsx` Save Draft action now performs a real `POST /api/internal/content/draft` call instead of mock timeout success.
+- Request payload includes:
+  - `body` (full editor content)
+  - `title` (existing loaded draft title when present, otherwise derived from first content line with safe fallback `Untitled Draft`)
+- Save UX semantics remain intact:
+  - existing status line cycle (`saving` / `saved` / `error`)
+  - save button disable behavior remains tied to content + in-flight state
+- Save feedback now reports backend draft hints when available (`title` and `id`) and surfaces API error details from `fieldErrors`/`error` when save fails.
+- Existing Create behaviors were preserved:
+  - `draftId` query hydration/load path
+  - configure policy metadata indicator used by Create/compliance context
