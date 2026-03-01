@@ -41,7 +41,11 @@ function toRemediationHint(suggestion?: string) {
   return text.length > 120 ? `${text.slice(0, 117).trimEnd()}...` : text;
 }
 
-export function CompliancePanel() {
+type CompliancePanelProps = {
+  activePolicyContext?: string;
+};
+
+export function CompliancePanel({ activePolicyContext }: CompliancePanelProps) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [findings, setFindings] = useState<ComplianceFinding[]>([]);
@@ -101,6 +105,12 @@ export function CompliancePanel() {
       <button type="button" onClick={runComplianceCheck} disabled={running}>
         {running ? "Running Compliance Check..." : "Run Compliance Check"}
       </button>
+
+      {activePolicyContext ? (
+        <p className="rf-compliance-policy-context" role="status">
+          Active policy context: {activePolicyContext}
+        </p>
+      ) : null}
 
       <p className="rf-compliance-disclaimer" role="note">
         AI-backed compliance insights are guidance, not legal approval.
