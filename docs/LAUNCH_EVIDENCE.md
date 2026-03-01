@@ -1,100 +1,81 @@
 # Launch Readiness Evidence
 
-Last updated (UTC): 2026-02-28 23:58
-Prepared by: DEV (task-00081)
-Branch: `feat/dev/task-00081-prod-draft-persistence-verify`
+Last updated (UTC): 2026-03-01 00:50
+Prepared by: SEC (task-00083)
+Branch: `chore/sec/task-00083-launch-evidence-closeout`
 
-## Evidence Checklist (current status)
+## Evidence Ledger (deterministic source for GO/NO-GO)
 
 ### 1) Deployed commit on Vercel
 
-- Status: **PENDING** (not blocked)
-- Current local candidate commit: `b7b9097`
-- Verified/Not Verified: **Not Verified**
-- Required proof source:
-  - Vercel Production deployment details page showing:
-    - deployment URL
-    - git commit SHA
-    - deploy timestamp
-  - Acceptable evidence artifact: screenshot or copied deployment metadata in release notes.
+- Critical: **YES**
+- Verified: **YES (partial chain verified to current main target)**
+- Tonight verified evidence:
+  - Production deploy commit progression captured in Vercel deploy history up to current main target.
+  - Current main progression reference used for closeout: `5a90d76 -> 2b8d77b -> 73f38d9 -> 2e0edf6 -> 6e4fe3a -> 25487d6`.
+- Evidence artifact expectation:
+  - Vercel Production deployment details screenshot/export including deploy URL + deployed SHA + UTC timestamp.
 
 ### 2) Env vars present in runtime
 
-- Status: **PENDING** (not blocked)
-- Verified/Not Verified: **Not Verified**
-- Expected runtime env vars (from current API/runtime contract):
+- Critical: **YES**
+- Verified: **NO (still open)**
+- Required runtime vars:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY`
-  - `AI_PROVIDER` (optional selector; defaults to `codex`)
-- Required proof source:
-  - Vercel Project → Environment Variables panel (Production scope), or
-  - runtime startup/log evidence from production showing resolved/masked env presence.
+  - AI provider key path (`CODEX_API_KEY` and/or fallback path `OPENAI_API_KEY`/`CHATGPT_API_KEY`)
+- Operator proof steps:
+  1. Open Vercel Project → Settings → Environment Variables (Production).
+  2. Capture screenshot showing var names present (values masked is fine).
+  3. Add UTC timestamp and environment scope in evidence note.
 
-### 3) Drafts create/read runtime verification
+### 3) Draft runtime verification (create/read against production)
 
-- Status: **PENDING** (not blocked)
-- Verified/Not Verified: **Not Verified**
-- Verification target:
-  - `POST /api/internal/content/draft` create succeeds (`ok: true`)
-  - `GET /api/internal/content/draft?id=<id>` read succeeds (`ok: true`)
-  - backed by Supabase `public.drafts` table in production runtime
-- Required proof source:
-  - Production smoke test output (curl/Postman/test harness) with request/response captures, and
-  - Supabase table row evidence for created draft id.
+- Critical: **YES**
+- Verified: **PARTIAL (write verified, read still open)**
+- Tonight verified production write evidence:
+  - `POST /api/internal/content/draft` returned `200` with `ok: true`.
+  - Supabase `public.drafts` row exists for created draft id (DB evidence captured).
+- Known constraint encountered:
+  - Unauthenticated direct `curl` to Vercel protected production produced `401` until authenticated/browser-session context was used.
 
-**Operator verification runbook (production proof capture):**
+#### Remaining open item: draft read proof (required)
 
-1. Capture deployment anchor first:
-   - production URL
-   - deployed git SHA
-   - timestamp (UTC)
-2. Create draft:
-   - `curl -sS -X POST "$APP_URL/api/internal/content/draft" -H 'content-type: application/json' -d '{"title":"prod-smoke","body":"task-00081 proof"}'`
-   - Save full JSON response and extract `data.id`.
-3. Read draft back by id:
-   - `curl -sS "$APP_URL/api/internal/content/draft?id=$DRAFT_ID"`
-   - Save full JSON response.
-4. Confirm Supabase table evidence:
-   - Query/filter `public.drafts` by the same `$DRAFT_ID` in Supabase SQL editor/table UI.
-   - Capture screenshot (id/title/body/created_at visible).
+1. Reuse authenticated context (browser devtools/cookie-authenticated client or authorized API tool).
+2. Read by id:
+   - `GET /api/internal/content/draft?id=<created-id>`
+3. Capture response proving:
+   - `200`
+   - `ok: true`
+   - returned `data.id` matches created id.
+4. Capture matching `public.drafts` row (id/title/body/created_at visible).
 
-**Evidence package must include:**
+### 4) AI provider primary/fallback runtime proof
 
-- Deployed URL + SHA + UTC timestamp in one note/screenshot.
-- POST response (`ok: true`, `data.id` present).
-- GET response (`ok: true`, same `data.id`).
-- Supabase `public.drafts` row proof for same id.
+- Critical: **YES**
+- Verified: **NO (open)**
 
-### 4) AI provider primary/fallback runtime check
+#### Required primary-path proof
 
-- Status: **PENDING** (not blocked)
-- Verified/Not Verified: **Not Verified**
-- Verification target:
-  - Primary provider path executes (`codex` by default or configured `AI_PROVIDER`)
-  - Fallback path executes when primary fails/timeouts (`chatgpt-api`)
-  - Endpoint remains contract-stable (`ok: true`, normalized findings)
-- Required proof source:
-  - Production/staging runtime logs showing provider selection and fallback event, and/or
-  - Controlled failure test report demonstrating fallback behavior with captured responses.
+1. Run compliance check in production under normal provider conditions.
+2. Capture logs/response showing configured primary provider executed.
+3. Record endpoint response contract (`ok: true`, normalized findings shape).
+
+#### Required fallback-path proof
+
+1. Trigger controlled primary failure (timeout/invalid primary key or deliberate provider disable in non-destructive test window).
+2. Re-run compliance check and capture logs showing fallback provider path executed.
+3. Capture final response and ensure contract stability (`ok: true`, normalized findings).
+4. Record incident owner acknowledgment for degraded-mode handling.
 
 ---
 
-## Tiny Operator Checklist (Rolly)
+## Constraints & Notes
 
-Fill these values to complete launch evidence quickly:
-
-- [ ] Vercel deploy URL: `____________________`
-- [ ] Deployed commit SHA: `____________________`
-- [ ] Deploy timestamp (UTC): `____________________`
-- [ ] Env vars confirmed present (Y/N): `____`
-- [ ] Draft create/read smoke result: `PASS / FAIL`
-- [ ] AI primary path result: `PASS / FAIL`
-- [ ] AI fallback path result: `PASS / FAIL`
-- [ ] Links to proof artifacts (logs/screenshots):
-  - `____________________`
-  - `____________________`
+- Vercel project protection can return `401` for unauthenticated direct `curl`; evidence collection must use authenticated context.
+- Deterministic launch policy remains unchanged: all critical items must be `Verified: YES` for GO.
 
 ## Completion Rule
 
-When all four checklist items are set to **Verified**, this document can be marked `Launch Evidence: COMPLETE`.
-Until then, pending evidence is tracked as **PENDING** (informational, not blocked by this doc task).
+- `Launch Evidence: COMPLETE` only when all four critical sections are fully `Verified: YES` with linked artifacts.
+- Current status: **INCOMPLETE (open: env runtime proof, draft read proof, AI primary/fallback runtime proof).**

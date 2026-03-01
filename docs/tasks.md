@@ -569,3 +569,14 @@
   - Added robust save response parsing with meaningful error extraction (`fieldErrors`/`error`) and success feedback that includes draft title/id hints when returned.
   - Kept existing draft load via `draftId` and configure-policy metadata context behavior unchanged.
   - Updated UI foundations docs to reflect restored API wiring for Save Draft.
+
+## task-00083 — SEC — Launch evidence closeout + GO/NO-GO rerun
+
+- Status: **Done**
+- Branch: `chore/sec/task-00083-launch-evidence-closeout`
+- Scope delivered:
+  - Updated `docs/LAUNCH_EVIDENCE.md` with tonight’s verified production evidence (Vercel deploy progression, production draft write `200/ok:true`, and `public.drafts` row proof) and captured the known Vercel protection `401` constraint for unauthenticated curl.
+  - Added explicit remaining evidence gaps with concrete operator steps: production draft read proof and AI provider primary/fallback runtime proof (plus env-var presence artifact capture).
+  - Re-ran deterministic launch policy gate in `docs/SECURITY_BASELINE.md` and recorded current decision as **NO-GO (BLOCKED)** due only to remaining evidence completeness.
+  - Kept changes docs-only; no runtime code modified.
+  - Build validation not rerun for this task because scope is documentation-only and does not touch build/runtime surfaces.

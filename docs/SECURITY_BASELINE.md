@@ -472,3 +472,29 @@ ownerAcks:
 
 - Outcome: **PASS**
 - Result type: Template + governance artifact update (no runtime code-path change)
+
+## task-00083 — SEC — Launch evidence closeout + deterministic gate rerun
+
+Deterministic model source: task-00061 policy in this document.
+Evidence source of truth: `docs/LAUNCH_EVIDENCE.md` (updated 2026-03-01 00:50 UTC).
+
+### Rerun summary
+
+- Verified tonight evidence captured in ledger:
+  - Vercel production deploy progression tracked up to current main target.
+  - Production draft write path proven (`POST /api/internal/content/draft` => `200`, `ok: true`) with matching `public.drafts` row evidence.
+  - Known evidence-capture constraint recorded: Vercel protection returns `401` for unauthenticated direct `curl`.
+- Remaining required artifacts are explicitly open in the ledger:
+  - Production draft **read** proof (`GET /api/internal/content/draft?id=<id>` success evidence).
+  - AI provider runtime proof for both **primary** execution and **fallback** execution.
+  - Runtime env-var presence proof in production for Supabase + AI provider key path.
+
+### Deterministic decision rerun (task-00083)
+
+- Rule applied: GO only when all critical evidence items are `Verified: YES`.
+- Current state: at least one critical item remains unverified.
+- **Decision: NO-GO (BLOCKED)**.
+
+### Concise rationale
+
+No new code-path blocker was found; blocker is strictly outstanding production evidence completeness under the deterministic policy.
