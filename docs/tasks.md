@@ -612,3 +612,14 @@
   - Wired `src/ui/editor-shell.tsx` to pass editor context into the compliance panel (`content`, baseline `contentType`, baseline `policySet`).
   - Preserved existing compliance UX states (loading, error, findings rendering/grouping) while preventing empty-content runs.
   - Updated compliance request contract notes in `docs/API_BOUNDARY.md` and UI behavior notes in `docs/UI_FOUNDATIONS.md`.
+
+## task-00087 — DEV/SEC — AI single-key dual-service contract unification
+
+- Status: **Done**
+- Branch: `chore/dev/task-00087-ai-service-contract-unification`
+- Scope delivered:
+  - Recorded architecture decision: one shared AI key/config path with two independent service contracts (Generate vs Compliance).
+  - Updated `docs/API_BOUNDARY.md` with explicit dual-service separation rules, shared env path notes, and provider primary/fallback behavior across both services.
+  - Updated `docs/SECURITY_BASELINE.md` with safety-boundary requirements for contract/prompt/schema separation.
+  - Added minimal follow-up implementation checklist for Generate/Compliance contract hardening and failover tests.
+  - Captured merge guidance context for task-00086 commit `945b712` in task handoff/reporting.

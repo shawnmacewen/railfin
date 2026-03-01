@@ -498,3 +498,127 @@ Evidence source of truth: `docs/LAUNCH_EVIDENCE.md` (updated 2026-03-01 00:50 UT
 ### Concise rationale
 
 No new code-path blocker was found; blocker is strictly outstanding production evidence completeness under the deterministic policy.
+
+## task-00084 — SEC/DEV — Final launch evidence completion + deterministic gate rerun
+
+Deterministic model source: task-00061 policy in this document.
+Evidence source of truth: `docs/LAUNCH_EVIDENCE.md` (updated 2026-03-01 01:02 UTC).
+
+### Rerun summary
+
+- task-00083 closeout commit remains the baseline evidence package for this rerun.
+- `docs/LAUNCH_EVIDENCE.md` now includes explicit operator placeholders and a fast runbook for production read-proof and AI-proof capture.
+- No additional runtime artifacts were produced in this docs-only pass.
+
+### Deterministic decision rerun (task-00084)
+
+- Rule applied: GO only when all critical evidence items are `Verified: YES`.
+- Current ledger state:
+  - Deployed commit evidence: verified.
+  - Runtime env-var evidence: unverified.
+  - Draft runtime create/read evidence: read proof still unverified.
+  - AI runtime evidence: primary and fallback proofs unverified.
+- **Decision: NO-GO (BLOCKED)**.
+
+### Exact remaining blockers
+
+1. Production runtime env proof for required vars (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and configured AI key path).
+2. Production draft read proof: `GET /api/internal/content/draft?id=<id>` success (`200`, `ok:true`, matching `data.id`) plus matching `public.drafts` row artifact.
+3. AI runtime proof for both provider paths: primary execution evidence and controlled fallback execution evidence with stable response contract.
+
+## task-00085 — DEV/SEC — AI compliance launch-gate decision record
+
+Repository inspected from canonical path `/home/node/railfin`.
+
+### Current-state reality check (code/runtime wiring)
+
+- Active route used by UI: `POST /api/internal/compliance/check` in `src/app/api/internal/compliance/check/route.ts`.
+- Provider chain is implemented in code:
+  - Primary selected by `AI_PROVIDER` (`codex` default)
+  - Secondary fallback hard-wired to the other provider
+  - Both providers call `/chat/completions` with JSON-only expectation (`response_format: json_object`)
+- If both providers fail/time out/missing keys, endpoint still returns `200 { ok: true, findings: ["Compliance scan unavailable"] }` safe fallback guidance (non-blocking API contract).
+- Configure policy text is injected into compliance prompt (`Latest configure policy guidance`) via internal configure-policy read.
+- Important runtime mismatch observed:
+  - `src/ui/compliance-panel.tsx` currently calls compliance endpoint without a JSON body; route requires non-empty `content`, so this path returns `400 Missing content` unless caller behavior is adjusted.
+- Legacy placeholder function remains in repo at `src/api/internal/compliance/check.ts`, but current app-router endpoint is the real execution path.
+
+### Option record
+
+#### Option A — make real AI runtime launch-critical now (primary + fallback)
+
+- Pros:
+  - Stronger launch confidence on AI-dependent compliance behavior.
+  - Clearer operational readiness for provider outages.
+- Cons:
+  - Requires immediate runtime hardening, test coverage, and production evidence collection.
+  - Higher schedule risk for MVP due to external provider/env dependency and fallback-path proof burden.
+
+#### Option B — defer AI runtime as launch-critical; keep MVP on manual compliance gate
+
+- Pros:
+  - Aligns launch criteria to what can be proven quickly and deterministically.
+  - Removes false blocker pressure from provider-path evidence during MVP closeout.
+  - Keeps safety posture by requiring human review and avoiding legal-approval claims.
+- Cons:
+  - AI compliance readiness is not considered MVP-complete.
+  - AI runtime still needs dedicated hardening before future AI-dependent launch claims.
+
+### Recommendation
+
+- **Recommend Option B for MVP** (effort/risk/time tradeoff).
+- Rationale:
+  - Current launch blockers are evidence operations (env/read proof) and an immediate UI→endpoint payload contract mismatch for compliance content.
+  - Forcing Option A into MVP critical path increases release risk without proportionate MVP value.
+  - Option B keeps gate deterministic and honest to runtime reality while preserving post-MVP path to elevate AI runtime to critical.
+
+### Gate semantics update applied
+
+- MVP launch-critical evidence should not require AI primary/fallback runtime proof in this phase.
+- AI runtime evidence remains tracked as post-MVP hardening before any AI-dependent automated-compliance claim.
+
+### Verification outcome (task-00085)
+
+- Outcome: **PASS** (decision + documentation alignment)
+- Launch verdict under updated MVP scope: still **NO-GO** until remaining critical evidence (env vars + draft read proof) is captured.
+
+## task-00087 — DEV/SEC — AI single-key dual-service contract unification
+
+Decision scope: architecture and security boundary documentation (docs-first, no runtime refactor in this task).
+
+### Security/architecture decision
+
+- One shared AI credential/config path is allowed for internal AI services (`AI_PROVIDER` + shared key envs).
+- Service contracts are explicitly separated:
+  - **Generate service**: content generation contract
+  - **Compliance service**: policy/compliance contract
+- Shared keying **does not** permit schema/prompt/safety coupling between services.
+
+### Safety boundary requirements
+
+1. **Prompt separation:** Generate and Compliance prompts are maintained independently.
+2. **Schema separation:** each service enforces its own request/response validator.
+3. **Failure-mode separation:** each service returns its own degraded/fallback output shape.
+4. **Policy separation:** Compliance-specific legal/safety guardrails remain strict and are not diluted by Generate UX goals.
+
+### Operational notes (env/config)
+
+- Shared env path for AI provider chain:
+  - `AI_PROVIDER` (primary selector)
+  - `CODEX_API_KEY` (primary key path)
+  - `OPENAI_API_KEY` or `CHATGPT_API_KEY` (fallback key path)
+- Primary/fallback behavior expectation for both services:
+  - primary provider attempt → secondary retry on error/timeout/invalid output → service-specific safe degraded response if both fail.
+
+### Minimal follow-up implementation checklist
+
+- [ ] Generate endpoint contract doc finalized (`/api/internal/content/generate`) with explicit schema.
+- [ ] Prompt modules split by service and code-owner reviewed.
+- [ ] Per-service validator tests added (reject cross-service schema drift).
+- [ ] Per-service safety tests added (Compliance: no legal approval claims; Generate: output-policy sanitation rules).
+- [ ] Provider failover tests captured for both services with shared env path inputs.
+
+### Verification outcome (task-00087)
+
+- Outcome: **PASS** (architecture/security boundary documentation updated)
+- Runtime refactor: **Not performed** (by design for docs-first scope)

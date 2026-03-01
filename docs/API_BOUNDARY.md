@@ -61,6 +61,52 @@ Response JSON:
 - If primary provider fails or times out, the endpoint automatically retries with the secondary provider
 - If all providers fail, endpoint returns safe fallback findings to keep UI response handling stable
 
+## AI Service Contract Decision (task-00087)
+
+Railfin uses a **single shared AI credential path** for AI-backed internal services, while maintaining **two distinct service contracts**:
+
+1. **Generate service contract** (content generation)
+2. **Compliance service contract** (policy/compliance checks)
+
+This is an architecture boundary rule to prevent drift and accidental contract coupling.
+
+### Shared key/env path (both services)
+
+- Shared provider-selection env: `AI_PROVIDER` (`codex` default)
+- Shared primary key path: `CODEX_API_KEY`
+- Shared fallback key path: `OPENAI_API_KEY` or `CHATGPT_API_KEY` (provider adapter-dependent)
+
+Operational rule:
+
+- Both Generate and Compliance services resolve credentials from the same env path family above.
+- No service-specific secret naming forks should be introduced unless an explicit ADR supersedes this decision.
+
+### Dual-service contract separation (must remain independent)
+
+Even with shared key/config, each service keeps its own:
+
+- Prompt template and system instructions
+- Request schema and validation rules
+- Response schema and normalization logic
+- Safety policy and failure-mode handling
+
+Generate and Compliance must not reuse one another’s response type as a shortcut.
+
+### Provider primary/fallback behavior (applies to both services)
+
+- Resolve primary from `AI_PROVIDER`.
+- Attempt primary provider first.
+- On provider error/timeout/invalid response, retry once through secondary provider path.
+- If both providers fail, return each service’s safe degraded contract output (service-specific; contract-preserving).
+
+### Minimal implementation checklist (follow-up coding)
+
+- [ ] Add/confirm `POST /api/internal/content/generate` contract docs with explicit request/response schema.
+- [ ] Keep Generate and Compliance prompts in separate modules/files.
+- [ ] Add service-specific output validators (no shared lax parser for both).
+- [ ] Add per-service safety assertions in tests (e.g., no legal-approval wording in Compliance outputs).
+- [ ] Add provider-chain tests proving primary/fallback behavior for both services using shared env path.
+
 ### `location` normalization
 
 `location` is normalized to canonical string format:
