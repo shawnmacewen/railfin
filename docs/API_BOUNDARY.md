@@ -58,8 +58,10 @@ Response JSON:
 - Preferred provider path: `codex`
 - Fallback-capable path: `chatgpt-api`
 - Primary provider can be selected via `AI_PROVIDER` (`codex` default)
-- If primary provider fails or times out, the endpoint automatically retries with the secondary provider
+- Provider-chain execution is deterministic for each call: `[primary, secondary]` with no randomization
+- If primary provider fails or times out, the endpoint automatically retries with the secondary provider exactly once
 - If all providers fail, endpoint returns safe fallback findings to keep UI response handling stable
+- Runtime diagnostics are returned in `meta.providerChain` (provider names + classified attempt outcomes only; no prompt/body/secret data)
 
 ## AI Service Contract Decision (task-00087)
 
@@ -99,11 +101,26 @@ Generate and Compliance must not reuse one another’s response type as a shortc
 - On provider error/timeout/invalid response, retry once through secondary provider path.
 - If both providers fail, return each service’s safe degraded contract output (service-specific; contract-preserving).
 
+### Generate contract (`POST /api/internal/content/generate`)
+
+Request JSON:
+
+- Required: `prompt: string`
+- Required: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
+
+Response JSON:
+
+- Success: `{ ok: true, data: { draft, generationMeta } }`
+  - `draft`: `{ id, contentType, prompt, text, status, createdAt }`
+  - `generationMeta`: includes `provider`, `notes`, and `providerChain` diagnostics metadata
+- Validation error: `{ ok: false, error: string }` with `400`
+- Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
+
 ### Minimal implementation checklist (follow-up coding)
 
-- [ ] Add/confirm `POST /api/internal/content/generate` contract docs with explicit request/response schema.
-- [ ] Keep Generate and Compliance prompts in separate modules/files.
-- [ ] Add service-specific output validators (no shared lax parser for both).
+- [x] Add/confirm `POST /api/internal/content/generate` contract docs with explicit request/response schema.
+- [x] Keep Generate and Compliance prompts in separate modules/files.
+- [x] Add service-specific output validators (no shared lax parser for both).
 - [ ] Add per-service safety assertions in tests (e.g., no legal-approval wording in Compliance outputs).
 - [ ] Add provider-chain tests proving primary/fallback behavior for both services using shared env path.
 

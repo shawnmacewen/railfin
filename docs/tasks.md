@@ -655,3 +655,14 @@
   - Re-ran deterministic launch gate in `docs/SECURITY_BASELINE.md` under task-00085 Option B semantics and recorded final **GO** decision for MVP-critical criteria.
   - Documented non-blocking follow-up that AI runtime primary/fallback evidence remains post-MVP hardening work.
   - Kept changes docs-only with no runtime/code-path modifications.
+
+## task-00091 — DEV — AI runtime hardening phase 1
+
+- Status: **Done**
+- Branch: `feat/dev/task-00091-ai-runtime-hardening-phase1`
+- Scope delivered:
+  - Added shared deterministic provider-chain runtime for both content generation and compliance service paths.
+  - Hardened provider error handling to avoid upstream body echo/leakage and classify failures into safe diagnostics kinds.
+  - Wired compliance and content-generate paths through the shared chain with service-specific parsing/fallback behavior preserved.
+  - Added `POST /api/internal/content/generate` app route and kept output contract stable with additive diagnostics metadata.
+  - Updated boundary/security docs for provider-chain behavior and runtime diagnostics.

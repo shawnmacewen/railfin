@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { CodexProvider } from "../../../../../ai/providers/CodexProvider";
-import { ChatGPTApiProvider } from "../../../../../ai/providers/ChatGPTApiProvider";
-import { getAIProviderFromEnv, type AIProviderName } from "../../../../../config/aiProvider";
+import { getCurrentConfigurePolicy } from "../../../../../api/internal/configure/policy";
+import { completeWithDeterministicFallback } from "../../../../../ai/runtime/providerChain";
 
 type RawFinding = {
   severity?: string;
@@ -17,11 +16,6 @@ type ComplianceFinding = {
   details: string;
   suggestion: string;
   location: string;
-};
-
-type ProviderAttempt = {
-  name: "codex" | "chatgpt-api";
-  complete: (prompt: string) => Promise<string>;
 };
 
 type ComplianceRequestBody = {
@@ -98,6 +92,7 @@ function buildCompliancePrompt(input: {
   content: string;
   contentType: string;
   policySet: string;
+  policyText: string;
 }): string {
   return [
     "You are a compliance review engine for marketing content.",
@@ -108,51 +103,11 @@ function buildCompliancePrompt(input: {
     "If there are no issues, return {\"findings\":[]}",
     `Policy set: ${input.policySet}`,
     `Content type: ${input.contentType}`,
+    "Latest configure policy guidance:",
+    input.policyText,
     "Content:",
     input.content,
   ].join("\n");
-}
-
-async function runProviderChain(prompt: string): Promise<{ findings: RawFinding[] }> {
-  const primaryName =
-    ((process.env.AI_PROVIDER as AIProviderName | undefined) ?? "codex") === "chatgpt-api"
-      ? "chatgpt-api"
-      : "codex";
-
-  const primaryProvider = getAIProviderFromEnv({
-    ...process.env,
-    AI_PROVIDER: primaryName,
-  });
-
-  const fallbackProvider =
-    primaryName === "codex" ? new ChatGPTApiProvider() : new CodexProvider();
-
-  const attempts: ProviderAttempt[] = [
-    {
-      name: primaryName,
-      complete: (inputPrompt) => primaryProvider.complete(inputPrompt),
-    },
-    {
-      name: primaryName === "codex" ? "chatgpt-api" : "codex",
-      complete: (inputPrompt) => fallbackProvider.complete(inputPrompt),
-    },
-  ];
-
-  let lastError: unknown = null;
-
-  for (const attempt of attempts) {
-    try {
-      const completion = await attempt.complete(prompt);
-      const findings = parseFindingsFromCompletion(completion);
-      return { findings };
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("Compliance provider chain failed.");
 }
 
 export async function POST(request: Request) {
@@ -163,28 +118,54 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Missing content" }, { status: 400 });
   }
 
+  const policyResponse = await getCurrentConfigurePolicy();
+  const policyText = policyResponse.ok ? policyResponse.data.policyText.trim() : "";
+
   const prompt = buildCompliancePrompt({
     content,
     contentType: body.contentType ?? "blog",
     policySet: body.policySet ?? "default",
+    policyText,
   });
 
-  try {
-    const { findings: rawFindings } = await runProviderChain(prompt);
-    const findings = rawFindings.map(normalizeFinding);
-    return NextResponse.json({ ok: true, findings });
-  } catch {
-    const safeFallbackFindings: ComplianceFinding[] = [
-      {
-        severity: "unknown",
-        issue: "Compliance scan unavailable",
-        details:
-          "AI compliance providers were unavailable or timed out. Returning safe fallback output.",
-        suggestion: "Retry shortly or review content manually before publishing.",
-        location: "unknown:0:0",
-      },
-    ];
+  const runtime = await completeWithDeterministicFallback({
+    flow: "compliance-check",
+    prompt,
+  });
 
-    return NextResponse.json({ ok: true, findings: safeFallbackFindings });
+  if ("completion" in runtime) {
+    try {
+      const findings = parseFindingsFromCompletion(runtime.completion).map(normalizeFinding);
+
+      return NextResponse.json({
+        ok: true,
+        findings,
+        meta: {
+          providerChain: runtime.diagnostic,
+        },
+      });
+    } catch {
+      // Keep service contract stable while preserving failure diagnostics metadata.
+    }
   }
+
+  const safeFallbackFindings: ComplianceFinding[] = [
+    {
+      severity: "unknown",
+      issue: "Compliance scan unavailable",
+      details:
+        "AI compliance providers were unavailable or returned invalid output. Returning safe fallback output.",
+      suggestion: "Retry shortly or review content manually before publishing.",
+      location: "unknown:0:0",
+    },
+  ];
+
+  return NextResponse.json({
+    ok: true,
+    findings: safeFallbackFindings,
+    meta: {
+      providerChain: runtime.diagnostic,
+      degraded: true,
+    },
+  });
 }

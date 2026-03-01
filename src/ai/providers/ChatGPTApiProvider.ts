@@ -40,8 +40,7 @@ async function callChatCompletions(options: {
     });
 
     if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`ChatGPT provider request failed (${response.status}): ${body.slice(0, 300)}`);
+      throw new Error(`ChatGPT provider request failed with status ${response.status}.`);
     }
 
     const payload = (await response.json()) as {

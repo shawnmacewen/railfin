@@ -651,6 +651,29 @@ Decision source of truth: `docs/LAUNCH_EVIDENCE.md` (task-00089 reconciliation).
 - Outcome: **PASS** (docs reconciliation + execution-ready closeout checklist)
 - Runtime/code changes: **None** (docs-first)
 
+## task-00091 — DEV — AI runtime hardening phase 1 (dual-service path)
+
+Verification scope:
+- `src/ai/runtime/providerChain.ts`
+- `src/ai/providers/CodexProvider.ts`
+- `src/ai/providers/ChatGPTApiProvider.ts`
+- `src/app/api/internal/compliance/check/route.ts`
+- `src/api/internal/content/generate.ts`
+- `src/app/api/internal/content/generate/route.ts`
+
+### Hardening controls delivered
+
+- Added shared deterministic provider-chain runtime utility used by both service paths (`content-generate`, `compliance-check`).
+- Enforced fixed execution order per request (`primary` from `AI_PROVIDER`, then single secondary fallback).
+- Added non-secret diagnostics metadata (`meta.providerChain`) so failures are classifiable by provider + error kind without exposing prompts, keys, or provider response bodies.
+- Tightened provider error hygiene by removing upstream response-body echoing from provider error messages.
+- Preserved contract safety: both services return stable success/fallback response shapes when providers fail or return invalid output.
+
+### Verification outcome (task-00091)
+
+- Outcome: **PASS**
+- Residual follow-up: add explicit automated tests for per-service safety assertions and provider-chain behavior.
+
 ## task-00090 — SEC — Final MVP gate rerun using production evidence
 
 Deterministic model source: task-00061 policy + task-00085 Option B MVP semantics.
