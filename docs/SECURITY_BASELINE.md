@@ -622,3 +622,31 @@ Decision scope: architecture and security boundary documentation (docs-first, no
 
 - Outcome: **PASS** (architecture/security boundary documentation updated)
 - Runtime refactor: **Not performed** (by design for docs-first scope)
+
+## task-00089 — SEC/COO — MVP gate closeout checklist + deterministic unblock conditions
+
+Decision source of truth: `docs/LAUNCH_EVIDENCE.md` (task-00089 reconciliation).
+
+### Reconciled policy state
+
+- MVP gate currently runs with **task-00085 Option B** semantics:
+  - AI runtime primary/fallback proof is deferred from MVP-critical criteria.
+  - MVP-critical blockers are limited to production env evidence and production draft create/read evidence.
+
+### Deterministic decision status (task-00089)
+
+- Current decision: **NO-GO (BLOCKED)**
+- Blockers are evidence-only and deterministic:
+  1. `Env vars present in runtime` still unverified in production.
+  2. `Draft runtime verification` still missing production read-proof artifact.
+
+### Exact unblock conditions
+
+1. In `docs/LAUNCH_EVIDENCE.md`, Section 2 must be set `Verified: YES` with completed production artifact payload for required vars (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`; plus AI key-path/deferral semantics recorded).
+2. In `docs/LAUNCH_EVIDENCE.md`, Section 3 must be set `Verified: YES` with completed payload for draft create+read+DB-row proofs.
+3. Evidence links/refs must be present; placeholders or inferred values do not satisfy gate closure.
+
+### Verification outcome (task-00089)
+
+- Outcome: **PASS** (docs reconciliation + execution-ready closeout checklist)
+- Runtime/code changes: **None** (docs-first)

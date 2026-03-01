@@ -634,3 +634,14 @@
   - Reconciled `docs/tasks.md` ledger so task entries 00086, 00087, and 00088 are coherent and marked done.
   - Ran `npm run build` in the merge worktree and confirmed success before publishing.
   - Pushed merged result to `origin/main`.
+
+## task-00089 — SEC/COO — MVP gate closeout checklist + deterministic unblock sync
+
+- Status: **Done**
+- Branch: `chore/sec/task-00089-mvp-gate-closeout`
+- Scope delivered:
+  - Reconciled launch-gate document state on latest `main` for `docs/LAUNCH_EVIDENCE.md`, `docs/SECURITY_BASELINE.md`, and `docs/tasks.md`.
+  - Added one-pass, operator-executable evidence checklist with explicit artifact payload format requirements for production env proof and draft read proof.
+  - Aligned AI runtime proof semantics to current policy (task-00085 Option B): deferred from MVP-critical gate with explicit deferral recording fields.
+  - Recorded deterministic decision status and exact unblock conditions required to flip MVP gate from NO-GO to GO.
+  - Kept changes docs-only; no runtime/code-path refactor performed.
