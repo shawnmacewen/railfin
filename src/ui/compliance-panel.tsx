@@ -43,9 +43,17 @@ function toRemediationHint(suggestion?: string) {
 
 type CompliancePanelProps = {
   activePolicyContext?: string;
+  content?: string;
+  contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
+  policySet?: string;
 };
 
-export function CompliancePanel({ activePolicyContext }: CompliancePanelProps) {
+export function CompliancePanel({
+  activePolicyContext,
+  content,
+  contentType,
+  policySet,
+}: CompliancePanelProps) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [findings, setFindings] = useState<ComplianceFinding[]>([]);
@@ -68,6 +76,13 @@ export function CompliancePanel({ activePolicyContext }: CompliancePanelProps) {
   const runComplianceCheck = async () => {
     if (running) return;
 
+    const trimmedContent = content?.trim() ?? "";
+    if (!trimmedContent) {
+      setFindings([]);
+      setError("Add editor content before running compliance check.");
+      return;
+    }
+
     setRunning(true);
     setError(null);
 
@@ -79,6 +94,11 @@ export function CompliancePanel({ activePolicyContext }: CompliancePanelProps) {
           "X-Requested-With": "XMLHttpRequest",
         },
         credentials: "include",
+        body: JSON.stringify({
+          content: trimmedContent,
+          ...(contentType ? { contentType } : {}),
+          ...(policySet ? { policySet } : {}),
+        }),
       });
 
       const payload = (await response
@@ -100,9 +120,11 @@ export function CompliancePanel({ activePolicyContext }: CompliancePanelProps) {
     }
   };
 
+  const hasContent = Boolean(content?.trim());
+
   return (
     <section aria-live="polite">
-      <button type="button" onClick={runComplianceCheck} disabled={running}>
+      <button type="button" onClick={runComplianceCheck} disabled={running || !hasContent}>
         {running ? "Running Compliance Check..." : "Run Compliance Check"}
       </button>
 

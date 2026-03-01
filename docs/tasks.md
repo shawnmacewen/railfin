@@ -580,3 +580,35 @@
   - Re-ran deterministic launch policy gate in `docs/SECURITY_BASELINE.md` and recorded current decision as **NO-GO (BLOCKED)** due only to remaining evidence completeness.
   - Kept changes docs-only; no runtime code modified.
   - Build validation not rerun for this task because scope is documentation-only and does not touch build/runtime surfaces.
+
+## task-00084 — SEC/DEV — Final launch evidence completion + deterministic gate rerun
+
+- Status: **Done**
+- Branch: `chore/sec/task-00084-final-evidence-gate`
+- Scope delivered:
+  - Confirmed task-00083 docs closeout commit is still not contained in `main`; prepared it for merge via local `main` merge path.
+  - Expanded `docs/LAUNCH_EVIDENCE.md` with explicit operator placeholders for remaining evidence: production env vars, draft read proof, and AI primary/fallback runtime proofs.
+  - Added concise fast-runbook steps for collecting production draft read-proof and AI-proof artifacts quickly from an authenticated prod session.
+  - Re-ran deterministic gate in `docs/SECURITY_BASELINE.md` and recorded decision as **NO-GO (BLOCKED)** with exact remaining blockers.
+  - Kept task scope docs-only and clearly marked unknown evidence as open (no fabrication).
+
+## task-00085 — DEV/SEC — AI compliance path decision + MVP gate semantics alignment
+
+- Status: **Done**
+- Branch: `chore/dev/task-00085-ai-compliance-decision-plan`
+- Scope delivered:
+  - Inspected live AI compliance execution path and provider/fallback wiring in `src/app/api/internal/compliance/check/route.ts` plus provider modules.
+  - Documented current runtime reality vs placeholder artifact (`src/api/internal/compliance/check.ts` is legacy/non-route path).
+  - Added option-based decision record (Option A vs Option B) and recommended Option B for MVP based on effort/risk/time.
+  - Updated launch-evidence semantics so AI primary/fallback runtime proof is explicitly deferred from MVP-critical gating.
+  - Updated security baseline decision log and rationale to align launch gate policy with current MVP scope and evidence posture.
+
+## task-00086 — DEV/UI — Wire Create compliance request payload to contract
+
+- Status: **Done**
+- Branch: `feat/dev/task-00086-compliance-request-wireup`
+- Scope delivered:
+  - Updated `src/ui/compliance-panel.tsx` to send the required `content` field to `POST /api/internal/compliance/check` and include optional `contentType`/`policySet` when present.
+  - Wired `src/ui/editor-shell.tsx` to pass editor context into the compliance panel (`content`, baseline `contentType`, baseline `policySet`).
+  - Preserved existing compliance UX states (loading, error, findings rendering/grouping) while preventing empty-content runs.
+  - Updated compliance request contract notes in `docs/API_BOUNDARY.md` and UI behavior notes in `docs/UI_FOUNDATIONS.md`.

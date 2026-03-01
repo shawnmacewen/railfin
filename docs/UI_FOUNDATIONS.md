@@ -26,7 +26,7 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 
 ## Compliance Panel (MVP + AI insights UX)
 
-- `src/ui/compliance-panel.tsx` wires the `Run Compliance Check` action to `POST /api/internal/compliance/check` (internal stub endpoint contract).
+- `src/ui/compliance-panel.tsx` wires the `Run Compliance Check` action to `POST /api/internal/compliance/check` with editor-backed request payload (`content`, optional `contentType`, optional `policySet`).
 - Existing loading/error flow is preserved (`Running Compliance Check...`, inline `role="alert"` on failure).
 - Findings are now grouped by normalized severity (`critical`, `high`, `medium`, `low`, `unknown`) and rendered as grouped cards.
 - Severity is surfaced with clear visual badges (`.rf-severity-badge` variants) for fast scan/readability.

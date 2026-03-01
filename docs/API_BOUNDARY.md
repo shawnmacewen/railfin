@@ -27,6 +27,12 @@ Notes:
 
 `POST /api/internal/compliance/check` is an AI-backed endpoint with a Codex-first provider path and ChatGPT API fallback.
 
+Request JSON:
+
+- Required: `content: string` (source text to evaluate)
+- Optional: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
+- Optional: `policySet: string`
+
 Response JSON:
 
 - Success response: `200` with `{ ok: true, findings: ComplianceFinding[] }`

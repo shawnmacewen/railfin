@@ -258,7 +258,12 @@ export function EditorShell() {
         </p>
       ) : null}
 
-      <CompliancePanel activePolicyContext={activePolicyContext} />
+      <CompliancePanel
+        activePolicyContext={activePolicyContext}
+        content={content}
+        contentType="blog"
+        policySet="default"
+      />
     </section>
   );
 }
