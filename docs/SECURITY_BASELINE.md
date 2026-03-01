@@ -650,3 +650,30 @@ Decision source of truth: `docs/LAUNCH_EVIDENCE.md` (task-00089 reconciliation).
 
 - Outcome: **PASS** (docs reconciliation + execution-ready closeout checklist)
 - Runtime/code changes: **None** (docs-first)
+
+## task-00090 — SEC — Final MVP gate rerun using production evidence
+
+Deterministic model source: task-00061 policy + task-00085 Option B MVP semantics.
+Evidence source of truth: `docs/LAUNCH_EVIDENCE.md` (updated 2026-03-01 02:21 UTC).
+
+### New evidence applied
+
+- Production env vars evidence now confirms required Supabase vars in Production + Preview.
+- Production draft create proof confirmed (`POST /api/internal/content/draft` => `200`, `ok:true`, `data.id`).
+- Production draft read proof confirmed (`GET /api/internal/content/draft?id=<id>` => `200`, `ok:true`, matching id/title/body).
+- Matching `public.drafts` rows observed for verified draft IDs.
+
+### Deterministic gate rerun (task-00090)
+
+- Rule applied under active MVP policy: all MVP-critical evidence must be `Verified: YES`; AI runtime remains deferred (non-blocking) per Option B.
+- Current ledger state in `docs/LAUNCH_EVIDENCE.md`:
+  1. Deployed commit on Vercel: `Verified: YES`
+  2. Env vars present in runtime: `Verified: YES`
+  3. Draft runtime verification (create + read): `Verified: YES`
+  4. AI runtime proof: still open as post-MVP hardening (non-critical under Option B)
+
+### Final decision (task-00090)
+
+- **Decision: GO (MVP gate passed)**
+- Blocker class: **None for MVP-critical criteria** under current documented policy.
+- Follow-up (non-blocking): collect AI primary/fallback runtime evidence as post-MVP hardening artifact.

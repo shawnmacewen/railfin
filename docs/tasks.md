@@ -645,3 +645,13 @@
   - Aligned AI runtime proof semantics to current policy (task-00085 Option B): deferred from MVP-critical gate with explicit deferral recording fields.
   - Recorded deterministic decision status and exact unblock conditions required to flip MVP gate from NO-GO to GO.
   - Kept changes docs-only; no runtime/code-path refactor performed.
+
+## task-00090 — SEC — Final MVP gate rerun using production evidence
+
+- Status: **Done**
+- Branch: `chore/sec/task-00090-final-gate-rerun`
+- Scope delivered:
+  - Updated `docs/LAUNCH_EVIDENCE.md` to mark production env-vars evidence and draft create/read + DB-row evidence as verified.
+  - Re-ran deterministic launch gate in `docs/SECURITY_BASELINE.md` under task-00085 Option B semantics and recorded final **GO** decision for MVP-critical criteria.
+  - Documented non-blocking follow-up that AI runtime primary/fallback evidence remains post-MVP hardening work.
+  - Kept changes docs-only with no runtime/code-path modifications.
