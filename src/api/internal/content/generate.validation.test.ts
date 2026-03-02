@@ -94,3 +94,41 @@ test("accepts valid controlProfile values", async () => {
 
   assert.equal(result.ok, true);
 });
+
+test("accepts top-level tone intent audience objective controls", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      ...VALID_BASE_REQUEST.body,
+      template: "conversion",
+      controlProfile: "deep-outline",
+      tone: "bold",
+      intent: "convert",
+      audience: "executive",
+      objective: "decision",
+    },
+  });
+
+  assert.equal(result.ok, true);
+});
+
+test("rejects conflicting top-level and nested values with clear validation failure", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      ...VALID_BASE_REQUEST.body,
+      tone: "bold",
+      preset: {
+        tone: "friendly",
+      },
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected validation failure");
+  }
+
+  assert.equal(result.error, "Validation failed");
+  assert.equal(result.fieldErrors?.[0]?.field, "tone");
+});

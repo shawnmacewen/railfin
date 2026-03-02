@@ -106,19 +106,24 @@ Request JSON:
 - Required: `prompt: string`
 - Required: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
 - Optional: `template: "default" | "conversion"` (defaults to `default`)
+- Optional: `tone: "professional" | "friendly" | "bold"`
+- Optional: `intent: "educate" | "engage" | "convert"`
 - Optional: `preset: { tone?: "professional" | "friendly" | "bold", intent?: "educate" | "engage" | "convert" }`
-  - Missing `preset` defaults to `{ tone: "professional", intent: "educate" }`
-  - Partial preset is allowed; missing fields fall back to defaults
+  - Missing tone/intent values default to `{ tone: "professional", intent: "educate" }`
+  - Supports both top-level and nested values; when both are supplied they must match
   - Unknown keys are rejected (strict object validation)
 - Optional: `controlProfile: "social-quick" | "balanced-default" | "deep-outline"`
   - Missing `controlProfile` defaults to `"balanced-default"`
   - Each profile maps to controls defaults:
-    - `social-quick` -> `{ lengthTarget: "short", formatStyle: "bullet" }`
-    - `balanced-default` -> `{ lengthTarget: "medium", formatStyle: "standard" }`
-    - `deep-outline` -> `{ lengthTarget: "long", formatStyle: "outline" }`
-- Optional: `controls: { lengthTarget?: "short" | "medium" | "long", formatStyle?: "standard" | "bullet" | "outline" }`
+    - `social-quick` -> `{ lengthTarget: "short", formatStyle: "bullet", audience: "general", objective: "awareness" }`
+    - `balanced-default` -> `{ lengthTarget: "medium", formatStyle: "standard", audience: "practitioner", objective: "consideration" }`
+    - `deep-outline` -> `{ lengthTarget: "long", formatStyle: "outline", audience: "executive", objective: "decision" }`
+- Optional: `audience: "executive" | "practitioner" | "general"`
+- Optional: `objective: "awareness" | "consideration" | "decision"`
+- Optional: `controls: { lengthTarget?: "short" | "medium" | "long", formatStyle?: "standard" | "bullet" | "outline", audience?: "executive" | "practitioner" | "general", objective?: "awareness" | "consideration" | "decision" }`
   - Missing `controls` uses selected `controlProfile` mapping
   - Partial controls are allowed; missing fields fall back to selected profile defaults
+  - Supports both top-level and nested audience/objective; when both are supplied they must match
   - Unknown keys are rejected (strict object validation)
 
 Response JSON:
@@ -127,12 +132,13 @@ Response JSON:
   - `draft`: `{ id, contentType, prompt, text, status, createdAt }`
   - `generationMeta`: includes `provider`, `notes`, and `providerChain` diagnostics metadata
 - Validation error: `{ ok: false, error: string }` with `400`
+  - conflicting top-level+nested control values -> `Validation failed` with `fieldErrors[]`
   - missing/blank prompt -> `Missing prompt`
   - missing/invalid `contentType` -> `Invalid contentType`
   - invalid `template` -> `Invalid template`
   - invalid `preset` object, unknown preset keys, or unsupported `tone`/`intent` values -> `Invalid preset`
   - invalid `controlProfile` value -> `Invalid controlProfile`
-  - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle` values -> `Invalid controls`
+  - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle`/`audience`/`objective` values -> `Invalid controls`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
 - Degraded quality hint: when diagnostics classify primary failure as `provider_config`, generation notes include a non-secret operator hint to check `OPENAI_API_KEY` runtime configuration.
 

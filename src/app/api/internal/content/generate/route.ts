@@ -11,6 +11,10 @@ export async function POST(request: NextRequest) {
     prompt?: string;
     contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
     template?: "default" | "conversion";
+    tone?: "professional" | "friendly" | "bold";
+    intent?: "educate" | "engage" | "convert";
+    audience?: "executive" | "practitioner" | "general";
+    objective?: "awareness" | "consideration" | "decision";
     preset?: {
       tone?: "professional" | "friendly" | "bold";
       intent?: "educate" | "engage" | "convert";
@@ -18,6 +22,8 @@ export async function POST(request: NextRequest) {
     controls?: {
       lengthTarget?: "short" | "medium" | "long";
       formatStyle?: "standard" | "bullet" | "outline";
+      audience?: "executive" | "practitioner" | "general";
+      objective?: "awareness" | "consideration" | "decision";
     };
     controlProfile?: "social-quick" | "balanced-default" | "deep-outline";
   };

@@ -1,5 +1,30 @@
 # Tasks
 
+## task-00118 — UI — generation history panel in Create
+
+- Status: **Done**
+- Branch: `feat/ui/task-00118-generation-history-panel`
+- Scope delivered:
+  - Added Create generation history panel showing the most recent generated outputs for the current Create context (draft/session-scoped, capped history).
+  - Added quick restore action from history entries to repopulate editor content with low-friction operator feedback.
+  - Preserved save/generate/compliance/review flows and existing API contracts.
+  - Added matching `rf-*` style primitives for compact history cards/actions in Create.
+  - Updated UI foundations documentation and re-ran build verification (pass).
+
+
+## task-00117 — DEV — Prompt presets control panel backend/data support
+
+- Status: **Done**
+- Branch: `feat/dev/task-00117-prompt-presets-control-panel`
+- Scope delivered:
+  - Extended generate request normalization to support full preset/control-panel input set: `template`, `tone`, `intent`, `controlProfile`, `audience`, `objective`.
+  - Preserved backward compatibility with existing nested fields (`preset.*`, `controls.*`) while enforcing deterministic merge rules.
+  - Added strict conflict validation for mixed top-level+nested overrides and returned clear `Validation failed` + `fieldErrors` contract-safe payloads.
+  - Expanded control-profile defaults and prompt composition guidance to include audience/objective dimensions.
+  - Updated generate route typing, validation tests, and API boundary docs; response success/degraded contract unchanged.
+  - Rebuilt project with `npm run build` (pass).
+
+
 ## task-00119 — SEC — safety guardrails for automated remediation apply actions
 
 - Status: **Done**

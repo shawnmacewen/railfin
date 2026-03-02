@@ -7,12 +7,18 @@ type GenerateToneId = "professional" | "friendly" | "bold";
 type GenerateIntentId = "educate" | "engage" | "convert";
 type GenerateLengthTargetId = "short" | "medium" | "long";
 type GenerateFormatStyleId = "standard" | "bullet" | "outline";
+type GenerateAudienceId = "executive" | "practitioner" | "general";
+type GenerateObjectiveId = "awareness" | "consideration" | "decision";
 type GenerateControlProfileId = "social-quick" | "balanced-default" | "deep-outline";
 
 type GenerateRequestBody = {
   prompt?: string;
   contentType?: ContentType;
   template?: GenerateTemplateId;
+  tone?: GenerateToneId;
+  intent?: GenerateIntentId;
+  audience?: GenerateAudienceId;
+  objective?: GenerateObjectiveId;
   preset?: {
     tone?: GenerateToneId;
     intent?: GenerateIntentId;
@@ -20,6 +26,8 @@ type GenerateRequestBody = {
   controls?: {
     lengthTarget?: GenerateLengthTargetId;
     formatStyle?: GenerateFormatStyleId;
+    audience?: GenerateAudienceId;
+    objective?: GenerateObjectiveId;
   };
   controlProfile?: GenerateControlProfileId;
 };
@@ -45,8 +53,12 @@ type GenerationPreset = {
 type GenerationControls = {
   lengthTarget: GenerateLengthTargetId;
   formatStyle: GenerateFormatStyleId;
+  audience: GenerateAudienceId;
+  objective: GenerateObjectiveId;
   lengthGuidance: string[];
   formatGuidance: string[];
+  audienceGuidance: string[];
+  objectiveGuidance: string[];
 };
 
 type GenerationControlProfile = {
@@ -55,6 +67,8 @@ type GenerationControlProfile = {
   controls: {
     lengthTarget: GenerateLengthTargetId;
     formatStyle: GenerateFormatStyleId;
+    audience: GenerateAudienceId;
+    objective: GenerateObjectiveId;
   };
 };
 
@@ -140,6 +154,36 @@ const FORMAT_STYLE_GUIDANCE: Record<GenerateFormatStyleId, string[]> = {
   ],
 };
 
+const AUDIENCE_GUIDANCE: Record<GenerateAudienceId, string[]> = {
+  executive: [
+    "Prioritize strategic outcomes, business impact, and concise framing.",
+    "Minimize operational detail unless needed for decision confidence.",
+  ],
+  practitioner: [
+    "Prioritize practical implementation details and applied examples.",
+    "Use precise terminology where it improves execution clarity.",
+  ],
+  general: [
+    "Use plain language and avoid assuming domain expertise.",
+    "Provide enough context so first-time readers can follow quickly.",
+  ],
+};
+
+const OBJECTIVE_GUIDANCE: Record<GenerateObjectiveId, string[]> = {
+  awareness: [
+    "Optimize for initial interest, context-setting, and clarity of the core problem/value.",
+    "Avoid hard-sell language; keep the ask lightweight.",
+  ],
+  consideration: [
+    "Optimize for evaluation-stage readers comparing options or approaches.",
+    "Include practical differentiators and confidence-building specifics.",
+  ],
+  decision: [
+    "Optimize for action readiness with clear next steps and low-friction CTA.",
+    "Reinforce urgency carefully without overclaiming outcomes.",
+  ],
+};
+
 const CONTROL_PROFILES: Record<GenerateControlProfileId, GenerationControlProfile> = {
   "social-quick": {
     id: "social-quick",
@@ -147,6 +191,8 @@ const CONTROL_PROFILES: Record<GenerateControlProfileId, GenerationControlProfil
     controls: {
       lengthTarget: "short",
       formatStyle: "bullet",
+      audience: "general",
+      objective: "awareness",
     },
   },
   "balanced-default": {
@@ -155,6 +201,8 @@ const CONTROL_PROFILES: Record<GenerateControlProfileId, GenerationControlProfil
     controls: {
       lengthTarget: "medium",
       formatStyle: "standard",
+      audience: "practitioner",
+      objective: "consideration",
     },
   },
   "deep-outline": {
@@ -163,6 +211,8 @@ const CONTROL_PROFILES: Record<GenerateControlProfileId, GenerationControlProfil
     controls: {
       lengthTarget: "long",
       formatStyle: "outline",
+      audience: "executive",
+      objective: "decision",
     },
   },
 };
@@ -196,6 +246,14 @@ function isGenerateFormatStyleId(value: unknown): value is GenerateFormatStyleId
   return typeof value === "string" && value in FORMAT_STYLE_GUIDANCE;
 }
 
+function isGenerateAudienceId(value: unknown): value is GenerateAudienceId {
+  return typeof value === "string" && value in AUDIENCE_GUIDANCE;
+}
+
+function isGenerateObjectiveId(value: unknown): value is GenerateObjectiveId {
+  return typeof value === "string" && value in OBJECTIVE_GUIDANCE;
+}
+
 function isGenerateControlProfileId(value: unknown): value is GenerateControlProfileId {
   return typeof value === "string" && value in CONTROL_PROFILES;
 }
@@ -216,23 +274,15 @@ function resolveTemplate(value: unknown): GenerationTemplate | null {
   return GENERATION_TEMPLATES[value];
 }
 
-function resolvePreset(value: unknown): GenerationPreset | null {
-  if (value === undefined) {
-    return {
-      tone: DEFAULT_TONE,
-      intent: DEFAULT_INTENT,
-      toneGuidance: TONE_GUIDANCE[DEFAULT_TONE],
-      intentGuidance: INTENT_GUIDANCE[DEFAULT_INTENT],
-    };
-  }
-
-  if (!value || typeof value !== "object" || !hasOnlyKeys(value, ["tone", "intent"])) {
+function resolvePreset(value: unknown, toneOverride: unknown, intentOverride: unknown): GenerationPreset | null {
+  if (value !== undefined && (!value || typeof value !== "object" || !hasOnlyKeys(value, ["tone", "intent"]))) {
     return null;
   }
 
-  const candidate = value as { tone?: unknown; intent?: unknown };
-  const tone = candidate.tone === undefined ? DEFAULT_TONE : candidate.tone;
-  const intent = candidate.intent === undefined ? DEFAULT_INTENT : candidate.intent;
+  const candidate = (value ?? {}) as { tone?: unknown; intent?: unknown };
+  const tone = toneOverride === undefined ? (candidate.tone === undefined ? DEFAULT_TONE : candidate.tone) : toneOverride;
+  const intent =
+    intentOverride === undefined ? (candidate.intent === undefined ? DEFAULT_INTENT : candidate.intent) : intentOverride;
 
   if (!isGenerateToneId(tone) || !isGenerateIntentId(intent)) {
     return null;
@@ -258,33 +308,55 @@ function resolveControlProfile(value: unknown): GenerationControlProfile | null 
   return CONTROL_PROFILES[value];
 }
 
-function resolveControls(value: unknown, profile: GenerationControlProfile): GenerationControls | null {
-  if (value === undefined) {
-    return {
-      lengthTarget: profile.controls.lengthTarget,
-      formatStyle: profile.controls.formatStyle,
-      lengthGuidance: LENGTH_TARGET_GUIDANCE[profile.controls.lengthTarget],
-      formatGuidance: FORMAT_STYLE_GUIDANCE[profile.controls.formatStyle],
-    };
-  }
-
-  if (!value || typeof value !== "object" || !hasOnlyKeys(value, ["lengthTarget", "formatStyle"])) {
+function resolveControls(
+  value: unknown,
+  profile: GenerationControlProfile,
+  audienceOverride: unknown,
+  objectiveOverride: unknown,
+): GenerationControls | null {
+  if (
+    value !== undefined &&
+    (!value || typeof value !== "object" || !hasOnlyKeys(value, ["lengthTarget", "formatStyle", "audience", "objective"]))
+  ) {
     return null;
   }
 
-  const candidate = value as { lengthTarget?: unknown; formatStyle?: unknown };
+  const candidate = (value ?? {}) as {
+    lengthTarget?: unknown;
+    formatStyle?: unknown;
+    audience?: unknown;
+    objective?: unknown;
+  };
+
   const lengthTarget = candidate.lengthTarget === undefined ? profile.controls.lengthTarget : candidate.lengthTarget;
   const formatStyle = candidate.formatStyle === undefined ? profile.controls.formatStyle : candidate.formatStyle;
+  const audience =
+    audienceOverride === undefined ? (candidate.audience === undefined ? profile.controls.audience : candidate.audience) : audienceOverride;
+  const objective =
+    objectiveOverride === undefined
+      ? candidate.objective === undefined
+        ? profile.controls.objective
+        : candidate.objective
+      : objectiveOverride;
 
-  if (!isGenerateLengthTargetId(lengthTarget) || !isGenerateFormatStyleId(formatStyle)) {
+  if (
+    !isGenerateLengthTargetId(lengthTarget) ||
+    !isGenerateFormatStyleId(formatStyle) ||
+    !isGenerateAudienceId(audience) ||
+    !isGenerateObjectiveId(objective)
+  ) {
     return null;
   }
 
   return {
     lengthTarget,
     formatStyle,
+    audience,
+    objective,
     lengthGuidance: LENGTH_TARGET_GUIDANCE[lengthTarget],
     formatGuidance: FORMAT_STYLE_GUIDANCE[formatStyle],
+    audienceGuidance: AUDIENCE_GUIDANCE[audience],
+    objectiveGuidance: OBJECTIVE_GUIDANCE[objective],
   };
 }
 
@@ -312,6 +384,8 @@ function buildGenerationPrompt(input: {
     `Control profile: ${input.controlProfile.id} (${input.controlProfile.label})`,
     `Controls lengthTarget: ${input.controls.lengthTarget}`,
     `Controls formatStyle: ${input.controls.formatStyle}`,
+    `Controls audience: ${input.controls.audience}`,
+    `Controls objective: ${input.controls.objective}`,
     "Template guidance:",
     ...input.template.guidance.map((item) => `- ${item}`),
     "Tone guidance:",
@@ -322,6 +396,10 @@ function buildGenerationPrompt(input: {
     ...input.controls.lengthGuidance.map((item) => `- ${item}`),
     "Format guidance:",
     ...input.controls.formatGuidance.map((item) => `- ${item}`),
+    "Audience guidance:",
+    ...input.controls.audienceGuidance.map((item) => `- ${item}`),
+    "Objective guidance:",
+    ...input.controls.objectiveGuidance.map((item) => `- ${item}`),
     "Prompt:",
     input.prompt,
   ].join("\n");
@@ -378,6 +456,44 @@ function buildDegradedGenerationNote(errorKind?: string): string {
   return "AI generation unavailable or invalid output; fallback response used.";
 }
 
+function validateControlOverrides(body: GenerateRequestBody) {
+  const fieldErrors: Array<{ field: string; message: string }> = [];
+
+  if (body.tone !== undefined && body.preset?.tone !== undefined && body.tone !== body.preset.tone) {
+    fieldErrors.push({
+      field: "tone",
+      message: "tone conflicts with preset.tone; provide one value or keep them identical.",
+    });
+  }
+
+  if (body.intent !== undefined && body.preset?.intent !== undefined && body.intent !== body.preset.intent) {
+    fieldErrors.push({
+      field: "intent",
+      message: "intent conflicts with preset.intent; provide one value or keep them identical.",
+    });
+  }
+
+  if (body.audience !== undefined && body.controls?.audience !== undefined && body.audience !== body.controls.audience) {
+    fieldErrors.push({
+      field: "audience",
+      message: "audience conflicts with controls.audience; provide one value or keep them identical.",
+    });
+  }
+
+  if (
+    body.objective !== undefined &&
+    body.controls?.objective !== undefined &&
+    body.objective !== body.controls.objective
+  ) {
+    fieldErrors.push({
+      field: "objective",
+      message: "objective conflicts with controls.objective; provide one value or keep them identical.",
+    });
+  }
+
+  return fieldErrors;
+}
+
 export async function internalContentGenerate(request: {
   method: "POST";
   body?: GenerateRequestBody;
@@ -411,8 +527,19 @@ export async function internalContentGenerate(request: {
     };
   }
 
+  const body = request.body ?? {};
+  const combinationErrors = validateControlOverrides(body);
+
+  if (combinationErrors.length > 0) {
+    return {
+      ok: false,
+      error: "Validation failed",
+      fieldErrors: combinationErrors,
+    };
+  }
+
   const contentType = request.body.contentType;
-  const template = resolveTemplate(request.body?.template);
+  const template = resolveTemplate(body.template);
 
   if (!template) {
     return {
@@ -421,7 +548,7 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  const preset = resolvePreset(request.body?.preset);
+  const preset = resolvePreset(body.preset, body.tone, body.intent);
 
   if (!preset) {
     return {
@@ -430,7 +557,7 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  const controlProfile = resolveControlProfile(request.body?.controlProfile);
+  const controlProfile = resolveControlProfile(body.controlProfile);
 
   if (!controlProfile) {
     return {
@@ -439,7 +566,7 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  const controls = resolveControls(request.body?.controls, controlProfile);
+  const controls = resolveControls(body.controls, controlProfile, body.audience, body.objective);
 
   if (!controls) {
     return {
