@@ -1,5 +1,20 @@
 # UI Foundations
 
+## task-00114 — Content + review UX polish for live AI runtime
+
+- `src/ui/editor-shell.tsx` now distinguishes generation outcomes using existing `generationMeta` metadata:
+  - explicit successful runtime message when primary generation succeeds
+  - explicit degraded fallback message when `generationMeta.degraded` is true
+  - runtime/provider hint surfaced in review feedback for operator clarity
+- `src/ui/compliance-panel.tsx` now reads compliance `meta` metadata and shows run-result state:
+  - successful runtime completion status
+  - degraded fallback completion status when `meta.degraded` is present
+- `src/app/globals.css` includes shared `rf-status` variants (muted/success/error) to keep feedback low-friction and consistent with existing `rf-*` patterns.
+- Existing workflows are preserved:
+  - Create generate/save flow unchanged in request contracts
+  - Compliance check and review workbench actions preserved
+  - Library→Create draft-open behavior unaffected
+
 ## task-00111 — Review workbench phase 6 (apply + regenerate)
 
 - `src/ui/editor-shell.tsx` adds a quick selected-finding workflow in Review Workbench:

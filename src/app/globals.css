@@ -155,6 +155,23 @@ button:disabled {
   margin: 0;
 }
 
+.rf-status {
+  margin: 0.35rem 0 0.65rem;
+  font-size: 0.86rem;
+}
+
+.rf-status-muted {
+  color: #4e5879;
+}
+
+.rf-status-success {
+  color: #14532d;
+}
+
+.rf-status-error {
+  color: #991b1b;
+}
+
 .rf-compliance-disclaimer {
   margin-top: 0;
   color: #4e5879;

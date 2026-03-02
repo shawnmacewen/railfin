@@ -59,6 +59,7 @@ type GenerateResponse = {
     generationMeta?: {
       notes?: string;
       degraded?: boolean;
+      provider?: string;
     };
   };
   error?: string;
@@ -122,6 +123,7 @@ export function EditorShell() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
   const [generationFeedback, setGenerationFeedback] = useState<string | null>(null);
+  const [generationDegraded, setGenerationDegraded] = useState<boolean | null>(null);
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null);
   const [contentType, setContentType] = useState<ContentType>("blog");
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
@@ -262,6 +264,7 @@ export function EditorShell() {
 
     setGenerationStatus("generating");
     setGenerationFeedback("Generating draft text...");
+    setGenerationDegraded(null);
 
     try {
       const response = await fetch("/api/internal/content/generate", {
@@ -286,13 +289,25 @@ export function EditorShell() {
       setContent(generatedText);
       setGenerationStatus("generated");
       const notes = payload.data?.generationMeta?.notes?.trim();
-      setGenerationFeedback(successMessage || notes || "Draft generated. Review and save when ready.");
-      setReviewFeedback(null);
+      const degraded = Boolean(payload.data?.generationMeta?.degraded);
+      const provider = payload.data?.generationMeta?.provider?.trim();
+      setGenerationDegraded(degraded);
+      setGenerationFeedback(
+        degraded
+          ? notes || "Draft generated in degraded fallback mode. Review carefully before saving."
+          : successMessage || notes || "Draft generated successfully. Review and save when ready.",
+      );
+      setReviewFeedback(
+        degraded
+          ? `Generation runtime: degraded fallback${provider ? ` via ${provider}` : ""}.`
+          : `Generation runtime: success${provider ? ` via ${provider}` : ""}.`,
+      );
       setRemediationPreview(null);
       setStatus("idle");
       setFeedback(null);
     } catch (err) {
       setGenerationStatus("error");
+      setGenerationDegraded(null);
       setGenerationFeedback(err instanceof Error ? err.message : "Unable to generate content.");
     }
   };
@@ -472,7 +487,13 @@ export function EditorShell() {
 
       {generationFeedback ? (
         <p
-          className={`rf-status ${generationStatus === "error" ? "rf-status-error" : "rf-status-success"}`}
+          className={`rf-status ${
+            generationStatus === "error"
+              ? "rf-status-error"
+              : generationDegraded
+                ? "rf-status-muted"
+                : "rf-status-success"
+          }`}
           role={generationStatus === "error" ? "alert" : "status"}
         >
           {generationFeedback}
@@ -494,6 +515,7 @@ export function EditorShell() {
             if (generationStatus !== "idle") {
               setGenerationStatus("idle");
               setGenerationFeedback(null);
+              setGenerationDegraded(null);
             }
             if (reviewFeedback) {
               setReviewFeedback(null);

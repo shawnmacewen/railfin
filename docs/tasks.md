@@ -1,5 +1,15 @@
 # Tasks
 
+## task-00114 — UI — Content + review UX polish for live AI runtime
+
+- Status: **Done**
+- Branch: `feat/ui/task-00114-content-review-ux-polish`
+- Scope delivered:
+  - Surfaced generation runtime outcomes in Create with explicit distinction between normal success and degraded fallback mode using existing `generationMeta` metadata.
+  - Surfaced compliance runtime outcomes with explicit success vs degraded fallback status using existing `meta` diagnostics when available.
+  - Added/standardized `rf-status` visual variants in shared stylesheet for low-friction status consistency.
+  - Preserved existing create/save/library/review workflows and endpoint contracts.
+
 ## task-00115 — SEC — Auth compat risk guardrails
 
 - Status: **Done**

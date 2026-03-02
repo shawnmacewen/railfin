@@ -15,6 +15,16 @@ type ComplianceCheckResponse = {
   error?: string;
   message?: string;
   findings?: ComplianceFinding[];
+  meta?: {
+    degraded?: boolean;
+    providerChain?: {
+      attempts?: Array<{
+        provider?: string;
+        ok?: boolean;
+      }>;
+      primary?: string;
+    };
+  };
 };
 
 const COMPLIANCE_CHECK_ENDPOINT = "/api/internal/compliance/check";
@@ -75,6 +85,8 @@ export function CompliancePanel({
   const [error, setError] = useState<string | null>(null);
   const [findings, setFindings] = useState<ComplianceFinding[]>([]);
   const [selectedFindingKey, setSelectedFindingKey] = useState<string | null>(null);
+  const [runSummary, setRunSummary] = useState<string | null>(null);
+  const [runDegraded, setRunDegraded] = useState(false);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ComplianceFinding[]>();
@@ -157,6 +169,8 @@ export function CompliancePanel({
 
     setRunning(true);
     setError(null);
+    setRunSummary(null);
+    setRunDegraded(false);
 
     try {
       const response = await fetch(COMPLIANCE_CHECK_ENDPOINT, {
@@ -183,11 +197,25 @@ export function CompliancePanel({
       }
 
       const nextFindings = Array.isArray(payload?.findings) ? payload.findings : [];
+      const degraded = Boolean(payload?.meta?.degraded);
+      const provider =
+        payload?.meta?.providerChain?.attempts?.find((attempt) => attempt?.ok)?.provider ||
+        payload?.meta?.providerChain?.primary ||
+        "runtime";
+
       setFindings(nextFindings);
       setSelectedFindingKey(null);
+      setRunDegraded(degraded);
+      setRunSummary(
+        degraded
+          ? `Compliance completed in degraded fallback mode (${provider}). Review findings carefully before publishing.`
+          : `Compliance check completed successfully (${provider}).`,
+      );
     } catch {
       setFindings([]);
       setSelectedFindingKey(null);
+      setRunSummary(null);
+      setRunDegraded(false);
       setError("Compliance check failed. Please try again.");
     } finally {
       setRunning(false);
@@ -205,6 +233,12 @@ export function CompliancePanel({
       {activePolicyContext ? (
         <p className="rf-compliance-policy-context" role="status">
           Active policy context: {activePolicyContext}
+        </p>
+      ) : null}
+
+      {runSummary ? (
+        <p className={`rf-status ${runDegraded ? "rf-status-muted" : "rf-status-success"}`} role="status">
+          {runSummary}
         </p>
       ) : null}
 
