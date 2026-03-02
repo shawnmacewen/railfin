@@ -1,5 +1,46 @@
 # Security Baseline Verification
 
+## task-00097 — SEC — Security hardening sweep phase 1
+
+Review scope:
+- `src/app/api/internal/compliance/check/route.ts`
+- `src/api/internal/content/generate.ts`
+- `src/app/api/internal/content/generate/route.ts`
+- `src/app/api/internal/content/draft/route.ts`
+- `src/app/api/internal/content/list/route.ts`
+- `src/api/internal/content/draft.ts`, `src/api/internal/content/list.ts`
+- `src/ui/editor-shell.tsx`, `src/ui/compliance-panel.tsx`
+
+### Hardening checklist (phase-1)
+
+- [x] Audit newly touched content/review flows for input boundaries and fail-closed behavior.
+- [x] Add low-risk bounds validation to obvious high-impact inputs (`prompt`, compliance `content`, `policySet`).
+- [x] Enforce allowlist validation for compliance `contentType` at server boundary.
+- [ ] Enforce route-level authz for `/api/internal/*` handlers (currently relies on page-nav guard model, not endpoint guard).
+- [ ] Add explicit `Cache-Control: no-store` on compliance/generate/list responses that may include sensitive draft/policy-derived content.
+
+### Findings + changes
+
+1. **Input bounds gap (fixed):**
+   - Added `MAX_PROMPT_LENGTH` enforcement in `src/api/internal/content/generate.ts`.
+   - Added compliance request bounds in `src/app/api/internal/compliance/check/route.ts`:
+     - `MAX_COMPLIANCE_CONTENT_LENGTH = 12000`
+     - `MAX_POLICY_SET_LENGTH = 80`
+     - `contentType` allowlist validation (`blog|linkedin|newsletter|x-thread`)
+   - Behavior is fail-closed with `400 Validation failed` and field-level error details.
+
+2. **Authz boundary gap (open follow-up):**
+   - Internal API routes in scope do not yet enforce server-authoritative session/role checks.
+   - Current middleware scope is `/app/:path*` only; direct API invocation path remains outside this guard.
+
+3. **Fail-closed degraded behavior (confirmed):**
+   - Compliance and generation runtime paths preserve explicit degraded fallback outputs rather than silent success on provider failure.
+
+### Verification outcome (task-00097)
+
+- Outcome: **PASS (phase-1 hardening complete with residual authz/cache follow-ups open)**
+- Type: Runtime input-hardening + documentation update
+
 ## Preview Validation Checklist (task-00029)
 
 - [x] Guard source verified at repository root: `middleware.ts`

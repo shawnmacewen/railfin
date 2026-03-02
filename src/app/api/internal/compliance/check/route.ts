@@ -24,6 +24,14 @@ type ComplianceRequestBody = {
   policySet?: string;
 };
 
+const CONTENT_TYPES = ["blog", "linkedin", "newsletter", "x-thread"] as const;
+const MAX_COMPLIANCE_CONTENT_LENGTH = 12000;
+const MAX_POLICY_SET_LENGTH = 80;
+
+function isContentType(value: unknown): value is ComplianceRequestBody["contentType"] {
+  return typeof value === "string" && CONTENT_TYPES.includes(value as (typeof CONTENT_TYPES)[number]);
+}
+
 function normalizeLocation(location: unknown): string {
   if (typeof location === "string") {
     const trimmed = location.trim();
@@ -118,13 +126,63 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Missing content" }, { status: 400 });
   }
 
+  if (content.length > MAX_COMPLIANCE_CONTENT_LENGTH) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Validation failed",
+        fieldErrors: [
+          {
+            field: "content",
+            message: `Content must be ${MAX_COMPLIANCE_CONTENT_LENGTH} characters or fewer.`,
+          },
+        ],
+      },
+      { status: 400 },
+    );
+  }
+
+  if (body.contentType !== undefined && !isContentType(body.contentType)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Validation failed",
+        fieldErrors: [
+          {
+            field: "contentType",
+            message: "contentType must be one of: blog, linkedin, newsletter, x-thread.",
+          },
+        ],
+      },
+      { status: 400 },
+    );
+  }
+
+  const normalizedPolicySet = (body.policySet ?? "default").trim() || "default";
+
+  if (normalizedPolicySet.length > MAX_POLICY_SET_LENGTH) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Validation failed",
+        fieldErrors: [
+          {
+            field: "policySet",
+            message: `policySet must be ${MAX_POLICY_SET_LENGTH} characters or fewer.`,
+          },
+        ],
+      },
+      { status: 400 },
+    );
+  }
+
   const policyResponse = await getCurrentConfigurePolicy();
   const policyText = policyResponse.ok ? policyResponse.data.policyText.trim() : "";
 
   const prompt = buildCompliancePrompt({
     content,
     contentType: body.contentType ?? "blog",
-    policySet: body.policySet ?? "default",
+    policySet: normalizedPolicySet,
     policyText,
   });
 
