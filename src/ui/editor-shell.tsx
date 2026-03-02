@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { ComplianceFinding, CompliancePanel } from "./compliance-panel";
+import { ComplianceFinding, CompliancePanel, SelectedFindingContext } from "./compliance-panel";
 
 type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
@@ -21,6 +21,14 @@ type RemediationPreview = {
   location: string;
   previousBlock: string | null;
   appliedBlock: string;
+};
+
+type RemediationApplyHistoryEntry = {
+  issue: string;
+  severity: string;
+  location: string;
+  hint: string;
+  appliedAt: string;
 };
 
 const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
@@ -119,6 +127,8 @@ export function EditorShell() {
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
+  const [selectedFindingContext, setSelectedFindingContext] = useState<SelectedFindingContext | null>(null);
+  const [remediationApplyHistory, setRemediationApplyHistory] = useState<RemediationApplyHistoryEntry[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -338,18 +348,32 @@ export function EditorShell() {
 
   const onApplyRemediationHint = (hint: string, finding: ComplianceFinding) => {
     const remediationBlock = buildRemediationBlock(hint, finding);
+    const issue = finding.issue || "unknown issue";
+    const severity = (finding.severity || "unknown").toLowerCase();
+    const location = finding.location || "N/A";
 
     setContent((current) => {
       const result = applyControlledRemediationContext(current, remediationBlock);
       setRemediationPreview({
-        issue: finding.issue || "unknown issue",
-        severity: (finding.severity || "unknown").toLowerCase(),
-        location: finding.location || "N/A",
+        issue,
+        severity,
+        location,
         previousBlock: result.previousBlock,
         appliedBlock: result.appliedBlock,
       });
       return result.nextContent;
     });
+
+    setRemediationApplyHistory((current) => [
+      {
+        issue,
+        severity,
+        location,
+        hint,
+        appliedAt: new Date().toISOString(),
+      },
+      ...current,
+    ].slice(0, 5));
 
     setReviewFeedback("Selected remediation context applied. Compare previous/new context, then revise the draft above.");
   };
@@ -444,6 +468,48 @@ export function EditorShell() {
         </p>
       ) : null}
 
+      <section className="rf-review-workbench" aria-label="Review workbench">
+        <h3>Review Workbench</h3>
+        <div className="rf-review-workbench-grid">
+          <div>
+            <h4>Selected Finding</h4>
+            {selectedFindingContext ? (
+              <>
+                <p>
+                  <strong>Issue:</strong> {selectedFindingContext.issue}
+                </p>
+                <p>
+                  <strong>Severity:</strong> {selectedFindingContext.severity}
+                </p>
+                <p>
+                  <strong>Location:</strong> {selectedFindingContext.location}
+                </p>
+                <p>
+                  <strong>Hint:</strong> {selectedFindingContext.remediationHint}
+                </p>
+              </>
+            ) : (
+              <p className="rf-status rf-status-muted">Select a finding in Compliance to stage remediation context.</p>
+            )}
+          </div>
+
+          <div>
+            <h4>Session Apply History</h4>
+            {remediationApplyHistory.length ? (
+              <ul className="rf-review-history-list">
+                {remediationApplyHistory.map((entry, index) => (
+                  <li key={`${entry.appliedAt}-${index}`}>
+                    <strong>{entry.severity.toUpperCase()}</strong> · {entry.issue} · {entry.location}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="rf-status rf-status-muted">No remediation context applied in this session yet.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
       {remediationPreview ? (
         <section className="rf-remediation-preview" aria-label="Applied remediation context preview">
           <h3>Applied Remediation Context</h3>
@@ -473,6 +539,7 @@ export function EditorShell() {
         policySet="default"
         onApplyRemediationHint={onApplyRemediationHint}
         onRemindRemediationHint={onRemindRemediationHint}
+        onSelectedFindingChange={setSelectedFindingContext}
       />
     </section>
   );

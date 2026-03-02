@@ -308,6 +308,48 @@ button:disabled {
   border-color: #d1d5db;
 }
 
+.rf-review-workbench {
+  margin: 0.75rem 0;
+  border: 1px solid #dbe4ff;
+  border-radius: 0.65rem;
+  background: #f8faff;
+  padding: 0.65rem;
+}
+
+.rf-review-workbench h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.93rem;
+}
+
+.rf-review-workbench-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.rf-review-workbench h4 {
+  margin: 0.15rem 0 0.25rem;
+  font-size: 0.84rem;
+}
+
+.rf-review-workbench p {
+  margin: 0.2rem 0;
+  font-size: 0.84rem;
+}
+
+.rf-review-history-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+}
+
+@media (min-width: 860px) {
+  .rf-review-workbench-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .rf-remediation-preview {
   margin: 0.8rem 0;
   border: 1px solid #dbe4ff;

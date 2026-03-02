@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 export type ComplianceFinding = {
   severity?: string;
@@ -45,6 +45,13 @@ function getFindingKey(finding: ComplianceFinding, severity: string, index: numb
   return `${finding.issue || "issue"}-${severity}-${index}`;
 }
 
+export type SelectedFindingContext = {
+  issue: string;
+  severity: string;
+  location: string;
+  remediationHint: string;
+};
+
 type CompliancePanelProps = {
   activePolicyContext?: string;
   content?: string;
@@ -52,6 +59,7 @@ type CompliancePanelProps = {
   policySet?: string;
   onApplyRemediationHint?: (hint: string, finding: ComplianceFinding) => void;
   onRemindRemediationHint?: (hint: string, finding: ComplianceFinding) => void;
+  onSelectedFindingChange?: (selected: SelectedFindingContext | null) => void;
 };
 
 export function CompliancePanel({
@@ -61,6 +69,7 @@ export function CompliancePanel({
   policySet,
   onApplyRemediationHint,
   onRemindRemediationHint,
+  onSelectedFindingChange,
 }: CompliancePanelProps) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +125,24 @@ export function CompliancePanel({
 
     return null;
   }, [groupedFindings, selectedFindingKey]);
+
+  useEffect(() => {
+    if (!onSelectedFindingChange) {
+      return;
+    }
+
+    if (!selectedFindingMeta) {
+      onSelectedFindingChange(null);
+      return;
+    }
+
+    onSelectedFindingChange({
+      issue: selectedFindingMeta.finding.issue || "N/A",
+      severity: selectedFindingMeta.severity,
+      location: selectedFindingMeta.finding.location || "N/A",
+      remediationHint: selectedFindingMeta.remediationHint,
+    });
+  }, [onSelectedFindingChange, selectedFindingMeta]);
 
   const runComplianceCheck = async () => {
     if (running) return;

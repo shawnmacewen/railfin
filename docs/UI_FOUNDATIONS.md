@@ -128,6 +128,17 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - review actions are additive UI affordances only
 - Styling stays within existing railfin-ui patterns and primitives (`rf-status`, severity badges, card-like sections).
 
+## task-00102 — Review workbench phase 4
+
+- `src/ui/editor-shell.tsx` now includes a compact **Review Workbench** section in Create that surfaces:
+  - the currently selected finding context (issue, severity, location, remediation hint)
+  - current-session remediation apply history (latest entries)
+- `src/ui/compliance-panel.tsx` now emits selected-finding context to parent editor state via `onSelectedFindingChange`, keeping selection UX and existing action controls intact.
+- `src/app/globals.css` adds compact `rf-review-workbench*` styles consistent with existing railfin `rf-*` conventions.
+- Preserved behavior constraints:
+  - no generation/save/compliance API contract changes
+  - existing compliance disclaimer, status messaging, and remediation apply flow retained
+
 ## task-00099 — Review tools UX phase 3
 
 - `src/ui/editor-shell.tsx` now provides clearer remediation apply context with an **Applied Remediation Context** panel:
