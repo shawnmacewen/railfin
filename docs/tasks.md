@@ -10,6 +10,17 @@
 
 # Tasks
 
+## task-00127 — UI — review workbench tidy pass 1 (pre-UX cleanup)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00127-review-workbench-tidy-pass1`
+- Scope delivered:
+  - Reduced visual clutter in Create Review Workbench while preserving existing selected-finding remediation capabilities.
+  - Improved hierarchy/spacing for selected-finding details/actions, protected-zone warning visibility, and session apply history readability.
+  - Tightened Generation History presentation for faster scan without flow changes.
+  - Kept implementation aligned to existing `rf-*` conventions with no broad redesign.
+  - Updated `docs/UI_FOUNDATIONS.md` and re-ran `npm run build` (pass).
+
 ## task-00124 — UI — remediation UX phase 2
 
 - Status: **Done**

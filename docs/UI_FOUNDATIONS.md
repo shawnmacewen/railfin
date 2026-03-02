@@ -1,5 +1,14 @@
 # UI Foundations
 
+## task-00127 — Review workbench tidy pass 1
+
+- `src/ui/editor-shell.tsx` reduces create-review clutter while preserving all remediation capabilities:
+  - generation history panel spacing/header rhythm tightened for better scanability
+  - review workbench now has clearer hierarchy via cardized sections and tighter spacing for selected-finding details/actions
+  - selected-finding actions, protected-zone warning, and session apply history remain available with no contract/flow changes
+- `src/app/globals.css` refines spacing/hierarchy for review workbench and generation history using existing `rf-*` conventions (no broad shell redesign).
+- Existing create/save/generate/compliance/remediation behaviors are preserved; this is a targeted tidy pass ahead of broader UX cleanup.
+
 ## task-00124 — Auto-remediation UX phase 2
 
 - `src/ui/editor-shell.tsx` now includes an explicit **Undo Last Apply** action in Review Workbench (manual, single-step rollback of the most recent remediation apply).
