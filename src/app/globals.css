@@ -336,6 +336,17 @@ button:disabled {
   font-size: 0.84rem;
 }
 
+.rf-review-workbench-actions {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.rf-review-workbench-actions button {
+  font-size: 0.78rem;
+}
+
 .rf-review-history-list {
   margin: 0;
   padding-left: 1rem;

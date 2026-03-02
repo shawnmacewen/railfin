@@ -1,5 +1,26 @@
 # Tasks
 
+## task-00110 — DEV — Content tools phase 6 (prompt scaffold audience/objective controls)
+
+- Status: **Done (Retry completed on correct repo path: /home/node/railfin-repo)**
+- Branch: `feat/dev/task-00110-content-tools-phase6`
+- Scope delivered:
+  - Added prompt scaffold control dimensions for generation: `controls.audience` (`executive|practitioner|general`) and `controls.objective` (`awareness|consideration|decision`).
+  - Enforced strict allowlist validation with reject-by-default behavior for unknown keys/unsupported enum values; preserved safe defaults via control-profile mapping when omitted.
+  - Integrated new controls into existing template/preset/control-profile stack and prompt guidance composition without changing response shape consumed by UI.
+  - Updated generate route request typing, validation tests, and API boundary documentation for the expanded controls contract.
+
+## task-00111 — UI — Review workbench phase 6 (apply + regenerate)
+
+- Status: **Done (retry completed on correct repo path)**
+- Branch: `feat/ui/task-00111-review-workbench-phase6`
+- Scope delivered:
+  - Added quick selected-finding workflow affordances in Create Review Workbench: `Apply Selected Context` and `Apply + Regenerate Draft`.
+  - Implemented single-step apply+regenerate action that stages selected remediation context and immediately runs generation without changing endpoint contracts.
+  - Preserved save/generate/compliance behavior and disclaimer/status flows; no API contract changes.
+  - Added compact `rf-*` style support for review workbench action row.
+  - Updated UI foundations documentation for the new review workflow.
+
 ## task-00112 — SEC — Auth compat follow-up verification + replacement plan
 
 - Status: **Done**

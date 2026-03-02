@@ -1,5 +1,17 @@
 # UI Foundations
 
+## task-00111 — Review workbench phase 6 (apply + regenerate)
+
+- `src/ui/editor-shell.tsx` adds a quick selected-finding workflow in Review Workbench:
+  - **Apply Selected Context** to stage remediation context directly from currently selected compliance finding
+  - **Apply + Regenerate Draft** to apply selected remediation context and immediately run draft generation in one action
+- Generation flow in `EditorShell` now uses a shared helper so standard Generate and apply+regenerate both preserve existing request contracts (`POST /api/internal/content/generate` with `{ prompt, contentType }`).
+- Existing behavior remains preserved:
+  - save flow/status feedback unchanged
+  - compliance check flow/disclaimer unchanged
+  - selected-finding/context/history behavior remains low-friction and additive
+- `src/app/globals.css` adds compact `rf-review-workbench-actions` styles aligned with existing `rf-*` UI patterns.
+
 ## Login
 
 Implemented MVP login action wiring in `src/ui/login.tsx` with the following behavior:

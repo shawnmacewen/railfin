@@ -251,8 +251,10 @@ export function EditorShell() {
     return `Configure policy updated ${date.toLocaleString()}.`;
   }, [policyUpdatedAt]);
 
-  const onGenerate = async () => {
-    if (!canGenerate) {
+  const runGenerate = async (prompt: string, successMessage?: string) => {
+    const trimmedPrompt = prompt.trim();
+
+    if (!trimmedPrompt || generationStatus === "generating") {
       setGenerationStatus("error");
       setGenerationFeedback("Add some source content before generating.");
       return;
@@ -269,7 +271,7 @@ export function EditorShell() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prompt: content,
+          prompt: trimmedPrompt,
           contentType,
         }),
       });
@@ -284,7 +286,7 @@ export function EditorShell() {
       setContent(generatedText);
       setGenerationStatus("generated");
       const notes = payload.data?.generationMeta?.notes?.trim();
-      setGenerationFeedback(notes || "Draft generated. Review and save when ready.");
+      setGenerationFeedback(successMessage || notes || "Draft generated. Review and save when ready.");
       setReviewFeedback(null);
       setRemediationPreview(null);
       setStatus("idle");
@@ -293,6 +295,16 @@ export function EditorShell() {
       setGenerationStatus("error");
       setGenerationFeedback(err instanceof Error ? err.message : "Unable to generate content.");
     }
+  };
+
+  const onGenerate = async () => {
+    if (!canGenerate) {
+      setGenerationStatus("error");
+      setGenerationFeedback("Add some source content before generating.");
+      return;
+    }
+
+    await runGenerate(content);
   };
 
   const onSave = async (event: FormEvent) => {
@@ -384,6 +396,44 @@ export function EditorShell() {
 
   const onRemindRemediationHint = (hint: string) => {
     setReviewFeedback(`Reminder set: ${hint}`);
+  };
+
+  const onApplyAndRegenerate = async () => {
+    if (!selectedFindingContext || generationStatus === "generating") {
+      return;
+    }
+
+    const finding: ComplianceFinding = {
+      issue: selectedFindingContext.issue,
+      severity: selectedFindingContext.severity,
+      location: selectedFindingContext.location,
+      suggestion: selectedFindingContext.remediationHint,
+    };
+
+    const remediationBlock = buildRemediationBlock(selectedFindingContext.remediationHint, finding);
+    const result = applyControlledRemediationContext(content, remediationBlock);
+
+    setContent(result.nextContent);
+    setRemediationPreview({
+      issue: finding.issue || "unknown issue",
+      severity: (finding.severity || "unknown").toLowerCase(),
+      location: finding.location || "N/A",
+      previousBlock: result.previousBlock,
+      appliedBlock: result.appliedBlock,
+    });
+    setRemediationApplyHistory((current) => [
+      {
+        issue: finding.issue || "unknown issue",
+        severity: (finding.severity || "unknown").toLowerCase(),
+        location: finding.location || "N/A",
+        hint: selectedFindingContext.remediationHint,
+        appliedAt: new Date().toISOString(),
+      },
+      ...current,
+    ].slice(0, 5));
+    setReviewFeedback("Selected remediation context applied. Regenerating draft from selected finding context...");
+
+    await runGenerate(result.nextContent, "Draft regenerated from selected remediation context. Review and save when ready.");
   };
 
   return (
@@ -495,6 +545,33 @@ export function EditorShell() {
             ) : (
               <p className="rf-status rf-status-muted">Select a finding in Compliance to stage remediation context.</p>
             )}
+            <div className="rf-review-workbench-actions" aria-label="Selected finding quick workflow">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!selectedFindingContext) return;
+
+                  const finding: ComplianceFinding = {
+                    issue: selectedFindingContext.issue,
+                    severity: selectedFindingContext.severity,
+                    location: selectedFindingContext.location,
+                    suggestion: selectedFindingContext.remediationHint,
+                  };
+
+                  onApplyRemediationHint(selectedFindingContext.remediationHint, finding);
+                }}
+                disabled={!selectedFindingContext || generationStatus === "generating"}
+              >
+                Apply Selected Context
+              </button>
+              <button
+                type="button"
+                onClick={onApplyAndRegenerate}
+                disabled={!selectedFindingContext || generationStatus === "generating"}
+              >
+                {generationStatus === "generating" ? "Applying + Regenerating..." : "Apply + Regenerate Draft"}
+              </button>
+            </div>
           </div>
 
           <div>
