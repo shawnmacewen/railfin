@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00093 — UI/DEV — Review tools kickoff on Create compliance flow
+
+- Status: **Done**
+- Branch: `feat/ui/task-00093-review-tools-kickoff`
+- Scope delivered:
+  - Added findings summary layer to compliance results with clear severity counts (critical/high/medium/low/unknown + total).
+  - Added per-finding review quick actions (`Apply Hint`, `Remind Later`) to improve remediation workflow affordance.
+  - Wired Create flow to handle quick actions without changing any API request/response contracts.
+  - Preserved existing compliance disclaimer and guardrail messaging, plus existing save/generate/compliance execution paths.
+  - Updated styling with railfin-consistent classes (`rf-status`, findings cards, severity badges) and no shell/layout redesign.
+
 ## task-00000 — DEV — Supabase wiring + internal draft endpoint scaffold
 
 - Status: **Done**

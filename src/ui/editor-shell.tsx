@@ -57,6 +57,7 @@ export function EditorShell() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
   const [generationFeedback, setGenerationFeedback] = useState<string | null>(null);
+  const [reviewFeedback, setReviewFeedback] = useState<string | null>(null);
   const [contentType, setContentType] = useState<ContentType>("blog");
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
@@ -213,6 +214,7 @@ export function EditorShell() {
       setGenerationStatus("generated");
       const notes = payload.data?.generationMeta?.notes?.trim();
       setGenerationFeedback(notes || "Draft generated. Review and save when ready.");
+      setReviewFeedback(null);
       setStatus("idle");
       setFeedback(null);
     } catch (err) {
@@ -275,6 +277,16 @@ export function EditorShell() {
     }
   };
 
+  const onApplyRemediationHint = (hint: string) => {
+    const suggestion = `\n\n[Compliance Remediation Hint]\n- ${hint}`;
+    setContent((current) => `${current.trimEnd()}${suggestion}`);
+    setReviewFeedback("Remediation hint added to editor content. Review and revise before saving.");
+  };
+
+  const onRemindRemediationHint = (hint: string) => {
+    setReviewFeedback(`Reminder set: ${hint}`);
+  };
+
   return (
     <section aria-live="polite">
       <header className="rf-page-header">
@@ -334,6 +346,9 @@ export function EditorShell() {
               setGenerationStatus("idle");
               setGenerationFeedback(null);
             }
+            if (reviewFeedback) {
+              setReviewFeedback(null);
+            }
           }}
           rows={8}
         />
@@ -352,11 +367,19 @@ export function EditorShell() {
         </p>
       ) : null}
 
+      {reviewFeedback ? (
+        <p className="rf-status rf-status-muted" role="status">
+          {reviewFeedback}
+        </p>
+      ) : null}
+
       <CompliancePanel
         activePolicyContext={activePolicyContext}
         content={content}
         contentType={contentType}
         policySet="default"
+        onApplyRemediationHint={onApplyRemediationHint}
+        onRemindRemediationHint={onRemindRemediationHint}
       />
     </section>
   );

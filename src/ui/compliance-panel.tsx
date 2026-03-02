@@ -46,6 +46,8 @@ type CompliancePanelProps = {
   content?: string;
   contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
   policySet?: string;
+  onApplyRemediationHint?: (hint: string, finding: ComplianceFinding) => void;
+  onRemindRemediationHint?: (hint: string, finding: ComplianceFinding) => void;
 };
 
 export function CompliancePanel({
@@ -53,6 +55,8 @@ export function CompliancePanel({
   content,
   contentType,
   policySet,
+  onApplyRemediationHint,
+  onRemindRemediationHint,
 }: CompliancePanelProps) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +75,22 @@ export function CompliancePanel({
     return Array.from(grouped.entries()).sort(
       (a, b) => SEVERITY_ORDER[a[0]] - SEVERITY_ORDER[b[0]],
     );
+  }, [findings]);
+
+  const severityCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      critical: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
+      unknown: 0,
+    };
+
+    for (const finding of findings) {
+      counts[normalizeSeverity(finding.severity)] += 1;
+    }
+
+    return counts;
   }, [findings]);
 
   const runComplianceCheck = async () => {
@@ -146,6 +166,21 @@ export function CompliancePanel({
 
       {groupedFindings.length ? (
         <div className="rf-findings-groups" aria-label="Compliance findings">
+          <section className="rf-findings-summary" aria-label="Findings summary">
+            <h3>Findings Summary</h3>
+            <p className="rf-status rf-status-muted" role="status">
+              Total findings: {findings.length}
+            </p>
+            <ul>
+              {Object.keys(SEVERITY_ORDER).map((severity) => (
+                <li key={`summary-${severity}`}>
+                  <span className={`rf-severity-badge is-${severity}`}>{severity.toUpperCase()}</span>
+                  <span>{severityCounts[severity]} findings</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           {groupedFindings.map(([severity, severityFindings]) => (
             <section key={severity} className="rf-finding-group">
               <h3>
@@ -172,6 +207,20 @@ export function CompliancePanel({
                       <strong>Remediation Hint:</strong>{" "}
                       {toRemediationHint(finding.suggestion)}
                     </p>
+                    <div className="rf-finding-actions" aria-label="Remediation actions">
+                      <button
+                        type="button"
+                        onClick={() => onApplyRemediationHint?.(toRemediationHint(finding.suggestion), finding)}
+                      >
+                        Apply Hint
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onRemindRemediationHint?.(toRemediationHint(finding.suggestion), finding)}
+                      >
+                        Remind Later
+                      </button>
+                    </div>
                     <p>
                       <strong>Location:</strong> {finding.location || "N/A"}
                     </p>

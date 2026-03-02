@@ -114,6 +114,22 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - provider chain remains Codex-first with ChatGPT API fallback
   - safe fallback finding is returned when providers fail/time out
 
+## task-00093 — Review tools kickoff in Create flow
+
+- `src/ui/compliance-panel.tsx` now includes a first review-tools layer on top of existing compliance findings:
+  - findings summary card with total + per-severity counts (`critical`, `high`, `medium`, `low`, `unknown`)
+  - per-finding quick actions for remediation workflow (`Apply Hint`, `Remind Later`)
+- `src/ui/editor-shell.tsx` now wires review quick actions without changing API contracts:
+  - **Apply Hint** appends a remediation note into editor content for immediate revision
+  - **Remind Later** surfaces a lightweight review reminder status in Create
+- Existing guardrail/disclaimer messaging is preserved unchanged:
+  - **"AI-backed compliance insights are guidance, not legal approval."**
+- Existing save, generate, and compliance-check flows are preserved:
+  - no endpoint contract changes
+  - no route/layout redesign
+  - review actions are additive UI affordances only
+- Styling stays within existing railfin-ui patterns and primitives (`rf-status`, severity badges, card-like sections).
+
 ## task-00092 — Create generation kickoff (AI runtime wired)
 
 - `src/ui/editor-shell.tsx` now wires a **Generate Draft** action to `POST /api/internal/content/generate`.
