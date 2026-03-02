@@ -56,6 +56,7 @@ function getFindingKey(finding: ComplianceFinding, severity: string, index: numb
 }
 
 export type SelectedFindingContext = {
+  findingId: string;
   issue: string;
   severity: string;
   location: string;
@@ -149,6 +150,7 @@ export function CompliancePanel({
     }
 
     onSelectedFindingChange({
+      findingId: selectedFindingKey!,
       issue: selectedFindingMeta.finding.issue || "N/A",
       severity: selectedFindingMeta.severity,
       location: selectedFindingMeta.finding.location || "N/A",

@@ -12,6 +12,19 @@
   - Docs-only verification task; no runtime code changes and no build run required.
 
 
+## task-00120 — DEV — auto-remediation engine phase 1 (safe scoped)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00120-auto-remediation-engine-phase1`
+- Scope delivered:
+  - Added backend apply endpoint `POST /api/internal/compliance/remediation/apply` for single selected finding remediation in current draft context only (no persistence side effects).
+  - Enforced fail-closed validation for required selected finding + draft context identity, with explicit `Validation failed` + `fieldErrors` responses.
+  - Enforced bounded edit guardrails (max changed chars/lines) and deterministic controlled remediation-block replacement (no hidden transforms).
+  - Added structured audit metadata generation (UTC timestamp, actor, draft context id, finding id, before/after snippet hash, bounded diff summary, outcome).
+  - Updated Create review workflow to call backend remediation apply path only on explicit user actions (opt-in; no automatic apply by default).
+  - Updated API boundary docs and rebuilt project with `npm run build` (pass).
+
+
 ## task-00118 — UI — generation history panel in Create
 
 - Status: **Done**

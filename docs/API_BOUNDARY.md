@@ -61,6 +61,37 @@ Response JSON:
 - Runtime diagnostics are returned in `meta.providerChain` (provider names + classified attempt outcomes only; no prompt/body/secret data), including `fallbackDeferred: true`
 - Evidence capture rule: when verifying runtime health, record only `providerChain.primary`, `fallbackDeferred`, and first-attempt `{ ok, errorKind }` plus degraded flag; do not record prompts, generated body text, or secrets.
 
+## Remediation apply contract (phase 1 safe-scoped)
+
+`POST /api/internal/compliance/remediation/apply` applies remediation context for exactly one selected finding to the current in-memory Create draft context.
+
+Request JSON:
+
+- Required: `currentContent: string`
+- Required: `findingId: string`
+- Required: `finding: { issue?: string, severity?: string, location?: string, remediationHint?: string }`
+- Required: `draftContextId: string`
+- Required: `activeDraftContextId: string`
+
+Safety/validation behavior (fail-closed):
+
+- Rejects missing/blank required fields with `400` + `{ ok:false, error:"Validation failed", fieldErrors[] }`.
+- Rejects context mismatch when `draftContextId !== activeDraftContextId` (current-context-only enforcement).
+- Enforces bounded input/content size and bounded edit outcome limits (max changed chars/lines). Overflow fails closed with validation error.
+- Performs deterministic controlled remediation block replacement only using explicit remediation context markers; no hidden transforms or cross-draft mutation/persistence side effects.
+
+Response JSON:
+
+- Success: `{ ok: true, data: { nextContent, previousBlock, appliedBlock, summary, audit } }`
+  - `summary`: bounded diff summary with `changedChars`, `changedLines`, `findingId`, `draftContextId`
+  - `audit`: deterministic apply audit metadata (UTC timestamp, actor, context id, finding id, before/after snippet hash, outcome)
+- Error: `400` with fail-closed validation payload as above
+
+Caching/auth:
+
+- Requires internal auth guard (same as other `/api/internal/*` routes).
+- Returns sensitive responses with `Cache-Control: no-store`.
+
 ## AI Service Contract Decision (task-00087)
 
 Railfin uses a **single shared AI credential path** for AI-backed internal services, while maintaining **two distinct service contracts**:

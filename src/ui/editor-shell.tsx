@@ -76,6 +76,26 @@ type GenerateResponse = {
   error?: string;
 };
 
+type RemediationApplyResponse = {
+  ok: boolean;
+  data?: {
+    nextContent: string;
+    previousBlock: string | null;
+    appliedBlock: string;
+    summary?: {
+      changedChars: number;
+      changedLines: number;
+      findingId: string;
+      draftContextId: string;
+    };
+  };
+  error?: string;
+  fieldErrors?: Array<{
+    field?: string;
+    message?: string;
+  }>;
+};
+
 type ConfigurePolicyResponse = {
   ok: boolean;
   data?: {
@@ -406,36 +426,73 @@ export function EditorShell() {
     }
   };
 
-  const onApplyRemediationHint = (hint: string, finding: ComplianceFinding) => {
-    const remediationBlock = buildRemediationBlock(hint, finding);
+  const applyRemediationViaApi = async (context: SelectedFindingContext) => {
+    const response = await fetch("/api/internal/compliance/remediation/apply", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentContent: content,
+        findingId: context.findingId,
+        finding: {
+          issue: context.issue,
+          severity: context.severity,
+          location: context.location,
+          remediationHint: context.remediationHint,
+        },
+        draftContextId: generationHistoryContextKey,
+        activeDraftContextId: generationHistoryContextKey,
+      }),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as RemediationApplyResponse;
+
+    if (!response.ok || !payload.ok || !payload.data) {
+      const fieldError = payload.fieldErrors?.find((item) => item?.message)?.message;
+      throw new Error(fieldError || payload.error || "Unable to apply remediation automatically.");
+    }
+
+    return payload.data;
+  };
+
+  const onApplyRemediationHint = async (hint: string, finding: ComplianceFinding) => {
     const issue = finding.issue || "unknown issue";
     const severity = (finding.severity || "unknown").toLowerCase();
     const location = finding.location || "N/A";
 
-    setContent((current) => {
-      const result = applyControlledRemediationContext(current, remediationBlock);
+    if (!selectedFindingContext) {
+      setReviewFeedback("Select a finding before applying remediation.");
+      return;
+    }
+
+    try {
+      const applied = await applyRemediationViaApi(selectedFindingContext);
+      setContent(applied.nextContent);
       setRemediationPreview({
         issue,
         severity,
         location,
-        previousBlock: result.previousBlock,
-        appliedBlock: result.appliedBlock,
+        previousBlock: applied.previousBlock,
+        appliedBlock: applied.appliedBlock,
       });
-      return result.nextContent;
-    });
 
-    setRemediationApplyHistory((current) => [
-      {
-        issue,
-        severity,
-        location,
-        hint,
-        appliedAt: new Date().toISOString(),
-      },
-      ...current,
-    ].slice(0, 5));
+      setRemediationApplyHistory((current) => [
+        {
+          issue,
+          severity,
+          location,
+          hint,
+          appliedAt: new Date().toISOString(),
+        },
+        ...current,
+      ].slice(0, 5));
 
-    setReviewFeedback("Selected remediation context applied. Compare previous/new context, then revise the draft above.");
+      setReviewFeedback("Selected remediation context applied. Compare previous/new context, then revise the draft above.");
+    } catch (err) {
+      setReviewFeedback(err instanceof Error ? err.message : "Unable to apply remediation automatically.");
+    }
   };
 
   const onRemindRemediationHint = (hint: string) => {
@@ -463,16 +520,22 @@ export function EditorShell() {
       suggestion: selectedFindingContext.remediationHint,
     };
 
-    const remediationBlock = buildRemediationBlock(selectedFindingContext.remediationHint, finding);
-    const result = applyControlledRemediationContext(content, remediationBlock);
+    let applied: { nextContent: string; previousBlock: string | null; appliedBlock: string; };
 
-    setContent(result.nextContent);
+    try {
+      applied = await applyRemediationViaApi(selectedFindingContext);
+    } catch (err) {
+      setReviewFeedback(err instanceof Error ? err.message : "Unable to apply remediation automatically.");
+      return;
+    }
+
+    setContent(applied.nextContent);
     setRemediationPreview({
       issue: finding.issue || "unknown issue",
       severity: (finding.severity || "unknown").toLowerCase(),
       location: finding.location || "N/A",
-      previousBlock: result.previousBlock,
-      appliedBlock: result.appliedBlock,
+      previousBlock: applied.previousBlock,
+      appliedBlock: applied.appliedBlock,
     });
     setRemediationApplyHistory((current) => [
       {
@@ -486,7 +549,7 @@ export function EditorShell() {
     ].slice(0, 5));
     setReviewFeedback("Selected remediation context applied. Regenerating draft from selected finding context...");
 
-    await runGenerate(result.nextContent, "Draft regenerated from selected remediation context. Review and save when ready.");
+    await runGenerate(applied.nextContent, "Draft regenerated from selected remediation context. Review and save when ready.");
   };
 
   return (
@@ -656,7 +719,7 @@ export function EditorShell() {
                     suggestion: selectedFindingContext.remediationHint,
                   };
 
-                  onApplyRemediationHint(selectedFindingContext.remediationHint, finding);
+                  void onApplyRemediationHint(selectedFindingContext.remediationHint, finding);
                 }}
                 disabled={!selectedFindingContext || generationStatus === "generating"}
               >
