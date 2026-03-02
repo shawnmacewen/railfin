@@ -108,6 +108,9 @@ Request JSON:
 - Required: `prompt: string`
 - Required: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
 - Optional: `template: "default" | "conversion"` (defaults to `default`)
+- Optional: `preset: { tone?: "professional" | "friendly" | "bold", intent?: "educate" | "engage" | "convert" }`
+  - Missing `preset` defaults to `{ tone: "professional", intent: "educate" }`
+  - Partial preset is allowed; missing fields fall back to defaults
 
 Response JSON:
 
@@ -118,6 +121,7 @@ Response JSON:
   - missing/blank prompt -> `Missing prompt`
   - missing/invalid `contentType` -> `Invalid contentType`
   - invalid `template` -> `Invalid template`
+  - invalid `preset` object or unsupported `tone`/`intent` values -> `Invalid preset`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
 
 Strict response validation behavior:

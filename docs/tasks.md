@@ -1,5 +1,15 @@
 # Tasks
 
+## task-00098 — DEV — Content tools phase 3
+
+- Status: **Done**
+- Branch: `feat/dev/task-00098-content-tools-phase3`
+- Scope delivered:
+  - Added structured generation presets to `internalContentGenerate` with strict validation for supported `tone` and `intent` enums.
+  - Added sane defaults for omitted preset input (`tone: professional`, `intent: educate`) while preserving existing template behavior.
+  - Extended generation prompt construction with preset-derived guidance without changing UI response shape (`{ ok, data: { draft, generationMeta } }`).
+  - Updated generate route typing and API boundary docs for preset request contract + validation behavior.
+
 ## task-00097 — SEC — Security hardening sweep phase 1
 
 - Status: **Done**
