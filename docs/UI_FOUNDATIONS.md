@@ -1,5 +1,20 @@
 # UI Foundations
 
+## task-00118 — Create generation history panel
+
+- `src/ui/editor-shell.tsx` now tracks an in-session generation history (last MAX_GENERATION_HISTORY outputs) scoped to the current Create context (active draft when `draftId` is present, otherwise current new-draft session).
+- Added a compact **Generation History** panel in Create that shows for each entry:
+  - content type badge
+  - runtime state badge (OK vs DEGRADED)
+  - generated timestamp and provider hint (when available)
+  - short preview snippet
+- Added low-friction **Restore to Editor** action per history entry, which rehydrates the editor content and updates generation status feedback without changing save/generate/compliance API contracts.
+- Existing behavior preserved:
+  - save flow unchanged
+  - generate request contract unchanged
+  - compliance + review workbench interactions unchanged
+- `src/app/globals.css` adds `rf-generation-history*` styles aligned with existing `rf-*` conventions.
+
 ## task-00114 — Content + review UX polish for live AI runtime
 
 - `src/ui/editor-shell.tsx` now distinguishes generation outcomes using existing `generationMeta` metadata:
