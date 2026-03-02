@@ -15,6 +15,10 @@ export async function POST(request: NextRequest) {
       tone?: "professional" | "friendly" | "bold";
       intent?: "educate" | "engage" | "convert";
     };
+    controls?: {
+      lengthTarget?: "short" | "medium" | "long";
+      formatStyle?: "standard" | "bullet" | "outline";
+    };
   };
 
   const result = await internalContentGenerate({

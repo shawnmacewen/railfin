@@ -111,6 +111,11 @@ Request JSON:
 - Optional: `preset: { tone?: "professional" | "friendly" | "bold", intent?: "educate" | "engage" | "convert" }`
   - Missing `preset` defaults to `{ tone: "professional", intent: "educate" }`
   - Partial preset is allowed; missing fields fall back to defaults
+  - Unknown keys are rejected (strict object validation)
+- Optional: `controls: { lengthTarget?: "short" | "medium" | "long", formatStyle?: "standard" | "bullet" | "outline" }`
+  - Missing `controls` defaults to `{ lengthTarget: "medium", formatStyle: "standard" }`
+  - Partial controls are allowed; missing fields fall back to defaults
+  - Unknown keys are rejected (strict object validation)
 
 Response JSON:
 
@@ -121,7 +126,8 @@ Response JSON:
   - missing/blank prompt -> `Missing prompt`
   - missing/invalid `contentType` -> `Invalid contentType`
   - invalid `template` -> `Invalid template`
-  - invalid `preset` object or unsupported `tone`/`intent` values -> `Invalid preset`
+  - invalid `preset` object, unknown preset keys, or unsupported `tone`/`intent` values -> `Invalid preset`
+  - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle` values -> `Invalid controls`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
 
 Strict response validation behavior:
