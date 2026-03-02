@@ -10,6 +10,28 @@
   - Re-validated internal API auth guard and sensitive-cache assumptions after merges (`requireInternalApiAuth` + `Cache-Control: no-store` on unauthorized/success/error responses).
   - Updated `docs/SECURITY_BASELINE.md` with task-00106 sweep checklist, findings, and verification outcome.
 
+## task-00104 — DEV — Merge-safe closeout + content tools phase 5
+
+- Status: **Done**
+- Branch: `feat/dev/task-00104-content-tools-phase5`
+- Scope delivered:
+  - Landed task-00102 commit (`ef4ec22890f803b3ba68f7975df922423c5cc3c8`) on `main` lineage via cherry-pick during phase closeout.
+  - Added reusable generation control profiles in `internalContentGenerate`: `social-quick`, `balanced-default`, and `deep-outline`.
+  - Mapped `controlProfile` defaults into `controls` resolution with strict validation and preserved additive/non-breaking request semantics.
+  - Preserved response contract (`{ ok, data: { draft, generationMeta } }`) and fallback behavior.
+  - Extended validation coverage and updated API boundary documentation for new `controlProfile` request field.
+
+## task-00101 — DEV — Content tools phase 4
+
+- Status: **Done**
+- Branch: `feat/dev/task-00101-content-tools-phase4`
+- Scope delivered:
+  - Extended `internalContentGenerate` request handling with structured output controls: `controls.lengthTarget` (`short|medium|long`) and `controls.formatStyle` (`standard|bullet|outline`).
+  - Added strict validation with safe defaults for omitted control fields and reject-by-default handling for unknown keys in `preset` and `controls` objects.
+  - Preserved generate response contract for UI consumers (`{ ok, data: { draft, generationMeta } }`) while enriching prompt construction only.
+  - Added lightweight validation coverage harness in `src/api/internal/content/generate.validation.test.ts` for new strict-validation paths.
+  - Updated API boundary documentation for the extended generate request contract and validation semantics.
+
 ## task-00103 — SEC — Authz hardening phase 2 follow-through
 
 - Status: **Done**
@@ -19,6 +41,16 @@
   - Confirmed no additional low-risk authz gap remained to patch in this phase.
   - Added a docs-backed implementation checklist in `docs/SECURITY_BASELINE.md` for enforcing `requireInternalApiAuth` + `no-store` semantics on all future internal routes.
   - Recorded phase-2 verification outcome and residual follow-up continuity (future upgrade from cookie-presence auth to authoritative session/role auth context).
+
+## task-00102 — UI — Review workbench phase 4
+
+- Status: **Done**
+- Branch: `feat/ui/task-00102-review-workbench-phase4`
+- Scope delivered:
+  - Added a compact **Review Workbench** section in Create (`src/ui/editor-shell.tsx`) that surfaces current selected finding context plus current-session remediation apply history.
+  - Extended compliance panel/editor wiring (`src/ui/compliance-panel.tsx` → `src/ui/editor-shell.tsx`) so selected finding context is shared without changing compliance execution behavior.
+  - Added low-friction styling updates in `src/app/globals.css` using existing `rf-*` patterns.
+  - Preserved generation/save/compliance behavior and request/response contracts.
 
 ## task-00100 — SEC — API authz hardening phase 1 for /api/internal
 

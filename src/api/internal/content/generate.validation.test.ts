@@ -66,3 +66,31 @@ test("rejects preset object with unknown keys", async () => {
   }
   assert.equal(result.error, "Invalid preset");
 });
+
+test("rejects invalid controlProfile values", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      ...VALID_BASE_REQUEST.body,
+      controlProfile: "invalid" as "social-quick",
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected validation failure");
+  }
+  assert.equal(result.error, "Invalid controlProfile");
+});
+
+test("accepts valid controlProfile values", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      ...VALID_BASE_REQUEST.body,
+      controlProfile: "social-quick",
+    },
+  });
+
+  assert.equal(result.ok, true);
+});
