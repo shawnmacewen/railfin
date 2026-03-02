@@ -64,6 +64,7 @@ export function LibraryPageContent() {
       try {
         const response = await fetch(endpoint, {
           method: "GET",
+          credentials: "include",
           signal: controller.signal,
         });
 

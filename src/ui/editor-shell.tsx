@@ -137,6 +137,7 @@ export function EditorShell() {
       try {
         const response = await fetch("/api/internal/configure/policy", {
           method: "GET",
+          credentials: "include",
           signal: controller.signal,
         });
         const payload = (await response.json().catch(() => ({}))) as ConfigurePolicyResponse;
@@ -174,6 +175,7 @@ export function EditorShell() {
         const endpoint = `/api/internal/content/draft?id=${encodeURIComponent(draftId)}`;
         const response = await fetch(endpoint, {
           method: "GET",
+          credentials: "include",
           signal: controller.signal,
         });
         const payload = (await response.json().catch(() => ({}))) as DraftResponse;
@@ -262,6 +264,7 @@ export function EditorShell() {
     try {
       const response = await fetch("/api/internal/content/generate", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -312,6 +315,7 @@ export function EditorShell() {
     try {
       const response = await fetch("/api/internal/content/draft", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

@@ -5,10 +5,19 @@ const SENSITIVE_NO_STORE_HEADERS = {
 };
 
 function hasInternalSessionCookie(request: NextRequest): boolean {
-  return (
-    Boolean(request.cookies.get("session")?.value) ||
-    Boolean(request.cookies.get("auth-token")?.value)
-  );
+  if (Boolean(request.cookies.get("session")?.value) || Boolean(request.cookies.get("auth-token")?.value)) {
+    return true;
+  }
+
+  const cookieNames = request.cookies.getAll().map((cookie) => cookie.name);
+
+  return cookieNames.some((name) => {
+    if (name === "sb-access-token" || name === "sb-refresh-token") {
+      return true;
+    }
+
+    return /^sb-[^-]+-auth-token(?:\.\d+)?$/.test(name);
+  });
 }
 
 export function requireInternalApiAuth(request: NextRequest): NextResponse | null {

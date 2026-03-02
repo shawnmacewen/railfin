@@ -1,5 +1,37 @@
 # Security Baseline Verification
 
+## task-00107 — DEV — Library unauthorized hotfix after internal API auth hardening
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `middleware.ts`
+- `src/ui/library-page.tsx`
+- `src/ui/editor-shell.tsx`
+
+### Findings + hotfix outcome
+
+1. **Root cause (auth cookie-name mismatch):**
+   - `requireInternalApiAuth` (and middleware placeholder gate) only recognized `session` / `auth-token` cookie names.
+   - Production in-app sessions may present as Supabase-style cookies (`sb-*`), so valid in-app requests to `/api/internal/content/list` and draft read flows were rejected with `401 Unauthorized`.
+
+2. **Hotfix applied (minimal + scoped):**
+   - Expanded placeholder internal auth-cookie detection to include common Supabase session cookie names:
+     - `sb-access-token`
+     - `sb-refresh-token`
+     - `sb-<project-ref>-auth-token` (including chunked suffix form `.N`)
+   - Kept route guards fail-closed for unauthenticated requests (no broad read/list route bypass).
+
+3. **In-app propagation consistency:**
+   - Added explicit `credentials: "include"` to Create/Library internal fetch calls (`configure/policy`, `content/list`, `content/draft`, `content/generate`) so cookie propagation behavior is explicit and consistent across environments.
+
+### Verification outcome (task-00107)
+
+- Outcome: **PASS (hotfix)**
+- Type: Internal API auth compatibility fix for in-app draft/list/read flows
+- Residual risk / follow-up:
+  - Auth is still placeholder cookie-presence-based and not server-authoritative session validation.
+  - Follow-up hardening required: replace cookie-name presence checks with trusted server-side session verification + claim-based authorization.
+
 ## task-00106 — SEC — security sweep for latest content/review additions
 
 Review scope:

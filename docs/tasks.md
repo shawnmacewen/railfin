@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00107 — DEV — Library unauthorized hotfix after internal API auth hardening
+
+- Status: **Done**
+- Branch: `fix/dev/task-00107-library-unauthorized-hotfix`
+- Scope delivered:
+  - Diagnosed auth mismatch between newly hardened `/api/internal/*` guards and production in-app session cookie variants (Supabase-style auth cookie names were not recognized by `requireInternalApiAuth` / middleware placeholder checks).
+  - Applied minimal hotfix to restore in-app Library/Create draft read/list/open flows by expanding placeholder cookie detection to include common Supabase auth cookies (`sb-access-token`, `sb-refresh-token`, and `sb-<ref>-auth-token[.N]`).
+  - Kept security posture fail-closed at route boundary (still requires auth-cookie presence; no blanket route relaxation for unauthenticated callers).
+  - Added explicit `credentials: "include"` on internal app fetches in Create/Library UI flows to make cookie propagation explicit and consistent.
+  - Updated security baseline docs with hotfix details and residual follow-up risk.
+
 ## task-00106 — SEC — security sweep for latest content/review additions
 
 - Status: **Done**
