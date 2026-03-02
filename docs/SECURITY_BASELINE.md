@@ -139,6 +139,45 @@ Review scope:
 - Code changes: none (docs-only verification task)
 - Build: not run (no SEC runtime code changes in task-00125)
 
+## task-00128 — SEC — remediation safety gate rerun after explicit undo completion
+
+Review scope:
+- `src/api/internal/compliance/remediation.ts`
+- `src/api/internal/compliance/remediation-undo-store.ts`
+- `src/app/api/internal/compliance/remediation/apply/route.ts`
+- `src/ui/editor-shell.tsx`
+- `docs/API_BOUNDARY.md`
+- `docs/tasks.md`
+
+### Re-check against task-00122/task-00125 NO-GO criteria
+
+1. **Prohibited-transform enforcement (still closed):**
+   - Apply flow remains constrained to deterministic remediation context block replacement in current draft content.
+   - Sensitive-region guard remains fail-closed (`Prohibited transform detected in legal/disclaimer/citation-sensitive regions.`).
+
+2. **Deterministic auditability (still closed):**
+   - Apply response still emits required audit schema (`timestampUtc`, `actor`, `draftContextId`, `findingId`, `beforeHash`, `afterHash`, `changedChars`, `changedLines`, `outcome`).
+   - Apply route logs audit payload via `[remediation-apply]` and returns `no-store` headers.
+
+3. **Bounded edit-size enforcement (still closed):**
+   - Hard caps remain in remediation engine (`MAX_CHANGED_CHARS`, `MAX_CHANGED_LINES`) with explicit validation failure on overflow.
+
+4. **One-step undo for last apply action (now closed):**
+   - Create Review Workbench now includes explicit `Undo Last Apply` control (`src/ui/editor-shell.tsx`).
+   - Undo is session-local, one-step behavior that restores prior in-memory draft content + preview state and clears undo state after use.
+   - API contract includes session-scoped undo token + undo endpoint boundary (`docs/API_BOUNDARY.md`), while UI preserves immediate manual one-step undo path required by baseline.
+
+### Gate decision (task-00128)
+
+- **Auto-remediation residual-control status (task-00122/00125 gate):** **GO (all previously blocking residual controls now implemented)**
+- Rationale: all four previously cited NO-GO criteria from task-00122/task-00125 are now satisfied in current `main` implementation, including explicit one-step undo.
+
+### Verification outcome (task-00128)
+
+- Outcome: **PASS (rerun complete, residual-control gate flips to GO)**
+- Code changes: none (docs-only verification task)
+- Build: not run (no runtime code changes in task-00128)
+
 ## task-00115 — SEC — Auth compat operational guardrails + rollback triggers
 
 Review scope:

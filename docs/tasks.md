@@ -55,6 +55,18 @@
   - Updated `docs/SECURITY_BASELINE.md` with task-00125 verification notes and decision rationale.
   - Docs-only verification task; no runtime SEC code changes and no build run required.
 
+## task-00128 — SEC — remediation safety gate rerun after phase-2 completion
+
+- Status: **Done**
+- Branch: `chore/sec/task-00128-remediation-gate-rerun-after-undo`
+- Scope delivered:
+  - Re-checked all task-00122/task-00125 residual NO-GO criteria against latest `main`.
+  - Confirmed prohibited-transform enforcement, deterministic audit fields, and bounded edit-size controls remain enforced in remediation apply path.
+  - Confirmed explicit one-step manual `Undo Last Apply` control now exists in Create Review Workbench and restores prior in-memory draft state session-locally.
+  - Re-evaluated residual remediation safety gate status to **GO** (all previously blocking criteria now closed).
+  - Updated `docs/SECURITY_BASELINE.md` with task-00128 verification evidence and gate decision.
+  - Docs-only verification task; no runtime SEC code changes and no build run required.
+
 
 ## task-00120 — DEV — auto-remediation engine phase 1 (safe scoped)
 
