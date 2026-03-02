@@ -28,7 +28,7 @@ test("provider chain returns primary success without fallback attempt", async ()
   assert.deepEqual(result.diagnostic.attempts[0], { provider: "codex", ok: true });
 });
 
-test("provider chain falls back when primary fails and secondary succeeds", async () => {
+test("provider chain defers fallback when codex primary fails", async () => {
   const result = await completeWithDeterministicFallback({
     flow: "content-generate",
     prompt: "hello",
@@ -36,23 +36,23 @@ test("provider chain falls back when primary fails and secondary succeeds", asyn
     providerFactory: makeFactory({ codex: "fail", "chatgpt-api": "ok" }),
   });
 
-  assert.ok("completion" in result);
-  assert.equal(result.diagnostic.attempts.length, 2);
+  assert.ok(!("completion" in result));
+  assert.equal(result.diagnostic.fallbackDeferred, true);
+  assert.equal(result.diagnostic.attempts.length, 1);
   assert.equal(result.diagnostic.attempts[0]?.provider, "codex");
   assert.equal(result.diagnostic.attempts[0]?.ok, false);
-  assert.equal(result.diagnostic.attempts[1]?.provider, "chatgpt-api");
-  assert.equal(result.diagnostic.attempts[1]?.ok, true);
 });
 
-test("provider chain returns degraded diagnostics when all providers fail", async () => {
+test("provider chain ignores AI_PROVIDER override and remains codex-first", async () => {
   const result = await completeWithDeterministicFallback({
     flow: "content-generate",
     prompt: "hello",
-    env: { AI_PROVIDER: "codex" } as NodeJS.ProcessEnv,
-    providerFactory: makeFactory({ codex: "fail", "chatgpt-api": "fail" }),
+    env: { AI_PROVIDER: "chatgpt-api" } as NodeJS.ProcessEnv,
+    providerFactory: makeFactory({ codex: "ok", "chatgpt-api": "fail" }),
   });
 
-  assert.ok(!("completion" in result));
-  assert.equal(result.diagnostic.attempts.length, 2);
-  assert.equal(result.diagnostic.attempts.every((attempt) => !attempt.ok), true);
+  assert.ok("completion" in result);
+  assert.equal(result.diagnostic.primary, "codex");
+  assert.equal(result.diagnostic.attempts.length, 1);
+  assert.equal(result.diagnostic.attempts[0]?.provider, "codex");
 });

@@ -1,5 +1,29 @@
 # Security Baseline Verification
 
+## task-00109 — DEV — Codex-primary runtime wiring for generate + compliance
+
+Review scope:
+- `src/ai/runtime/providerChain.ts`
+- `src/ai/runtime/providerChain.test.ts`
+- `src/api/internal/content/generate.ts`
+- `src/app/api/internal/compliance/check/route.ts`
+- `docs/API_BOUNDARY.md`
+
+### Outcome
+
+- Codex is now the authoritative provider runtime path for both services (`/api/internal/content/generate`, `/api/internal/compliance/check`).
+- Secondary provider execution is explicitly deferred in this phase (`fallbackDeferred: true` diagnostics).
+- Existing UI contracts remain stable under success and degraded paths.
+- Failure diagnostics remain non-secret and metadata-only (`providerChain` attempt/errorKind classification).
+- Safe degraded behavior is preserved for Codex failures:
+  - Generate returns `ok:true` fallback draft payload with `generationMeta.degraded: true`
+  - Compliance returns `ok:true` safe fallback finding with `meta.degraded: true`
+
+### Deferred fallback note
+
+- Fallback implementation details are intentionally deferred/non-blocking per product directive.
+- ChatGPT fallback key-path documentation remains for future hardening, but runtime launch path is Codex-first only in current production posture.
+
 ## task-00108 — DEV emergency — temporary internal API auth compatibility rollback
 
 Review scope:

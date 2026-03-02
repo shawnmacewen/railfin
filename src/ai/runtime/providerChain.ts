@@ -1,7 +1,7 @@
 import type { AIProvider } from "../providers/AIProvider";
 import { ChatGPTApiProvider } from "../providers/ChatGPTApiProvider";
 import { CodexProvider } from "../providers/CodexProvider";
-import { getAIProviderFromEnv, type AIProviderName } from "../../config/aiProvider";
+import { getAIProviderFromEnv } from "../../config/aiProvider";
 
 export type RuntimeProviderName = "codex" | "chatgpt-api";
 
@@ -21,6 +21,7 @@ export type ProviderChainDiagnostic = {
   flow: "content-generate" | "compliance-check";
   primary: RuntimeProviderName;
   fallback: RuntimeProviderName;
+  fallbackDeferred: boolean;
   attempts: ProviderAttemptDiagnostic[];
 };
 
@@ -35,10 +36,8 @@ export type ProviderChainFailure = {
 
 type ProviderFactory = (name: RuntimeProviderName, env: NodeJS.ProcessEnv) => AIProvider;
 
-function selectPrimary(env = process.env): RuntimeProviderName {
-  return ((env.AI_PROVIDER as AIProviderName | undefined) ?? "codex") === "chatgpt-api"
-    ? "chatgpt-api"
-    : "codex";
+function selectPrimary(_env = process.env): RuntimeProviderName {
+  return "codex";
 }
 
 function secondaryProviderName(primary: RuntimeProviderName): RuntimeProviderName {
@@ -90,29 +89,26 @@ export async function completeWithDeterministicFallback(options: {
     flow: options.flow,
     primary,
     fallback,
+    fallbackDeferred: true,
     attempts: [],
   };
 
-  const attempts: RuntimeProviderName[] = [primary, fallback];
+  const provider = providerFactory(primary, env);
 
-  for (const providerName of attempts) {
-    const provider = providerFactory(providerName, env);
+  try {
+    const completion = await provider.complete(options.prompt);
+    diagnostic.attempts.push({ provider: primary, ok: true });
 
-    try {
-      const completion = await provider.complete(options.prompt);
-      diagnostic.attempts.push({ provider: providerName, ok: true });
-
-      return {
-        completion,
-        diagnostic,
-      };
-    } catch (error) {
-      diagnostic.attempts.push({
-        provider: providerName,
-        ok: false,
-        errorKind: classifyProviderError(error),
-      });
-    }
+    return {
+      completion,
+      diagnostic,
+    };
+  } catch (error) {
+    diagnostic.attempts.push({
+      provider: primary,
+      ok: false,
+      errorKind: classifyProviderError(error),
+    });
   }
 
   return {

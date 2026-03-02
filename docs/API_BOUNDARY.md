@@ -23,9 +23,9 @@ Notes:
 - `next` is optional and sanitized to internal redirects only (`/` fallback).
 - No real Supabase credential verification or session issuance happens at this stage.
 
-## Compliance Check Contract (AI-backed, fallback-safe)
+## Compliance Check Contract (AI-backed, codex-primary)
 
-`POST /api/internal/compliance/check` is an AI-backed endpoint with a Codex-first provider path and ChatGPT API fallback.
+`POST /api/internal/compliance/check` is an AI-backed endpoint with Codex as the authoritative runtime path.
 
 Request JSON:
 
@@ -55,13 +55,10 @@ Response JSON:
 
 ### Provider behavior
 
-- Preferred provider path: `codex`
-- Fallback-capable path: `chatgpt-api`
-- Primary provider can be selected via `AI_PROVIDER` (`codex` default)
-- Provider-chain execution is deterministic for each call: `[primary, secondary]` with no randomization
-- If primary provider fails or times out, the endpoint automatically retries with the secondary provider exactly once
-- If all providers fail, endpoint returns safe fallback findings to keep UI response handling stable
-- Runtime diagnostics are returned in `meta.providerChain` (provider names + classified attempt outcomes only; no prompt/body/secret data)
+- Authoritative provider path: `codex` (always selected in runtime)
+- Fallback provider wiring (`chatgpt-api`) remains documented but execution is explicitly deferred/non-blocking for this phase
+- If Codex fails or times out, endpoint returns safe fallback findings to keep UI response handling stable
+- Runtime diagnostics are returned in `meta.providerChain` (provider names + classified attempt outcomes only; no prompt/body/secret data), including `fallbackDeferred: true`
 
 ## AI Service Contract Decision (task-00087)
 
@@ -74,9 +71,9 @@ This is an architecture boundary rule to prevent drift and accidental contract c
 
 ### Shared key/env path (both services)
 
-- Shared provider-selection env: `AI_PROVIDER` (`codex` default)
-- Shared primary key path: `CODEX_API_KEY`
-- Shared fallback key path: `OPENAI_API_KEY` or `CHATGPT_API_KEY` (provider adapter-dependent)
+- Shared provider-selection env: `AI_PROVIDER` (currently ignored for production runtime; codex is pinned as primary)
+- Shared primary key path: `CODEX_API_KEY` (or `OPENAI_API_KEY` as accepted by Codex provider)
+- Shared fallback key path: `CHATGPT_API_KEY` (fallback execution deferred in this phase)
 
 Operational rule:
 
@@ -94,12 +91,12 @@ Even with shared key/config, each service keeps its own:
 
 Generate and Compliance must not reuse one another’s response type as a shortcut.
 
-### Provider primary/fallback behavior (applies to both services)
+### Provider behavior (applies to both services)
 
-- Resolve primary from `AI_PROVIDER`.
-- Attempt primary provider first.
-- On provider error/timeout/invalid response, retry once through secondary provider path.
-- If both providers fail, return each service’s safe degraded contract output (service-specific; contract-preserving).
+- Runtime primary is pinned to Codex for production (`codex` authoritative path).
+- Attempt Codex provider first.
+- Secondary provider wiring remains in codebase but fallback execution is deferred for this phase.
+- On Codex error/timeout/invalid response, return each service’s safe degraded contract output (service-specific; contract-preserving).
 
 ### Generate contract (`POST /api/internal/content/generate`)
 

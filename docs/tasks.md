@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00109 — DEV — Codex-primary runtime wiring for generate + compliance
+
+- Status: **Done**
+- Branch: `feat/dev/task-00109-codex-primary-wiring`
+- Scope delivered:
+  - Pinned provider-chain runtime primary to Codex for production execution in both content generation and compliance checks.
+  - Made fallback behavior explicit as deferred/non-blocking (`fallbackDeferred: true`) while preserving contract-safe degraded responses.
+  - Kept UI-facing API contracts stable for `/api/internal/content/generate` and `/api/internal/compliance/check`.
+  - Preserved non-secret runtime diagnostics (`providerChain` attempts + classified `errorKind`) for Codex failure analysis.
+  - Updated API/security docs for Codex-first posture and deferred fallback note.
+
 ## task-00108 — DEV — Emergency authz regression rollback for internal APIs
 
 - Status: **Done**
