@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00104 — DEV — Merge-safe closeout + content tools phase 5
+
+- Status: **Done**
+- Branch: `feat/dev/task-00104-content-tools-phase5`
+- Scope delivered:
+  - Landed task-00102 commit (`ef4ec22890f803b3ba68f7975df922423c5cc3c8`) on `main` lineage via cherry-pick during phase closeout.
+  - Added reusable generation control profiles in `internalContentGenerate`: `social-quick`, `balanced-default`, and `deep-outline`.
+  - Mapped `controlProfile` defaults into `controls` resolution with strict validation and preserved additive/non-breaking request semantics.
+  - Preserved response contract (`{ ok, data: { draft, generationMeta } }`) and fallback behavior.
+  - Extended validation coverage and updated API boundary documentation for new `controlProfile` request field.
+
 ## task-00101 — DEV — Content tools phase 4
 
 - Status: **Done**

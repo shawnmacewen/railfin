@@ -112,9 +112,15 @@ Request JSON:
   - Missing `preset` defaults to `{ tone: "professional", intent: "educate" }`
   - Partial preset is allowed; missing fields fall back to defaults
   - Unknown keys are rejected (strict object validation)
+- Optional: `controlProfile: "social-quick" | "balanced-default" | "deep-outline"`
+  - Missing `controlProfile` defaults to `"balanced-default"`
+  - Each profile maps to controls defaults:
+    - `social-quick` -> `{ lengthTarget: "short", formatStyle: "bullet" }`
+    - `balanced-default` -> `{ lengthTarget: "medium", formatStyle: "standard" }`
+    - `deep-outline` -> `{ lengthTarget: "long", formatStyle: "outline" }`
 - Optional: `controls: { lengthTarget?: "short" | "medium" | "long", formatStyle?: "standard" | "bullet" | "outline" }`
-  - Missing `controls` defaults to `{ lengthTarget: "medium", formatStyle: "standard" }`
-  - Partial controls are allowed; missing fields fall back to defaults
+  - Missing `controls` uses selected `controlProfile` mapping
+  - Partial controls are allowed; missing fields fall back to selected profile defaults
   - Unknown keys are rejected (strict object validation)
 
 Response JSON:
@@ -127,6 +133,7 @@ Response JSON:
   - missing/invalid `contentType` -> `Invalid contentType`
   - invalid `template` -> `Invalid template`
   - invalid `preset` object, unknown preset keys, or unsupported `tone`/`intent` values -> `Invalid preset`
+  - invalid `controlProfile` value -> `Invalid controlProfile`
   - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle` values -> `Invalid controls`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
 

@@ -7,6 +7,7 @@ type GenerateToneId = "professional" | "friendly" | "bold";
 type GenerateIntentId = "educate" | "engage" | "convert";
 type GenerateLengthTargetId = "short" | "medium" | "long";
 type GenerateFormatStyleId = "standard" | "bullet" | "outline";
+type GenerateControlProfileId = "social-quick" | "balanced-default" | "deep-outline";
 
 type GenerateRequestBody = {
   prompt?: string;
@@ -20,6 +21,7 @@ type GenerateRequestBody = {
     lengthTarget?: GenerateLengthTargetId;
     formatStyle?: GenerateFormatStyleId;
   };
+  controlProfile?: GenerateControlProfileId;
 };
 
 type GenerateModelOutput = {
@@ -45,6 +47,15 @@ type GenerationControls = {
   formatStyle: GenerateFormatStyleId;
   lengthGuidance: string[];
   formatGuidance: string[];
+};
+
+type GenerationControlProfile = {
+  id: GenerateControlProfileId;
+  label: string;
+  controls: {
+    lengthTarget: GenerateLengthTargetId;
+    formatStyle: GenerateFormatStyleId;
+  };
 };
 
 const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
@@ -129,11 +140,37 @@ const FORMAT_STYLE_GUIDANCE: Record<GenerateFormatStyleId, string[]> = {
   ],
 };
 
+const CONTROL_PROFILES: Record<GenerateControlProfileId, GenerationControlProfile> = {
+  "social-quick": {
+    id: "social-quick",
+    label: "Social Quick",
+    controls: {
+      lengthTarget: "short",
+      formatStyle: "bullet",
+    },
+  },
+  "balanced-default": {
+    id: "balanced-default",
+    label: "Balanced Default",
+    controls: {
+      lengthTarget: "medium",
+      formatStyle: "standard",
+    },
+  },
+  "deep-outline": {
+    id: "deep-outline",
+    label: "Deep Outline",
+    controls: {
+      lengthTarget: "long",
+      formatStyle: "outline",
+    },
+  },
+};
+
 const DEFAULT_TEMPLATE: GenerateTemplateId = "default";
 const DEFAULT_TONE: GenerateToneId = "professional";
 const DEFAULT_INTENT: GenerateIntentId = "educate";
-const DEFAULT_LENGTH_TARGET: GenerateLengthTargetId = "medium";
-const DEFAULT_FORMAT_STYLE: GenerateFormatStyleId = "standard";
+const DEFAULT_CONTROL_PROFILE: GenerateControlProfileId = "balanced-default";
 
 function isContentType(value: unknown): value is ContentType {
   return typeof value === "string" && CONTENT_TYPES.includes(value as ContentType);
@@ -157,6 +194,10 @@ function isGenerateLengthTargetId(value: unknown): value is GenerateLengthTarget
 
 function isGenerateFormatStyleId(value: unknown): value is GenerateFormatStyleId {
   return typeof value === "string" && value in FORMAT_STYLE_GUIDANCE;
+}
+
+function isGenerateControlProfileId(value: unknown): value is GenerateControlProfileId {
+  return typeof value === "string" && value in CONTROL_PROFILES;
 }
 
 function hasOnlyKeys(candidate: object, keys: string[]) {
@@ -205,13 +246,25 @@ function resolvePreset(value: unknown): GenerationPreset | null {
   };
 }
 
-function resolveControls(value: unknown): GenerationControls | null {
+function resolveControlProfile(value: unknown): GenerationControlProfile | null {
+  if (value === undefined) {
+    return CONTROL_PROFILES[DEFAULT_CONTROL_PROFILE];
+  }
+
+  if (!isGenerateControlProfileId(value)) {
+    return null;
+  }
+
+  return CONTROL_PROFILES[value];
+}
+
+function resolveControls(value: unknown, profile: GenerationControlProfile): GenerationControls | null {
   if (value === undefined) {
     return {
-      lengthTarget: DEFAULT_LENGTH_TARGET,
-      formatStyle: DEFAULT_FORMAT_STYLE,
-      lengthGuidance: LENGTH_TARGET_GUIDANCE[DEFAULT_LENGTH_TARGET],
-      formatGuidance: FORMAT_STYLE_GUIDANCE[DEFAULT_FORMAT_STYLE],
+      lengthTarget: profile.controls.lengthTarget,
+      formatStyle: profile.controls.formatStyle,
+      lengthGuidance: LENGTH_TARGET_GUIDANCE[profile.controls.lengthTarget],
+      formatGuidance: FORMAT_STYLE_GUIDANCE[profile.controls.formatStyle],
     };
   }
 
@@ -220,8 +273,8 @@ function resolveControls(value: unknown): GenerationControls | null {
   }
 
   const candidate = value as { lengthTarget?: unknown; formatStyle?: unknown };
-  const lengthTarget = candidate.lengthTarget === undefined ? DEFAULT_LENGTH_TARGET : candidate.lengthTarget;
-  const formatStyle = candidate.formatStyle === undefined ? DEFAULT_FORMAT_STYLE : candidate.formatStyle;
+  const lengthTarget = candidate.lengthTarget === undefined ? profile.controls.lengthTarget : candidate.lengthTarget;
+  const formatStyle = candidate.formatStyle === undefined ? profile.controls.formatStyle : candidate.formatStyle;
 
   if (!isGenerateLengthTargetId(lengthTarget) || !isGenerateFormatStyleId(formatStyle)) {
     return null;
@@ -240,6 +293,7 @@ function buildGenerationPrompt(input: {
   contentType: ContentType;
   template: GenerationTemplate;
   preset: GenerationPreset;
+  controlProfile: GenerationControlProfile;
   controls: GenerationControls;
 }): string {
   return [
@@ -255,6 +309,7 @@ function buildGenerationPrompt(input: {
     `Template: ${input.template.id} (${input.template.label})`,
     `Preset tone: ${input.preset.tone}`,
     `Preset intent: ${input.preset.intent}`,
+    `Control profile: ${input.controlProfile.id} (${input.controlProfile.label})`,
     `Controls lengthTarget: ${input.controls.lengthTarget}`,
     `Controls formatStyle: ${input.controls.formatStyle}`,
     "Template guidance:",
@@ -367,7 +422,16 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  const controls = resolveControls(request.body?.controls);
+  const controlProfile = resolveControlProfile(request.body?.controlProfile);
+
+  if (!controlProfile) {
+    return {
+      ok: false,
+      error: "Invalid controlProfile",
+    };
+  }
+
+  const controls = resolveControls(request.body?.controls, controlProfile);
 
   if (!controls) {
     return {
@@ -378,7 +442,7 @@ export async function internalContentGenerate(request: {
 
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
-    prompt: buildGenerationPrompt({ prompt, contentType, template, preset, controls }),
+    prompt: buildGenerationPrompt({ prompt, contentType, template, preset, controlProfile, controls }),
   });
 
   if ("completion" in runtime) {

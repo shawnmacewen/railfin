@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       lengthTarget?: "short" | "medium" | "long";
       formatStyle?: "standard" | "bullet" | "outline";
     };
+    controlProfile?: "social-quick" | "balanced-default" | "deep-outline";
   };
 
   const result = await internalContentGenerate({
