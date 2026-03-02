@@ -199,10 +199,14 @@ button:disabled {
 }
 
 .rf-selected-finding-panel {
-  border: 1px solid #dde4f9;
+  position: sticky;
+  top: 0.6rem;
+  z-index: 2;
+  border: 1px solid #cfdafb;
   border-radius: 0.5rem;
   background: #ffffff;
   padding: 0.6rem;
+  box-shadow: 0 2px 12px rgba(26, 76, 255, 0.08);
 }
 
 .rf-selected-finding-panel h4 {
@@ -302,6 +306,42 @@ button:disabled {
   color: #374151;
   background: #e5e7eb;
   border-color: #d1d5db;
+}
+
+.rf-remediation-preview {
+  margin: 0.8rem 0;
+  border: 1px solid #dbe4ff;
+  border-radius: 0.65rem;
+  background: #f8faff;
+  padding: 0.7rem;
+}
+
+.rf-remediation-preview h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.rf-remediation-preview-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.rf-remediation-preview-grid h4 {
+  margin: 0.15rem 0 0.25rem;
+  font-size: 0.86rem;
+}
+
+.rf-remediation-preview-grid pre {
+  margin: 0;
+  border: 1px solid #d8dced;
+  border-radius: 0.45rem;
+  background: #fff;
+  padding: 0.55rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.76rem;
+  line-height: 1.35;
 }
 
 .rf-library-header {

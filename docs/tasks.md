@@ -10,6 +10,16 @@
   - Applied auth guard to content/compliance/configure internal endpoints and standardized `Cache-Control: no-store` headers on success/error responses.
   - Preserved safe error payloads (`Unauthorized`, validation errors, blocked metadata) without secret/body echoing.
 
+## task-00098 — DEV — Content tools phase 3
+
+- Status: **Done**
+- Branch: `feat/dev/task-00098-content-tools-phase3`
+- Scope delivered:
+  - Added structured generation presets to `internalContentGenerate` with strict validation for supported `tone` and `intent` enums.
+  - Added sane defaults for omitted preset input (`tone: professional`, `intent: educate`) while preserving existing template behavior.
+  - Extended generation prompt construction with preset-derived guidance without changing UI response shape (`{ ok, data: { draft, generationMeta } }`).
+  - Updated generate route typing and API boundary docs for preset request contract + validation behavior.
+
 ## task-00097 — SEC — Security hardening sweep phase 1
 
 - Status: **Done**
@@ -21,6 +31,16 @@
     - `internalContentGenerate`: max prompt length with structured validation failure contract.
   - Updated security baseline with a concise hardening checklist, findings, and residual follow-ups for route-level authz and sensitive endpoint cache semantics.
   - Marked docs/task ledger completion for task-00097.
+
+## task-00099 — UI — Review tools UX phase 3
+
+- Status: **Done**
+- Branch: `feat/ui/task-00099-review-tools-ux-phase3`
+- Scope delivered:
+  - Improved remediation usability in `src/ui/editor-shell.tsx` with an explicit **Applied Remediation Context** preview showing before/after remediation block context.
+  - Strengthened selected-finding flow in `src/ui/compliance-panel.tsx` by keeping selection actions centralized, persistent, and low-friction with disabled-until-selected controls.
+  - Refined review-tool styling in `src/app/globals.css` using existing `rf-*` conventions, including stronger selected-action panel prominence and remediation context preview styling.
+  - Preserved existing generation, save, and compliance request/response behaviors and disclaimer/status messaging (no API contract changes).
 
 ## task-00096 — UI — Review tools UX phase 2
 

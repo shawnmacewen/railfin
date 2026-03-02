@@ -128,6 +128,21 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - review actions are additive UI affordances only
 - Styling stays within existing railfin-ui patterns and primitives (`rf-status`, severity badges, card-like sections).
 
+## task-00099 — Review tools UX phase 3
+
+- `src/ui/editor-shell.tsx` now provides clearer remediation apply context with an **Applied Remediation Context** panel:
+  - captures previous remediation block (if present) and the newly applied block
+  - shows side-by-side before/after context to reduce ambiguity while revising
+  - preserves controlled remediation block replacement behavior (`[Compliance Remediation Draft Context] ...`)
+- `src/ui/compliance-panel.tsx` keeps selection and action handling obvious and low-friction:
+  - selected-finding action controls remain centralized and persist in the summary panel
+  - action controls (`Apply Selected`, `Remind Later`, `Clear Selection`) are always visible and explicitly disabled until a finding is selected
+  - selected context includes issue/severity/remediation/location details
+- Styling updates in `src/app/globals.css` remain aligned with existing railfin patterns (`rf-*` classes), including stronger selected-action panel prominence and remediation preview card styling.
+- Preserved behavior constraints:
+  - no generation/save/compliance contract changes
+  - existing status + legal-disclaimer messaging retained
+
 ## task-00096 — Review tools UX phase 2
 
 - `src/ui/compliance-panel.tsx` now presents severity totals as compact summary chips for faster scan/readability (`critical`, `high`, `medium`, `low`, `unknown`).

@@ -2,15 +2,18 @@ import { completeWithDeterministicFallback } from "../../../ai/runtime/providerC
 
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 
-const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
-const MAX_PROMPT_LENGTH = 12000;
-
 type GenerateTemplateId = "default" | "conversion";
+type GenerateToneId = "professional" | "friendly" | "bold";
+type GenerateIntentId = "educate" | "engage" | "convert";
 
 type GenerateRequestBody = {
   prompt?: string;
   contentType?: ContentType;
   template?: GenerateTemplateId;
+  preset?: {
+    tone?: GenerateToneId;
+    intent?: GenerateIntentId;
+  };
 };
 
 type GenerateModelOutput = {
@@ -23,6 +26,16 @@ type GenerationTemplate = {
   label: string;
   guidance: string[];
 };
+
+type GenerationPreset = {
+  tone: GenerateToneId;
+  intent: GenerateIntentId;
+  toneGuidance: string[];
+  intentGuidance: string[];
+};
+
+const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
+const MAX_PROMPT_LENGTH = 12000;
 
 const GENERATION_TEMPLATES: Record<GenerateTemplateId, GenerationTemplate> = {
   default: {
@@ -43,7 +56,39 @@ const GENERATION_TEMPLATES: Record<GenerateTemplateId, GenerationTemplate> = {
   },
 };
 
+const TONE_GUIDANCE: Record<GenerateToneId, string[]> = {
+  professional: [
+    "Use polished language and clear sentence structure.",
+    "Keep claims measured and avoid hype-heavy wording.",
+  ],
+  friendly: [
+    "Use approachable language with warm, conversational phrasing.",
+    "Keep readability high and avoid jargon unless needed.",
+  ],
+  bold: [
+    "Use confident voice with high clarity and direct statements.",
+    "Emphasize differentiated value without making risky claims.",
+  ],
+};
+
+const INTENT_GUIDANCE: Record<GenerateIntentId, string[]> = {
+  educate: [
+    "Prioritize informative structure and practical takeaways.",
+    "Clarify why recommendations matter for the audience.",
+  ],
+  engage: [
+    "Prioritize audience connection and narrative momentum.",
+    "Invite reflection or interaction without overpromising.",
+  ],
+  convert: [
+    "Prioritize clear value framing and decision-driving clarity.",
+    "Include a direct, low-friction call-to-action.",
+  ],
+};
+
 const DEFAULT_TEMPLATE: GenerateTemplateId = "default";
+const DEFAULT_TONE: GenerateToneId = "professional";
+const DEFAULT_INTENT: GenerateIntentId = "educate";
 
 function isContentType(value: unknown): value is ContentType {
   return typeof value === "string" && CONTENT_TYPES.includes(value as ContentType);
@@ -51,6 +96,14 @@ function isContentType(value: unknown): value is ContentType {
 
 function isGenerateTemplateId(value: unknown): value is GenerateTemplateId {
   return typeof value === "string" && value in GENERATION_TEMPLATES;
+}
+
+function isGenerateToneId(value: unknown): value is GenerateToneId {
+  return typeof value === "string" && value in TONE_GUIDANCE;
+}
+
+function isGenerateIntentId(value: unknown): value is GenerateIntentId {
+  return typeof value === "string" && value in INTENT_GUIDANCE;
 }
 
 function resolveTemplate(value: unknown): GenerationTemplate | null {
@@ -65,7 +118,42 @@ function resolveTemplate(value: unknown): GenerationTemplate | null {
   return GENERATION_TEMPLATES[value];
 }
 
-function buildGenerationPrompt(input: { prompt: string; contentType: ContentType; template: GenerationTemplate }): string {
+function resolvePreset(value: unknown): GenerationPreset | null {
+  if (value === undefined) {
+    return {
+      tone: DEFAULT_TONE,
+      intent: DEFAULT_INTENT,
+      toneGuidance: TONE_GUIDANCE[DEFAULT_TONE],
+      intentGuidance: INTENT_GUIDANCE[DEFAULT_INTENT],
+    };
+  }
+
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as { tone?: unknown; intent?: unknown };
+  const tone = candidate.tone === undefined ? DEFAULT_TONE : candidate.tone;
+  const intent = candidate.intent === undefined ? DEFAULT_INTENT : candidate.intent;
+
+  if (!isGenerateToneId(tone) || !isGenerateIntentId(intent)) {
+    return null;
+  }
+
+  return {
+    tone,
+    intent,
+    toneGuidance: TONE_GUIDANCE[tone],
+    intentGuidance: INTENT_GUIDANCE[intent],
+  };
+}
+
+function buildGenerationPrompt(input: {
+  prompt: string;
+  contentType: ContentType;
+  template: GenerationTemplate;
+  preset: GenerationPreset;
+}): string {
   return [
     "You are a content generation engine for marketing copy.",
     "Return strict JSON only.",
@@ -77,8 +165,14 @@ function buildGenerationPrompt(input: { prompt: string; contentType: ContentType
     "- notes is optional",
     `Content type: ${input.contentType}`,
     `Template: ${input.template.id} (${input.template.label})`,
+    `Preset tone: ${input.preset.tone}`,
+    `Preset intent: ${input.preset.intent}`,
     "Template guidance:",
     ...input.template.guidance.map((item) => `- ${item}`),
+    "Tone guidance:",
+    ...input.preset.toneGuidance.map((item) => `- ${item}`),
+    "Intent guidance:",
+    ...input.preset.intentGuidance.map((item) => `- ${item}`),
     "Prompt:",
     input.prompt,
   ].join("\n");
@@ -170,9 +264,18 @@ export async function internalContentGenerate(request: {
     };
   }
 
+  const preset = resolvePreset(request.body?.preset);
+
+  if (!preset) {
+    return {
+      ok: false,
+      error: "Invalid preset",
+    };
+  }
+
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
-    prompt: buildGenerationPrompt({ prompt, contentType, template }),
+    prompt: buildGenerationPrompt({ prompt, contentType, template, preset }),
   });
 
   if ("completion" in runtime) {
