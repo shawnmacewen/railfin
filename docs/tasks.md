@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00112 — SEC — Auth compat follow-up verification + replacement plan
+
+- Status: **Done**
+- Branch: `chore/sec/task-00112-auth-compat-followup-plan`
+- Scope delivered:
+  - Re-verified current `requireInternalApiAuth` behavior in `src/app/api/internal/_auth.ts`: emergency compat fallback remains enabled by default (`INTERNAL_API_AUTH_COMPAT_MODE !== "off"`) and still permits trusted same-origin browser requests when no verified session is present.
+  - Documented current residual risk explicitly as an auth-bypass-by-origin-signals exposure (temporary acceptance only).
+  - Produced a concrete, phased replacement plan for robust server-side session verification using `getCurrentAuthContext()` + Supabase server auth context and role/claim enforcement at internal route boundary.
+  - Added rollout guardrails (feature flag, staged endpoint migration, telemetry, and compat retirement criteria) in `docs/SECURITY_BASELINE.md`.
+  - Docs-only update; no runtime code changes in this task.
+
 ## task-00109 — DEV — Codex-primary runtime wiring for generate + compliance
 
 - Status: **Done**

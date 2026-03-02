@@ -1,5 +1,53 @@
 # Security Baseline Verification
 
+## task-00112 — SEC — Auth compat follow-up verification + replacement plan
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `src/lib/supabase/server.ts`
+- `docs/API_BOUNDARY.md`
+
+### Verification findings (current state)
+
+1. **Emergency compat mode is still active by default:**
+   - `INTERNAL_API_AUTH_COMPAT_MODE` defaults to enabled unless explicitly set to `off`.
+   - In this mode, requests without session cookies can still pass `requireInternalApiAuth` when same-origin browser headers are present.
+
+2. **Auth decision is not yet server-authoritative:**
+   - Current allow path can succeed without a verified server session/user lookup.
+   - Existing `getCurrentAuthContext()` helper remains MVP placeholder (`isAuthenticated: false`) and is not currently used by internal API guards.
+
+3. **Residual risk (explicit):**
+   - **OPEN / TEMPORARILY ACCEPTED:** same-origin header signals are treated as sufficient in compat fallback, so internal endpoints may be reachable without authoritative session validation.
+
+### Replacement plan (concrete, phased)
+
+1. **Implement authoritative server auth context (phase A):**
+   - Upgrade `getCurrentAuthContext()` to read authenticated Supabase server context from request cookies (server client), then resolve trusted `session` + `user`.
+   - Keep return shape stable (`{ session, user, isAuthenticated }`) so call sites remain simple.
+
+2. **Add strict internal guard v2 (phase B):**
+   - Introduce a new guard entry point in `src/app/api/internal/_auth.ts` that depends on authoritative auth context (not cookie-name/header heuristics).
+   - Continue fail-closed unauthorized response contract (`401`, `{ ok:false, error:"Unauthorized" }`, `Cache-Control: no-store`).
+
+3. **Enforce claim/role checks for privileged routes (phase C):**
+   - Add role/claim verification for privileged internal endpoints first (starting with configure/policy paths), then extend to all internal mutate/read handlers as needed.
+   - Return deny-by-default (`403` for authenticated-but-not-authorized, `401` for unauthenticated).
+
+4. **Controlled rollout + compat retirement (phase D):**
+   - Gate new behavior behind a migration flag (example: `INTERNAL_API_AUTH_STRICT_MODE=on`) while collecting error telemetry.
+   - Migrate endpoint-by-endpoint, validate in preview/prod, then disable compat fallback globally (`INTERNAL_API_AUTH_COMPAT_MODE=off`) and remove fallback code.
+
+5. **Verification + tests (phase E):**
+   - Add route-level tests for: unauthenticated deny, authenticated allow, authenticated non-privileged deny (`403`) on privileged routes, and no-store headers on all deny paths.
+   - Record completion evidence in this baseline and close residual risk only after compat removal.
+
+### Task outcome (task-00112)
+
+- Outcome: **PASS (docs verification + replacement plan)**
+- Code changes: none (docs-first task)
+- Build: not run (no runtime code changed)
+
 ## task-00109 — DEV — Codex-primary runtime wiring for generate + compliance
 
 Review scope:
