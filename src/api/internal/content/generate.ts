@@ -2,15 +2,21 @@ import { completeWithDeterministicFallback } from "../../../ai/runtime/providerC
 
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 
+const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
+
 type GenerateRequestBody = {
   prompt?: string;
   contentType?: ContentType;
 };
 
 type GenerateModelOutput = {
-  text?: string;
+  text: string;
   notes?: string;
 };
+
+function isContentType(value: unknown): value is ContentType {
+  return typeof value === "string" && CONTENT_TYPES.includes(value as ContentType);
+}
 
 function buildGenerationPrompt(input: { prompt: string; contentType: ContentType }): string {
   return [
@@ -18,37 +24,56 @@ function buildGenerationPrompt(input: { prompt: string; contentType: ContentType
     "Return strict JSON only.",
     "Do not include markdown, prose, or code fences.",
     "Output schema:",
-    '{"text":"string","notes":"string"}',
+    '{"text":"string","notes":"string (optional)"}',
+    "Validation requirements:",
+    "- text must be non-empty plain text",
+    "- notes is optional",
     `Content type: ${input.contentType}`,
     "Prompt:",
     input.prompt,
   ].join("\n");
 }
 
-function parseGenerationCompletion(completion: string): GenerateModelOutput {
+function parseJsonCompletion(completion: string): unknown {
   const cleaned = completion
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
     .replace(/```$/i, "")
     .trim();
 
-  return JSON.parse(cleaned) as GenerateModelOutput;
+  return JSON.parse(cleaned) as unknown;
 }
 
-function normalizeGeneratedText(input: GenerateModelOutput, fallbackPrompt: string): { text: string; notes?: string } {
-  const text = typeof input.text === "string" ? input.text.trim() : "";
-  const notes = typeof input.notes === "string" ? input.notes.trim() : "";
+function validateGenerateModelOutput(value: unknown): GenerateModelOutput {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid model output: expected object");
+  }
+
+  const candidate = value as { text?: unknown; notes?: unknown };
+  const text = typeof candidate.text === "string" ? candidate.text.trim() : "";
 
   if (!text) {
-    return {
-      text: `[fallback-stub] ${fallbackPrompt}`,
-      notes: notes || "Model output did not include text field.",
-    };
+    throw new Error("Invalid model output: missing text");
+  }
+
+  if (candidate.notes !== undefined && typeof candidate.notes !== "string") {
+    throw new Error("Invalid model output: notes must be string when present");
   }
 
   return {
     text,
-    notes: notes || undefined,
+    notes: typeof candidate.notes === "string" ? candidate.notes.trim() : undefined,
+  };
+}
+
+function createFallbackDraft(input: { prompt: string; contentType: ContentType }) {
+  return {
+    id: `gen_${Date.now()}`,
+    contentType: input.contentType,
+    prompt: input.prompt,
+    text: `[fallback-stub:${input.contentType}] ${input.prompt}`,
+    status: "placeholder",
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -57,7 +82,6 @@ export async function internalContentGenerate(request: {
   body?: GenerateRequestBody;
 }) {
   const prompt = request.body?.prompt?.trim();
-  const contentType = request.body?.contentType;
 
   if (!prompt) {
     return {
@@ -66,13 +90,14 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  if (!contentType) {
+  if (!isContentType(request.body?.contentType)) {
     return {
       ok: false,
-      error: "Missing contentType",
+      error: "Invalid contentType",
     };
   }
 
+  const contentType = request.body.contentType;
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
     prompt: buildGenerationPrompt({ prompt, contentType }),
@@ -80,7 +105,7 @@ export async function internalContentGenerate(request: {
 
   if ("completion" in runtime) {
     try {
-      const generated = normalizeGeneratedText(parseGenerationCompletion(runtime.completion), prompt);
+      const generated = validateGenerateModelOutput(parseJsonCompletion(runtime.completion));
 
       return {
         ok: true,
@@ -95,27 +120,20 @@ export async function internalContentGenerate(request: {
           },
           generationMeta: {
             provider: runtime.diagnostic.attempts.find((attempt) => attempt.ok)?.provider ?? runtime.diagnostic.primary,
-            notes: generated.notes ?? "Generation completed",
+            notes: generated.notes || "Generation completed",
             providerChain: runtime.diagnostic,
           },
         },
       };
     } catch {
-      // fall through to safe fallback response
+      // keep contract stable and degrade safely
     }
   }
 
   return {
     ok: true,
     data: {
-      draft: {
-        id: `gen_${Date.now()}`,
-        contentType,
-        prompt,
-        text: `[fallback-stub:${contentType}] ${prompt}`,
-        status: "placeholder",
-        createdAt: new Date().toISOString(),
-      },
+      draft: createFallbackDraft({ prompt, contentType }),
       generationMeta: {
         provider: "fallback",
         notes: "AI generation unavailable or invalid output; fallback response used.",

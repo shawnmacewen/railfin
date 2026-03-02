@@ -666,3 +666,14 @@
   - Wired compliance and content-generate paths through the shared chain with service-specific parsing/fallback behavior preserved.
   - Added `POST /api/internal/content/generate` app route and kept output contract stable with additive diagnostics metadata.
   - Updated boundary/security docs for provider-chain behavior and runtime diagnostics.
+
+## task-00092 — DEV/UI — Content tools kickoff on hardened AI runtime
+
+- Status: **Done**
+- Branch: `feat/dev/task-00092-content-tools-kickoff`
+- Scope delivered:
+  - Hardened `POST /api/internal/content/generate` with strict request/response validation and safe degraded fallback behavior.
+  - Wired Create UI generation flow to call `/api/internal/content/generate` with content-type selection and in-editor hydration of generated text.
+  - Preserved existing save-draft and compliance-check flows, including compliance legal-guardrail language.
+  - Added deterministic provider-chain coverage tests for primary success, fallback success, and full-failure degraded diagnostics.
+  - Updated API/UI/task documentation for the new generation capability and coverage.

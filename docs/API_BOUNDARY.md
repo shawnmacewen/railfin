@@ -114,7 +114,16 @@ Response JSON:
   - `draft`: `{ id, contentType, prompt, text, status, createdAt }`
   - `generationMeta`: includes `provider`, `notes`, and `providerChain` diagnostics metadata
 - Validation error: `{ ok: false, error: string }` with `400`
+  - missing/blank prompt -> `Missing prompt`
+  - missing/invalid `contentType` -> `Invalid contentType`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
+
+Strict response validation behavior:
+
+- Model completion is parsed as strict JSON only.
+- Parsed payload must be an object with non-empty `text: string`.
+- Optional `notes` field is accepted only when it is a string.
+- Invalid/missing fields trigger safe degraded fallback output (contract preserved).
 
 ### Minimal implementation checklist (follow-up coding)
 
@@ -122,7 +131,7 @@ Response JSON:
 - [x] Keep Generate and Compliance prompts in separate modules/files.
 - [x] Add service-specific output validators (no shared lax parser for both).
 - [ ] Add per-service safety assertions in tests (e.g., no legal-approval wording in Compliance outputs).
-- [ ] Add provider-chain tests proving primary/fallback behavior for both services using shared env path.
+- [x] Add provider-chain tests proving primary/fallback/degraded behavior using deterministic provider injection harness (`src/ai/runtime/providerChain.test.ts`).
 
 ### `location` normalization
 

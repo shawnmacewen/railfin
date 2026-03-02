@@ -33,6 +33,8 @@ export type ProviderChainFailure = {
   diagnostic: ProviderChainDiagnostic;
 };
 
+type ProviderFactory = (name: RuntimeProviderName, env: NodeJS.ProcessEnv) => AIProvider;
+
 function selectPrimary(env = process.env): RuntimeProviderName {
   return ((env.AI_PROVIDER as AIProviderName | undefined) ?? "codex") === "chatgpt-api"
     ? "chatgpt-api"
@@ -77,10 +79,12 @@ export async function completeWithDeterministicFallback(options: {
   flow: "content-generate" | "compliance-check";
   prompt: string;
   env?: NodeJS.ProcessEnv;
+  providerFactory?: ProviderFactory;
 }): Promise<ProviderChainSuccess | ProviderChainFailure> {
   const env = options.env ?? process.env;
   const primary = selectPrimary(env);
   const fallback = secondaryProviderName(primary);
+  const providerFactory = options.providerFactory ?? instantiateProvider;
 
   const diagnostic: ProviderChainDiagnostic = {
     flow: options.flow,
@@ -92,7 +96,7 @@ export async function completeWithDeterministicFallback(options: {
   const attempts: RuntimeProviderName[] = [primary, fallback];
 
   for (const providerName of attempts) {
-    const provider = instantiateProvider(providerName, env);
+    const provider = providerFactory(providerName, env);
 
     try {
       const completion = await provider.complete(options.prompt);

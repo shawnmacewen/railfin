@@ -114,6 +114,17 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - provider chain remains Codex-first with ChatGPT API fallback
   - safe fallback finding is returned when providers fail/time out
 
+## task-00092 — Create generation kickoff (AI runtime wired)
+
+- `src/ui/editor-shell.tsx` now wires a **Generate Draft** action to `POST /api/internal/content/generate`.
+- Create UI sends `{ prompt: content, contentType }` with a selectable content type (`blog`, `linkedin`, `newsletter`, `x-thread`).
+- Generation flow adds explicit UX states without changing save/compliance behavior:
+  - `generating` pending state
+  - generated success message from `generationMeta.notes`
+  - inline error state on generation failure
+- On success, generated `draft.text` hydrates editor content in-place so existing save/compliance flows continue unchanged.
+- Existing compliance guardrail language remains intact in the compliance panel: **"AI-backed compliance insights are guidance, not legal approval."**
+
 ## Library UX behavior (task-00063)
 
 - `src/app/app/library/page.tsx` now renders a usable library UI (`LibraryPageContent`) instead of placeholder copy.

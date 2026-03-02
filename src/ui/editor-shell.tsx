@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { CompliancePanel } from "./compliance-panel";
 
 type EditorStatus = "idle" | "saving" | "saved" | "error";
+type GenerationStatus = "idle" | "generating" | "generated" | "error";
+type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 
 type DraftResponse = {
   ok: boolean;
@@ -20,6 +22,21 @@ type DraftResponse = {
     field?: string;
     message?: string;
   }>;
+};
+
+type GenerateResponse = {
+  ok: boolean;
+  data?: {
+    draft?: {
+      text?: string;
+      contentType?: ContentType;
+    };
+    generationMeta?: {
+      notes?: string;
+      degraded?: boolean;
+    };
+  };
+  error?: string;
 };
 
 type ConfigurePolicyResponse = {
@@ -38,6 +55,9 @@ export function EditorShell() {
   const [content, setContent] = useState("");
   const [status, setStatus] = useState<EditorStatus>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
+  const [generationFeedback, setGenerationFeedback] = useState<string | null>(null);
+  const [contentType, setContentType] = useState<ContentType>("blog");
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
 
@@ -114,6 +134,7 @@ export function EditorShell() {
   }, [draftId]);
 
   const canSave = content.trim().length > 0 && status !== "saving";
+  const canGenerate = content.trim().length > 0 && generationStatus !== "generating";
 
   const saveStatusText = useMemo(() => {
     if (status === "saving") {
@@ -158,6 +179,47 @@ export function EditorShell() {
 
     return `Configure policy updated ${date.toLocaleString()}.`;
   }, [policyUpdatedAt]);
+
+  const onGenerate = async () => {
+    if (!canGenerate) {
+      setGenerationStatus("error");
+      setGenerationFeedback("Add some source content before generating.");
+      return;
+    }
+
+    setGenerationStatus("generating");
+    setGenerationFeedback("Generating draft text...");
+
+    try {
+      const response = await fetch("/api/internal/content/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: content,
+          contentType,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as GenerateResponse;
+
+      const generatedText = payload.data?.draft?.text?.trim() ?? "";
+      if (!response.ok || !payload.ok || !generatedText) {
+        throw new Error(payload.error || "Unable to generate content.");
+      }
+
+      setContent(generatedText);
+      setGenerationStatus("generated");
+      const notes = payload.data?.generationMeta?.notes?.trim();
+      setGenerationFeedback(notes || "Draft generated. Review and save when ready.");
+      setStatus("idle");
+      setFeedback(null);
+    } catch (err) {
+      setGenerationStatus("error");
+      setGenerationFeedback(err instanceof Error ? err.message : "Unable to generate content.");
+    }
+  };
 
   const onSave = async (event: FormEvent) => {
     event.preventDefault();
@@ -228,6 +290,34 @@ export function EditorShell() {
         {policyUpdatedLabel}
       </p>
 
+      <div className="rf-generate-controls">
+        <label htmlFor="editor-content-type">Content Type</label>
+        <select
+          id="editor-content-type"
+          name="editor-content-type"
+          value={contentType}
+          onChange={(event) => setContentType(event.target.value as ContentType)}
+          disabled={generationStatus === "generating"}
+        >
+          <option value="blog">Blog</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="newsletter">Newsletter</option>
+          <option value="x-thread">X Thread</option>
+        </select>
+        <button type="button" onClick={onGenerate} disabled={!canGenerate}>
+          {generationStatus === "generating" ? "Generating..." : "Generate Draft"}
+        </button>
+      </div>
+
+      {generationFeedback ? (
+        <p
+          className={`rf-status ${generationStatus === "error" ? "rf-status-error" : "rf-status-success"}`}
+          role={generationStatus === "error" ? "alert" : "status"}
+        >
+          {generationFeedback}
+        </p>
+      ) : null}
+
       <form onSubmit={onSave} aria-busy={status === "saving"}>
         <label htmlFor="editor-content">Editor Content</label>
         <textarea
@@ -239,6 +329,10 @@ export function EditorShell() {
             if (status !== "idle") {
               setStatus("idle");
               setFeedback(null);
+            }
+            if (generationStatus !== "idle") {
+              setGenerationStatus("idle");
+              setGenerationFeedback(null);
             }
           }}
           rows={8}
@@ -261,7 +355,7 @@ export function EditorShell() {
       <CompliancePanel
         activePolicyContext={activePolicyContext}
         content={content}
-        contentType="blog"
+        contentType={contentType}
         policySet="default"
       />
     </section>
