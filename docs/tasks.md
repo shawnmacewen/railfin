@@ -1,5 +1,15 @@
 # Tasks
 
+## task-00106 — SEC — security sweep for latest content/review additions
+
+- Status: **Done**
+- Branch: `chore/sec/task-00106-security-sweep-content-review`
+- Scope delivered:
+  - Re-validated generation controls/profiles path for strict allowlist validation and fail-closed handling of unsupported `template`/`preset`/`controls` values.
+  - Re-validated review workbench flow behavior (Create editor + compliance panel) for fail-closed handling on missing/invalid operator inputs.
+  - Re-validated internal API auth guard and sensitive-cache assumptions after merges (`requireInternalApiAuth` + `Cache-Control: no-store` on unauthorized/success/error responses).
+  - Updated `docs/SECURITY_BASELINE.md` with task-00106 sweep checklist, findings, and verification outcome.
+
 ## task-00100 — SEC — API authz hardening phase 1 for /api/internal
 
 - Status: **Done**

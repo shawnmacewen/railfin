@@ -1,5 +1,48 @@
 # Security Baseline Verification
 
+## task-00106 — SEC — security sweep for latest content/review additions
+
+Review scope:
+- `src/api/internal/content/generate.ts`
+- `src/app/api/internal/content/generate/route.ts`
+- `src/ui/editor-shell.tsx`
+- `src/ui/compliance-panel.tsx`
+- `src/app/api/internal/compliance/check/route.ts`
+- `src/app/api/internal/content/list/route.ts`
+- `src/app/api/internal/content/draft/route.ts`
+- `src/app/api/internal/configure/policy/route.ts`
+- `src/app/api/internal/_auth.ts`
+
+### Sweep checklist (task-00106)
+
+- [x] Re-validated generation template/preset/control validation is allowlist-based and reject-by-default for unknown values.
+- [x] Re-validated review workbench flow fails closed on invalid/missing content before backend execution.
+- [x] Re-validated compliance route input bounds (`content`, `policySet`) and `contentType` allowlist enforcement.
+- [x] Re-validated `/api/internal/*` route-level auth guard coverage via `requireInternalApiAuth`.
+- [x] Re-validated `Cache-Control: no-store` coverage on auth failures, validation failures, and success/error responses carrying sensitive content.
+
+### Findings + outcome
+
+1. **Generation controls/profiles validation (PASS):**
+   - `internalContentGenerate` enforces strict enum validation for `template`, `preset.tone`, `preset.intent`, `controls.lengthTarget`, and `controls.formatStyle`.
+   - Unknown values return explicit `ok:false` errors (`Invalid template|preset|controls`) rather than permissive fallback.
+   - Prompt length remains bounded (`MAX_PROMPT_LENGTH = 12000`) with structured fail-closed validation output.
+
+2. **Review workbench fail-closed behavior (PASS):**
+   - `EditorShell` and `CompliancePanel` block generate/compliance actions when content is empty and surface explicit operator errors.
+   - Compliance API path independently enforces server-side content presence + validation, preserving fail-closed guarantees even if client checks are bypassed.
+
+3. **No-store + auth-guard assumptions after merges (PASS):**
+   - All internal route handlers (`content/*`, `compliance/check`, `configure/policy`) invoke `requireInternalApiAuth` at route boundary.
+   - Unauthorized responses are standardized (`401 Unauthorized`) and include `Cache-Control: no-store` via shared `_auth` header contract.
+   - Success + handled error responses across reviewed internal endpoints retain explicit `INTERNAL_SENSITIVE_NO_STORE_HEADERS` usage.
+
+### Verification outcome (task-00106)
+
+- Outcome: **PASS**
+- Type: Security sweep re-validation (content generation + review workbench + internal API protections)
+- Residual risk: **No new regression identified** in scoped areas; existing roadmap item remains replacing cookie-presence auth with full server-side session/role verification.
+
 ## task-00100 — SEC — API authz hardening phase 1 for /api/internal
 
 Review scope:
