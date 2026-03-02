@@ -41,6 +41,10 @@ function toRemediationHint(suggestion?: string) {
   return text.length > 120 ? `${text.slice(0, 117).trimEnd()}...` : text;
 }
 
+function getFindingKey(finding: ComplianceFinding, severity: string, index: number) {
+  return `${finding.issue || "issue"}-${severity}-${index}`;
+}
+
 type CompliancePanelProps = {
   activePolicyContext?: string;
   content?: string;
@@ -91,6 +95,26 @@ export function CompliancePanel({
 
     return counts;
   }, [findings]);
+
+  const selectedFindingMeta = useMemo(() => {
+    if (!selectedFindingKey) return null;
+
+    for (const [severity, severityFindings] of groupedFindings) {
+      for (let index = 0; index < severityFindings.length; index += 1) {
+        const finding = severityFindings[index];
+        const findingKey = getFindingKey(finding, severity, index);
+
+        if (findingKey === selectedFindingKey) {
+          return {
+            finding,
+            remediationHint: toRemediationHint(finding.suggestion),
+          };
+        }
+      }
+    }
+
+    return null;
+  }, [groupedFindings, selectedFindingKey]);
 
   const runComplianceCheck = async () => {
     if (running) return;
@@ -173,35 +197,73 @@ export function CompliancePanel({
             <p className="rf-status rf-status-muted" role="status">
               Total findings: {findings.length}
             </p>
-            <ul>
+
+            <div className="rf-severity-chip-row" aria-label="Severity summary chips">
               {Object.keys(SEVERITY_ORDER).map((severity) => (
-                <li key={`summary-${severity}`}>
+                <span key={`summary-${severity}`} className={`rf-severity-chip is-${severity}`}>
                   <span className={`rf-severity-badge is-${severity}`}>{severity.toUpperCase()}</span>
-                  <span>{severityCounts[severity]} findings</span>
-                </li>
+                  <span>{severityCounts[severity]}</span>
+                </span>
               ))}
-            </ul>
+            </div>
+
+            <div className="rf-selected-finding-panel" aria-label="Selected finding actions">
+              <h4>Selected Finding Actions</h4>
+              {selectedFindingMeta ? (
+                <>
+                  <p>
+                    <strong>Issue:</strong> {selectedFindingMeta.finding.issue || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Remediation Hint:</strong> {selectedFindingMeta.remediationHint}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {selectedFindingMeta.finding.location || "N/A"}
+                  </p>
+                  <div className="rf-finding-actions" aria-label="Selected remediation actions">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onApplyRemediationHint?.(selectedFindingMeta.remediationHint, selectedFindingMeta.finding)
+                      }
+                    >
+                      Apply Selected
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onRemindRemediationHint?.(selectedFindingMeta.remediationHint, selectedFindingMeta.finding)
+                      }
+                    >
+                      Remind Later
+                    </button>
+                    <button type="button" onClick={() => setSelectedFindingKey(null)}>
+                      Clear Selection
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="rf-status rf-status-muted">Select a finding below to unlock remediation actions.</p>
+              )}
+            </div>
           </section>
 
           {groupedFindings.map(([severity, severityFindings]) => (
             <section key={severity} className="rf-finding-group">
               <h3>
-                <span className={`rf-severity-badge is-${severity}`}>{severity.toUpperCase()}</span> {" "}
+                <span className={`rf-severity-badge is-${severity}`}>{severity.toUpperCase()}</span>{" "}
                 {severityFindings.length} finding
                 {severityFindings.length === 1 ? "" : "s"}
               </h3>
 
               <ul>
                 {severityFindings.map((finding, index) => {
-                  const findingKey = `${finding.issue || "issue"}-${severity}-${index}`;
+                  const findingKey = getFindingKey(finding, severity, index);
                   const remediationHint = toRemediationHint(finding.suggestion);
                   const isSelected = selectedFindingKey === findingKey;
 
                   return (
-                    <li
-                      key={findingKey}
-                      className={`rf-finding-card${isSelected ? " is-selected" : ""}`}
-                    >
+                    <li key={findingKey} className={`rf-finding-card${isSelected ? " is-selected" : ""}`}>
                       <p>
                         <strong>Issue:</strong> {finding.issue || "N/A"}
                       </p>
@@ -211,23 +273,9 @@ export function CompliancePanel({
                       <p>
                         <strong>Remediation Hint:</strong> {remediationHint}
                       </p>
-                      <div className="rf-finding-actions" aria-label="Remediation actions">
+                      <div className="rf-finding-actions" aria-label="Finding selection">
                         <button type="button" onClick={() => setSelectedFindingKey(findingKey)}>
-                          {isSelected ? "Hint Selected" : "Select Hint"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onApplyRemediationHint?.(remediationHint, finding)}
-                          disabled={!isSelected}
-                        >
-                          Apply Selected
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onRemindRemediationHint?.(remediationHint, finding)}
-                          disabled={!isSelected}
-                        >
-                          Remind Later
+                          {isSelected ? "Selected" : "Select Finding"}
                         </button>
                       </div>
                       <p>

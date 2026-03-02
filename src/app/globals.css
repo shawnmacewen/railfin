@@ -178,20 +178,40 @@ button:disabled {
   font-size: 0.95rem;
 }
 
-.rf-findings-summary ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
+.rf-severity-chip-row {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.45rem;
+  margin: 0.55rem 0 0.7rem;
 }
 
-.rf-findings-summary li {
+.rf-severity-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  color: #3b4259;
-  font-size: 0.88rem;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid #d5ddf5;
+  background: #ffffff;
+  padding: 0.2rem 0.5rem;
+  color: #2f3a5f;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.rf-selected-finding-panel {
+  border: 1px solid #dde4f9;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  padding: 0.6rem;
+}
+
+.rf-selected-finding-panel h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+}
+
+.rf-selected-finding-panel p {
+  margin: 0.2rem 0;
 }
 
 .rf-finding-group {
@@ -233,6 +253,7 @@ button:disabled {
 
 .rf-finding-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.45rem;
   margin: 0.45rem 0;
 }

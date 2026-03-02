@@ -12,6 +12,17 @@
   - Updated security baseline with a concise hardening checklist, findings, and residual follow-ups for route-level authz and sensitive endpoint cache semantics.
   - Marked docs/task ledger completion for task-00097.
 
+## task-00096 — UI — Review tools UX phase 2
+
+- Status: **Done**
+- Branch: `feat/ui/task-00096-review-tools-ux-phase2`
+- Scope delivered:
+  - Improved Create review workflow summary with severity chips for faster per-severity scan.
+  - Added a dedicated selected-finding action panel in `src/ui/compliance-panel.tsx` with clearer context + centralized `Apply Selected` / `Remind Later` controls.
+  - Kept finding card selection and selected-state highlight while simplifying card-level actions to explicit selection.
+  - Preserved existing generation/save/compliance request/response behavior and disclaimer/status messaging.
+  - Updated supporting styles in `src/app/globals.css` using existing railfin `rf-*` class conventions.
+
 ## task-00094 — DEV/UI — Review tools actions phase 1
 
 - Status: **Done**

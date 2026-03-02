@@ -128,6 +128,19 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - review actions are additive UI affordances only
 - Styling stays within existing railfin-ui patterns and primitives (`rf-status`, severity badges, card-like sections).
 
+## task-00096 — Review tools UX phase 2
+
+- `src/ui/compliance-panel.tsx` now presents severity totals as compact summary chips for faster scan/readability (`critical`, `high`, `medium`, `low`, `unknown`).
+- Added a dedicated **Selected Finding Actions** panel in the summary area:
+  - shows selected finding issue/remediation/location context
+  - centralizes `Apply Selected` / `Remind Later` actions for clearer decision flow
+  - provides explicit empty-state guidance until a finding is selected
+- Finding cards remain grouped by severity and keep explicit selection affordance (`Select Finding`) with selected-card highlighting.
+- Preserved behavior constraints:
+  - existing save/generate/compliance request paths unchanged
+  - existing status/disclaimer messaging retained
+  - no API contract or endpoint shape changes
+
 ## task-00094 — Review tools actions phase 1
 
 - `src/ui/compliance-panel.tsx` extends review actions with explicit finding selection:
