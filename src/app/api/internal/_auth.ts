@@ -4,6 +4,8 @@ const SENSITIVE_NO_STORE_HEADERS = {
   "Cache-Control": "no-store",
 };
 
+const INTERNAL_API_AUTH_COMPAT_MODE = process.env.INTERNAL_API_AUTH_COMPAT_MODE !== "off";
+
 function hasInternalSessionCookie(request: NextRequest): boolean {
   if (Boolean(request.cookies.get("session")?.value) || Boolean(request.cookies.get("auth-token")?.value)) {
     return true;
@@ -20,8 +22,26 @@ function hasInternalSessionCookie(request: NextRequest): boolean {
   });
 }
 
+function isTrustedSameOriginRequest(request: NextRequest): boolean {
+  const requestOrigin = request.nextUrl.origin;
+  const originHeader = request.headers.get("origin");
+  const refererHeader = request.headers.get("referer");
+  const secFetchSite = request.headers.get("sec-fetch-site");
+
+  const originMatches = originHeader === requestOrigin;
+  const refererMatches = Boolean(refererHeader && refererHeader.startsWith(`${requestOrigin}/`));
+
+  const sameOriginOrSite = secFetchSite === "same-origin" || secFetchSite === "same-site";
+
+  return (originMatches || refererMatches) && sameOriginOrSite;
+}
+
 export function requireInternalApiAuth(request: NextRequest): NextResponse | null {
   if (hasInternalSessionCookie(request)) {
+    return null;
+  }
+
+  if (INTERNAL_API_AUTH_COMPAT_MODE && isTrustedSameOriginRequest(request)) {
     return null;
   }
 

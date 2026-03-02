@@ -1,5 +1,38 @@
 # Security Baseline Verification
 
+## task-00108 — DEV emergency — temporary internal API auth compatibility rollback
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+
+### Root cause
+
+- The hardened `/api/internal/*` guard relied on session-cookie presence only.
+- Current login/auth plumbing is still placeholder and does not reliably issue/forward those cookies in all in-app flows.
+- Result: valid browser-origin in-app requests to draft/list/generate/compliance/configure endpoints were rejected as `401 Unauthorized`.
+
+### Emergency fix (minimal + reversible)
+
+- Added a **temporary compatibility mode** in internal auth guard:
+  - If auth cookie is present, allow (unchanged).
+  - If cookie is absent, allow only when request has trusted browser same-origin signals:
+    - `Origin` or `Referer` matches request origin, and
+    - `Sec-Fetch-Site` is `same-origin` or `same-site`.
+- Compatibility mode is centrally controlled via env toggle:
+  - `INTERNAL_API_AUTH_COMPAT_MODE=off` disables fallback and restores strict cookie-only behavior.
+- This preserves a basic fail-closed posture for cross-site/non-browser traffic while restoring in-app usability immediately.
+
+### Temporary-risk note (explicit)
+
+- This is an **emergency rollback compatibility layer**, not final auth.
+- Risk accepted temporarily: same-origin browser requests without verified server session can pass internal guard.
+- Required follow-up: replace this compatibility path with robust server-side session verification (Supabase-backed) and claim/role checks on internal endpoints, then remove compat mode.
+
+### Verification outcome (task-00108)
+
+- Expected outcome: Unauthorized regression removed for in-app internal routes while keeping non-same-origin requests blocked.
+- Build verification: see task report / CI build result.
+
 ## task-00107 — DEV — Library unauthorized hotfix after internal API auth hardening
 
 Review scope:

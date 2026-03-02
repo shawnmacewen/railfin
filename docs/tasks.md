@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00108 — DEV — Emergency authz regression rollback for internal APIs
+
+- Status: **Done**
+- Branch: `fix/dev/task-00108-emergency-authz-regression-rollback`
+- Scope delivered:
+  - Identified root regression in centralized internal API auth guard: strict cookie-only requirement created false negatives for valid in-app browser flows.
+  - Applied emergency centralized compatibility hotfix in `src/app/api/internal/_auth.ts` to temporarily allow trusted same-origin browser requests when session cookies are absent.
+  - Added env kill switch `INTERNAL_API_AUTH_COMPAT_MODE=off` for fast rollback to strict mode.
+  - Kept fail-closed behavior for non-same-origin/non-browser request patterns.
+  - Updated security baseline with explicit temporary-risk note and required follow-up hardening task for robust server-side session verification.
+
 ## task-00107 — DEV — Library unauthorized hotfix after internal API auth hardening
 
 - Status: **Done**
