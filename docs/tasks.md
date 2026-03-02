@@ -10,6 +10,7 @@
   - Preserved save/generate/compliance/review flows and existing API contracts.
   - Added matching `rf-*` style primitives for compact history cards/actions in Create.
   - Updated UI foundations documentation and re-ran build verification (pass).
+  - Updated docs/tasks.md tracking note for task-00118 completion.
 
 
 ## task-00117 — DEV — Prompt presets control panel backend/data support
