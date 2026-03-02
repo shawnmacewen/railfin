@@ -23,6 +23,19 @@
   - Docs-only verification task; no runtime code changes and no build run required.
 
 
+## task-00125 — SEC — remediation safety gate rerun after phase-2 changes
+
+- Status: **Done**
+- Branch: `chore/sec/task-00125-remediation-gate-rerun`
+- Scope delivered:
+  - Re-ran SEC verification for task-00122 residual auto-remediation gaps against current merged code.
+  - Confirmed prohibited-transform enforcement, deterministic audit record fields, and bounded edit-size limits are now implemented in remediation apply path.
+  - Confirmed required one-step undo for last remediation apply action is still not explicitly implemented.
+  - Re-evaluated gate status as **NO-GO** until undo control is completed.
+  - Updated `docs/SECURITY_BASELINE.md` with task-00125 verification notes and decision rationale.
+  - Docs-only verification task; no runtime SEC code changes and no build run required.
+
+
 ## task-00120 — DEV — auto-remediation engine phase 1 (safe scoped)
 
 - Status: **Done**

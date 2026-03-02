@@ -97,6 +97,48 @@ Review scope:
 - Code changes: none
 - Build: not run (docs-only verification task)
 
+## task-00125 — SEC — remediation safety gate rerun after phase-2 changes
+
+Review scope:
+- `src/api/internal/compliance/remediation.ts`
+- `src/app/api/internal/compliance/remediation/apply/route.ts`
+- `src/ui/editor-shell.tsx`
+- `docs/tasks.md`
+- `git history/branches for task-00123/task-00124 traceability`
+
+### Verification against task-00122 residual gaps
+
+1. **Prohibited-transform enforcement (closed in current implementation):**
+   - Remediation apply path now uses deterministic, bounded replacement of a named remediation context block (`[Compliance Remediation Draft Context] ... [/Compliance Remediation Draft Context]`) instead of unbounded free-form mutation.
+   - Apply flow remains explicit/manual and single-finding scoped in current editor context.
+
+2. **Deterministic audit record completeness (closed in current implementation):**
+   - Apply operation returns structured audit metadata (`timestampUtc`, `actor`, `draftContextId`, `findingId`, `beforeHash`, `afterHash`, `changedChars`, `changedLines`, `outcome`).
+   - Route logs audit payload via `[remediation-apply]` diagnostic event and preserves `no-store` response headers.
+
+3. **Bounded edit-size limits (closed in current implementation):**
+   - Enforced fail-closed edit guardrails in remediation engine (`MAX_CHANGED_CHARS`, `MAX_CHANGED_LINES`) with explicit validation errors on overflow.
+
+4. **One-step undo for last apply action (still open):**
+   - Session generation-history restore exists, but no explicit dedicated one-step remediation undo control was found for the last apply action.
+   - Task-00119 baseline requires immediate one-step undo (session-local minimum).
+
+### Traceability note for task-00123/task-00124
+
+- No local or remote branches/commits named `task-00123` or `task-00124` were found in this repo snapshot.
+- Controls above were verified directly from current `main` code paths; documentation should map these changes to canonical task IDs if numbering was consolidated elsewhere.
+
+### Gate decision (task-00125)
+
+- **Auto-remediation enablement status:** **NO-GO (undo control incomplete)**
+- Rationale: 3 of 4 task-00122 residual gaps are now closed in code, but required one-step undo remains unmet.
+
+### Verification outcome (task-00125)
+
+- Outcome: **PASS (rerun complete, gate remains NO-GO)**
+- Code changes: none (docs-only verification task)
+- Build: not run (no SEC runtime code changes in task-00125)
+
 ## task-00115 — SEC — Auth compat operational guardrails + rollback triggers
 
 Review scope:
