@@ -3,11 +3,14 @@
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { CompliancePanel } from "./compliance-panel";
+import { ComplianceFinding, CompliancePanel } from "./compliance-panel";
 
 type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
+
+const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
+const REMEDIATION_BLOCK_END = "[/Compliance Remediation Draft Context]";
 
 type DraftResponse = {
   ok: boolean;
@@ -48,6 +51,36 @@ type ConfigurePolicyResponse = {
   };
   error?: string;
 };
+
+function injectControlledRemediationContext(current: string, nextBlock: string) {
+  const start = current.indexOf(REMEDIATION_BLOCK_START);
+  const end = current.indexOf(REMEDIATION_BLOCK_END);
+
+  if (start !== -1 && end !== -1 && end > start) {
+    const prefix = current.slice(0, start).trimEnd();
+    return `${prefix}\n\n${nextBlock}`;
+  }
+
+  const base = current.trimEnd();
+  return base ? `${base}\n\n${nextBlock}` : nextBlock;
+}
+
+function buildRemediationBlock(hint: string, finding: ComplianceFinding) {
+  const safeHint = hint.trim().slice(0, 240) || "Add a compliant revision and rerun the check.";
+  const safeIssue = (finding.issue || "unknown issue").trim().slice(0, 180);
+  const safeSeverity = (finding.severity || "unknown").trim().toLowerCase();
+  const safeLocation = (finding.location || "unknown:0:0").trim().slice(0, 120);
+
+  return [
+    REMEDIATION_BLOCK_START,
+    `- Selected issue: ${safeIssue}`,
+    `- Severity: ${safeSeverity}`,
+    `- Location: ${safeLocation}`,
+    `- Suggested remediation: ${safeHint}`,
+    "- Operator note: revise the draft text directly above, then rerun compliance.",
+    REMEDIATION_BLOCK_END,
+  ].join("\n");
+}
 
 export function EditorShell() {
   const searchParams = useSearchParams();
@@ -277,10 +310,10 @@ export function EditorShell() {
     }
   };
 
-  const onApplyRemediationHint = (hint: string) => {
-    const suggestion = `\n\n[Compliance Remediation Hint]\n- ${hint}`;
-    setContent((current) => `${current.trimEnd()}${suggestion}`);
-    setReviewFeedback("Remediation hint added to editor content. Review and revise before saving.");
+  const onApplyRemediationHint = (hint: string, finding: ComplianceFinding) => {
+    const remediationBlock = buildRemediationBlock(hint, finding);
+    setContent((current) => injectControlledRemediationContext(current, remediationBlock));
+    setReviewFeedback("Selected remediation hint applied to draft context. Review and revise before saving.");
   };
 
   const onRemindRemediationHint = (hint: string) => {

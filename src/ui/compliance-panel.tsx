@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 
-type ComplianceFinding = {
+export type ComplianceFinding = {
   severity?: string;
   issue?: string;
   details?: string;
@@ -61,6 +61,7 @@ export function CompliancePanel({
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [findings, setFindings] = useState<ComplianceFinding[]>([]);
+  const [selectedFindingKey, setSelectedFindingKey] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ComplianceFinding[]>();
@@ -72,9 +73,7 @@ export function CompliancePanel({
       grouped.set(severity, current);
     }
 
-    return Array.from(grouped.entries()).sort(
-      (a, b) => SEVERITY_ORDER[a[0]] - SEVERITY_ORDER[b[0]],
-    );
+    return Array.from(grouped.entries()).sort((a, b) => SEVERITY_ORDER[a[0]] - SEVERITY_ORDER[b[0]]);
   }, [findings]);
 
   const severityCounts = useMemo(() => {
@@ -99,6 +98,7 @@ export function CompliancePanel({
     const trimmedContent = content?.trim() ?? "";
     if (!trimmedContent) {
       setFindings([]);
+      setSelectedFindingKey(null);
       setError("Add editor content before running compliance check.");
       return;
     }
@@ -121,19 +121,21 @@ export function CompliancePanel({
         }),
       });
 
-      const payload = (await response
-        .json()
-        .catch(() => ({}))) as ComplianceCheckResponse;
+      const payload = (await response.json().catch(() => ({}))) as ComplianceCheckResponse;
 
       if (!response.ok || payload?.ok === false) {
         setFindings([]);
+        setSelectedFindingKey(null);
         setError(payload?.error || payload?.message || "Compliance check failed.");
         return;
       }
 
-      setFindings(Array.isArray(payload?.findings) ? payload.findings : []);
+      const nextFindings = Array.isArray(payload?.findings) ? payload.findings : [];
+      setFindings(nextFindings);
+      setSelectedFindingKey(null);
     } catch {
       setFindings([]);
+      setSelectedFindingKey(null);
       setError("Compliance check failed. Please try again.");
     } finally {
       setRunning(false);
@@ -184,48 +186,56 @@ export function CompliancePanel({
           {groupedFindings.map(([severity, severityFindings]) => (
             <section key={severity} className="rf-finding-group">
               <h3>
-                <span className={`rf-severity-badge is-${severity}`}>
-                  {severity.toUpperCase()}
-                </span>{" "}
+                <span className={`rf-severity-badge is-${severity}`}>{severity.toUpperCase()}</span> {" "}
                 {severityFindings.length} finding
                 {severityFindings.length === 1 ? "" : "s"}
               </h3>
 
               <ul>
-                {severityFindings.map((finding, index) => (
-                  <li
-                    key={`${finding.issue || "issue"}-${severity}-${index}`}
-                    className="rf-finding-card"
-                  >
-                    <p>
-                      <strong>Issue:</strong> {finding.issue || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Details:</strong> {finding.details || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Remediation Hint:</strong>{" "}
-                      {toRemediationHint(finding.suggestion)}
-                    </p>
-                    <div className="rf-finding-actions" aria-label="Remediation actions">
-                      <button
-                        type="button"
-                        onClick={() => onApplyRemediationHint?.(toRemediationHint(finding.suggestion), finding)}
-                      >
-                        Apply Hint
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onRemindRemediationHint?.(toRemediationHint(finding.suggestion), finding)}
-                      >
-                        Remind Later
-                      </button>
-                    </div>
-                    <p>
-                      <strong>Location:</strong> {finding.location || "N/A"}
-                    </p>
-                  </li>
-                ))}
+                {severityFindings.map((finding, index) => {
+                  const findingKey = `${finding.issue || "issue"}-${severity}-${index}`;
+                  const remediationHint = toRemediationHint(finding.suggestion);
+                  const isSelected = selectedFindingKey === findingKey;
+
+                  return (
+                    <li
+                      key={findingKey}
+                      className={`rf-finding-card${isSelected ? " is-selected" : ""}`}
+                    >
+                      <p>
+                        <strong>Issue:</strong> {finding.issue || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Details:</strong> {finding.details || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Remediation Hint:</strong> {remediationHint}
+                      </p>
+                      <div className="rf-finding-actions" aria-label="Remediation actions">
+                        <button type="button" onClick={() => setSelectedFindingKey(findingKey)}>
+                          {isSelected ? "Hint Selected" : "Select Hint"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onApplyRemediationHint?.(remediationHint, finding)}
+                          disabled={!isSelected}
+                        >
+                          Apply Selected
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onRemindRemediationHint?.(remediationHint, finding)}
+                          disabled={!isSelected}
+                        >
+                          Remind Later
+                        </button>
+                      </div>
+                      <p>
+                        <strong>Location:</strong> {finding.location || "N/A"}
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ))}

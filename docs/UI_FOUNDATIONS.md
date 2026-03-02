@@ -119,9 +119,7 @@ Rerun completed after hosted path repair, verifying current route/component cont
 - `src/ui/compliance-panel.tsx` now includes a first review-tools layer on top of existing compliance findings:
   - findings summary card with total + per-severity counts (`critical`, `high`, `medium`, `low`, `unknown`)
   - per-finding quick actions for remediation workflow (`Apply Hint`, `Remind Later`)
-- `src/ui/editor-shell.tsx` now wires review quick actions without changing API contracts:
-  - **Apply Hint** appends a remediation note into editor content for immediate revision
-  - **Remind Later** surfaces a lightweight review reminder status in Create
+- `src/ui/editor-shell.tsx` now wires review quick actions without changing API contracts.
 - Existing guardrail/disclaimer messaging is preserved unchanged:
   - **"AI-backed compliance insights are guidance, not legal approval."**
 - Existing save, generate, and compliance-check flows are preserved:
@@ -129,6 +127,21 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - no route/layout redesign
   - review actions are additive UI affordances only
 - Styling stays within existing railfin-ui patterns and primitives (`rf-status`, severity badges, card-like sections).
+
+## task-00094 — Review tools actions phase 1
+
+- `src/ui/compliance-panel.tsx` extends review actions with explicit finding selection:
+  - each finding card now includes `Select Hint`
+  - selected-card state is visually highlighted and gates downstream actions
+  - remediation actions are now explicit (`Apply Selected`, `Remind Later`) and only enabled for the selected finding
+- `src/ui/editor-shell.tsx` applies selected remediation hints into a controlled, editable draft context block:
+  - inserts a bounded `[Compliance Remediation Draft Context] ... [/Compliance Remediation Draft Context]` block
+  - includes issue/severity/location + selected remediation hint
+  - replaces prior remediation block when reapplying, avoiding unbounded repeated append noise
+- Preserved behavior constraints:
+  - existing save/generate/compliance request paths unchanged
+  - existing status messaging/disclaimer retained
+  - no API contract changes
 
 ## task-00092 — Create generation kickoff (AI runtime wired)
 

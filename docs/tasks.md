@@ -1,5 +1,17 @@
 # Tasks
 
+## task-00094 — DEV/UI — Review tools actions phase 1
+
+- Status: **Done**
+- Branch: `feat/dev/task-00094-review-tools-actions-phase1`
+- Scope delivered:
+  - Added finding-level selection flow in `src/ui/compliance-panel.tsx` via `Select Hint` with selected-card state.
+  - Gated remediation actions so `Apply Selected` / `Remind Later` execute only for an explicit selected finding.
+  - Updated Create flow remediation apply behavior in `src/ui/editor-shell.tsx` to inject a controlled, replaceable remediation draft-context block (instead of unbounded append-only hints).
+  - Preserved existing save/generate/compliance request behavior and status/disclaimer messaging.
+  - Kept API contracts unchanged (UI-only enhancement, no endpoint/request-response shape changes).
+  - Added selected-card styling in `src/app/globals.css` consistent with existing railfin findings-card patterns.
+
 ## task-00093 — UI/DEV — Review tools kickoff on Create compliance flow
 
 - Status: **Done**
