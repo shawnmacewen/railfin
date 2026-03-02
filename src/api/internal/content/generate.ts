@@ -5,6 +5,8 @@ type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 type GenerateTemplateId = "default" | "conversion";
 type GenerateToneId = "professional" | "friendly" | "bold";
 type GenerateIntentId = "educate" | "engage" | "convert";
+type GenerateLengthTargetId = "short" | "medium" | "long";
+type GenerateFormatStyleId = "standard" | "bullet" | "outline";
 
 type GenerateRequestBody = {
   prompt?: string;
@@ -13,6 +15,10 @@ type GenerateRequestBody = {
   preset?: {
     tone?: GenerateToneId;
     intent?: GenerateIntentId;
+  };
+  controls?: {
+    lengthTarget?: GenerateLengthTargetId;
+    formatStyle?: GenerateFormatStyleId;
   };
 };
 
@@ -32,6 +38,13 @@ type GenerationPreset = {
   intent: GenerateIntentId;
   toneGuidance: string[];
   intentGuidance: string[];
+};
+
+type GenerationControls = {
+  lengthTarget: GenerateLengthTargetId;
+  formatStyle: GenerateFormatStyleId;
+  lengthGuidance: string[];
+  formatGuidance: string[];
 };
 
 const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
@@ -86,9 +99,41 @@ const INTENT_GUIDANCE: Record<GenerateIntentId, string[]> = {
   ],
 };
 
+const LENGTH_TARGET_GUIDANCE: Record<GenerateLengthTargetId, string[]> = {
+  short: [
+    "Keep output concise with approximately 80-140 words.",
+    "Prefer one to two compact paragraphs.",
+  ],
+  medium: [
+    "Keep output at moderate depth with approximately 180-280 words.",
+    "Use two to four short paragraphs.",
+  ],
+  long: [
+    "Provide expanded depth with approximately 320-500 words.",
+    "Use clear sections to keep longer output readable.",
+  ],
+};
+
+const FORMAT_STYLE_GUIDANCE: Record<GenerateFormatStyleId, string[]> = {
+  standard: [
+    "Use standard paragraph format with natural transitions.",
+    "Avoid heading-heavy formatting unless it improves clarity.",
+  ],
+  bullet: [
+    "Use concise bullet points for scannable structure.",
+    "Keep each bullet focused on one idea.",
+  ],
+  outline: [
+    "Use lightweight outline structure with short section headers.",
+    "Keep section order logical from context to action.",
+  ],
+};
+
 const DEFAULT_TEMPLATE: GenerateTemplateId = "default";
 const DEFAULT_TONE: GenerateToneId = "professional";
 const DEFAULT_INTENT: GenerateIntentId = "educate";
+const DEFAULT_LENGTH_TARGET: GenerateLengthTargetId = "medium";
+const DEFAULT_FORMAT_STYLE: GenerateFormatStyleId = "standard";
 
 function isContentType(value: unknown): value is ContentType {
   return typeof value === "string" && CONTENT_TYPES.includes(value as ContentType);
@@ -104,6 +149,18 @@ function isGenerateToneId(value: unknown): value is GenerateToneId {
 
 function isGenerateIntentId(value: unknown): value is GenerateIntentId {
   return typeof value === "string" && value in INTENT_GUIDANCE;
+}
+
+function isGenerateLengthTargetId(value: unknown): value is GenerateLengthTargetId {
+  return typeof value === "string" && value in LENGTH_TARGET_GUIDANCE;
+}
+
+function isGenerateFormatStyleId(value: unknown): value is GenerateFormatStyleId {
+  return typeof value === "string" && value in FORMAT_STYLE_GUIDANCE;
+}
+
+function hasOnlyKeys(candidate: object, keys: string[]) {
+  return Object.keys(candidate).every((key) => keys.includes(key));
 }
 
 function resolveTemplate(value: unknown): GenerationTemplate | null {
@@ -128,7 +185,7 @@ function resolvePreset(value: unknown): GenerationPreset | null {
     };
   }
 
-  if (!value || typeof value !== "object") {
+  if (!value || typeof value !== "object" || !hasOnlyKeys(value, ["tone", "intent"])) {
     return null;
   }
 
@@ -148,11 +205,42 @@ function resolvePreset(value: unknown): GenerationPreset | null {
   };
 }
 
+function resolveControls(value: unknown): GenerationControls | null {
+  if (value === undefined) {
+    return {
+      lengthTarget: DEFAULT_LENGTH_TARGET,
+      formatStyle: DEFAULT_FORMAT_STYLE,
+      lengthGuidance: LENGTH_TARGET_GUIDANCE[DEFAULT_LENGTH_TARGET],
+      formatGuidance: FORMAT_STYLE_GUIDANCE[DEFAULT_FORMAT_STYLE],
+    };
+  }
+
+  if (!value || typeof value !== "object" || !hasOnlyKeys(value, ["lengthTarget", "formatStyle"])) {
+    return null;
+  }
+
+  const candidate = value as { lengthTarget?: unknown; formatStyle?: unknown };
+  const lengthTarget = candidate.lengthTarget === undefined ? DEFAULT_LENGTH_TARGET : candidate.lengthTarget;
+  const formatStyle = candidate.formatStyle === undefined ? DEFAULT_FORMAT_STYLE : candidate.formatStyle;
+
+  if (!isGenerateLengthTargetId(lengthTarget) || !isGenerateFormatStyleId(formatStyle)) {
+    return null;
+  }
+
+  return {
+    lengthTarget,
+    formatStyle,
+    lengthGuidance: LENGTH_TARGET_GUIDANCE[lengthTarget],
+    formatGuidance: FORMAT_STYLE_GUIDANCE[formatStyle],
+  };
+}
+
 function buildGenerationPrompt(input: {
   prompt: string;
   contentType: ContentType;
   template: GenerationTemplate;
   preset: GenerationPreset;
+  controls: GenerationControls;
 }): string {
   return [
     "You are a content generation engine for marketing copy.",
@@ -167,12 +255,18 @@ function buildGenerationPrompt(input: {
     `Template: ${input.template.id} (${input.template.label})`,
     `Preset tone: ${input.preset.tone}`,
     `Preset intent: ${input.preset.intent}`,
+    `Controls lengthTarget: ${input.controls.lengthTarget}`,
+    `Controls formatStyle: ${input.controls.formatStyle}`,
     "Template guidance:",
     ...input.template.guidance.map((item) => `- ${item}`),
     "Tone guidance:",
     ...input.preset.toneGuidance.map((item) => `- ${item}`),
     "Intent guidance:",
     ...input.preset.intentGuidance.map((item) => `- ${item}`),
+    "Length guidance:",
+    ...input.controls.lengthGuidance.map((item) => `- ${item}`),
+    "Format guidance:",
+    ...input.controls.formatGuidance.map((item) => `- ${item}`),
     "Prompt:",
     input.prompt,
   ].join("\n");
@@ -273,9 +367,18 @@ export async function internalContentGenerate(request: {
     };
   }
 
+  const controls = resolveControls(request.body?.controls);
+
+  if (!controls) {
+    return {
+      ok: false,
+      error: "Invalid controls",
+    };
+  }
+
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
-    prompt: buildGenerationPrompt({ prompt, contentType, template, preset }),
+    prompt: buildGenerationPrompt({ prompt, contentType, template, preset, controls }),
   });
 
   if ("completion" in runtime) {
