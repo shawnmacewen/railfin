@@ -1,5 +1,15 @@
 # Tasks
 
+## task-00115 — SEC — Auth compat risk guardrails
+
+- Status: **Done**
+- Branch: `chore/sec/task-00115-auth-compat-risk-guardrails`
+- Scope delivered:
+  - Added explicit operational checklist guardrails in `docs/SECURITY_BASELINE.md` for temporary auth compat mode (ownership, telemetry cadence, rollback readiness, retirement gate).
+  - Added concrete rollback trigger criteria for compat mode disablement (`INTERNAL_API_AUTH_COMPAT_MODE=off`) under abuse/anomaly/regression/incident/strict-guard-ready conditions.
+  - Re-verified internal route guard posture after recent merges: all current `src/app/api/internal/**/route.ts` handlers retain `requireInternalApiAuth` and no-store header coverage.
+  - Docs-only update; no runtime code changes in this task.
+
 ## task-00110 — DEV — Content tools phase 6 (prompt scaffold audience/objective controls)
 
 - Status: **Done (Retry completed on correct repo path: /home/node/railfin-repo)**

@@ -1,5 +1,54 @@
 # Security Baseline Verification
 
+## task-00115 — SEC — Auth compat operational guardrails + rollback triggers
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `src/app/api/internal/**/route.ts`
+- `docs/tasks.md`
+
+### Verification findings (current state)
+
+1. **Compat mode posture unchanged (still temporary + risky):**
+   - `INTERNAL_API_AUTH_COMPAT_MODE` remains enabled by default (`!== "off"`).
+   - Same-origin header fallback remains active when auth cookies are absent.
+
+2. **Internal route guard posture unchanged after merges (PASS):**
+   - Current internal route surface remains:
+     - `src/app/api/internal/content/generate/route.ts`
+     - `src/app/api/internal/content/list/route.ts`
+     - `src/app/api/internal/content/draft/route.ts`
+     - `src/app/api/internal/compliance/check/route.ts`
+     - `src/app/api/internal/configure/policy/route.ts`
+   - Each route currently imports and invokes `requireInternalApiAuth(request)` at route boundary.
+   - Each reviewed route continues to return responses with `INTERNAL_SENSITIVE_NO_STORE_HEADERS` on sensitive paths.
+   - No newly introduced unguarded `src/app/api/internal/**/route.ts` files found in this verification pass.
+
+### Compat mode operational guardrails (required while fallback exists)
+
+Use this as an operator checklist until compat fallback is retired:
+
+- [ ] **Explicit ownership:** assign single owner for compat mode status + incident response for the current release window.
+- [ ] **Deployment annotation:** every deploy notes whether `INTERNAL_API_AUTH_COMPAT_MODE` is on/off and links to this baseline task.
+- [ ] **Daily telemetry review (minimum):** review internal API auth outcomes (401 rate, same-origin fallback-allow volume, route distribution) and record anomalies.
+- [ ] **Change freeze trigger:** if unknown-origin/suspicious auth patterns appear, freeze non-critical auth-adjacent feature work until triage completes.
+- [ ] **Rollback readiness:** keep one-step env rollback (`INTERNAL_API_AUTH_COMPAT_MODE=off`) documented and tested in preview before production use.
+- [ ] **Retirement gate:** do not keep compat mode past rollout milestone for authoritative server-side session guard replacement (task-00112 phase plan).
+
+### Rollback trigger criteria (execute compat-off rollback immediately if any trigger hits)
+
+1. **Abuse signal:** repeated suspicious internal API access attempts where same-origin signal appears inconsistent with expected in-app traffic.
+2. **Auth anomaly spike:** sudden, sustained fallback-allow growth without matching product usage change.
+3. **Guard regression evidence:** any internal route added/changed without `requireInternalApiAuth` + no-store coverage.
+4. **Incident/severity trigger:** any confirmed or high-confidence auth bypass incident tied to compat fallback behavior.
+5. **Authoritative guard ready:** strict/server-authoritative guard path is validated for impacted routes; compat mode must be turned off as part of rollout closeout.
+
+### Task outcome (task-00115)
+
+- Outcome: **PASS (docs guardrails + verification)**
+- Code changes: none (docs-first task)
+- Build: not run (no runtime code changed)
+
 ## task-00112 — SEC — Auth compat follow-up verification + replacement plan
 
 Review scope:
