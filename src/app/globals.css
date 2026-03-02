@@ -456,3 +456,56 @@ button:disabled {
   font-size: 0.82rem;
   color: #4e5879;
 }
+
+.rf-generation-history {
+  margin: 0.7rem 0;
+  border: 1px solid #dbe4ff;
+  border-radius: 0.65rem;
+  background: #f8faff;
+  padding: 0.65rem;
+}
+
+.rf-generation-history-header h3 {
+  margin: 0 0 0.2rem;
+  font-size: 0.93rem;
+}
+
+.rf-generation-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.rf-generation-history-item {
+  border: 1px solid #d6def6;
+  border-radius: 0.55rem;
+  background: #fff;
+  padding: 0.55rem;
+}
+
+.rf-generation-history-item p {
+  margin: 0.35rem 0;
+  font-size: 0.84rem;
+  color: #2f3a5f;
+}
+
+.rf-generation-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.76rem;
+  color: #4e5879;
+}
+
+.rf-generation-history-actions button {
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.45rem;
+  border: 1px solid #c9d2f2;
+  background: #eef2ff;
+  color: #1b378a;
+  font-size: 0.78rem;
+}

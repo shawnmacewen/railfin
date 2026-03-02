@@ -31,6 +31,17 @@ type RemediationApplyHistoryEntry = {
   appliedAt: string;
 };
 
+type GenerationHistoryEntry = {
+  id: string;
+  text: string;
+  contentType: ContentType;
+  createdAt: string;
+  degraded: boolean;
+  provider: string | null;
+};
+
+const MAX_GENERATION_HISTORY = 6;
+
 const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
 const REMEDIATION_BLOCK_END = "[/Compliance Remediation Draft Context]";
 
@@ -131,6 +142,9 @@ export function EditorShell() {
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
   const [selectedFindingContext, setSelectedFindingContext] = useState<SelectedFindingContext | null>(null);
   const [remediationApplyHistory, setRemediationApplyHistory] = useState<RemediationApplyHistoryEntry[]>([]);
+  const [generationHistory, setGenerationHistory] = useState<GenerationHistoryEntry[]>([]);
+
+  const generationHistoryContextKey = draftId || "session-new";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -205,6 +219,10 @@ export function EditorShell() {
 
     return () => controller.abort();
   }, [draftId]);
+
+  useEffect(() => {
+    setGenerationHistory([]);
+  }, [generationHistoryContextKey]);
 
   const canSave = content.trim().length > 0 && status !== "saving";
   const canGenerate = content.trim().length > 0 && generationStatus !== "generating";
@@ -291,6 +309,17 @@ export function EditorShell() {
       const notes = payload.data?.generationMeta?.notes?.trim();
       const degraded = Boolean(payload.data?.generationMeta?.degraded);
       const provider = payload.data?.generationMeta?.provider?.trim();
+      setGenerationHistory((current) => [
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          text: generatedText,
+          contentType,
+          createdAt: new Date().toISOString(),
+          degraded,
+          provider: provider || null,
+        },
+        ...current,
+      ].slice(0, MAX_GENERATION_HISTORY));
       setGenerationDegraded(degraded);
       setGenerationFeedback(
         degraded
@@ -413,6 +442,15 @@ export function EditorShell() {
     setReviewFeedback(`Reminder set: ${hint}`);
   };
 
+  const onRestoreGenerationHistory = (entry: GenerationHistoryEntry) => {
+    setContent(entry.text);
+    setStatus("idle");
+    setFeedback(`Restored generated draft from ${new Date(entry.createdAt).toLocaleString()}.`);
+    setGenerationStatus("generated");
+    setGenerationDegraded(entry.degraded);
+    setGenerationFeedback("Restored from generation history. Review, edit, and save when ready.");
+  };
+
   const onApplyAndRegenerate = async () => {
     if (!selectedFindingContext || generationStatus === "generating") {
       return;
@@ -484,6 +522,44 @@ export function EditorShell() {
           {generationStatus === "generating" ? "Generating..." : "Generate Draft"}
         </button>
       </div>
+
+      <section className="rf-generation-history" aria-label="Generation history">
+        <div className="rf-generation-history-header">
+          <h3>Generation History</h3>
+          <p className="rf-status rf-status-muted" role="status">
+            Last {MAX_GENERATION_HISTORY} generated drafts for this {draftId ? "draft" : "session"}.
+          </p>
+        </div>
+
+        {generationHistory.length ? (
+          <ul className="rf-generation-history-list">
+            {generationHistory.map((entry) => {
+              const preview = entry.text.replace(/\s+/g, " ").trim();
+
+              return (
+                <li key={entry.id} className="rf-generation-history-item">
+                  <div className="rf-generation-history-meta">
+                    <span className="rf-badge">{entry.contentType.toUpperCase()}</span>
+                    <span className={`rf-severity-badge is-${entry.degraded ? "medium" : "low"}`}>
+                      {entry.degraded ? "DEGRADED" : "OK"}
+                    </span>
+                    <span>{new Date(entry.createdAt).toLocaleString()}</span>
+                    {entry.provider ? <span>via {entry.provider}</span> : null}
+                  </div>
+                  <p>{preview.slice(0, 180)}{preview.length > 180 ? "…" : ""}</p>
+                  <div className="rf-generation-history-actions">
+                    <button type="button" onClick={() => onRestoreGenerationHistory(entry)}>
+                      Restore to Editor
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="rf-status rf-status-muted">No generated drafts in this context yet.</p>
+        )}
+      </section>
 
       {generationFeedback ? (
         <p
