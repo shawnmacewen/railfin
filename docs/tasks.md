@@ -1,5 +1,17 @@
 # Tasks
 
+## task-00122 — SEC — verification pass for auto-remediation phase 1 changes
+
+- Status: **Done**
+- Branch: `chore/sec/task-00122-auto-remediation-verification`
+- Scope delivered:
+  - Verified phase-1 remediation workflow implementation against task-00119 safety baseline controls.
+  - Confirmed flow remains user-initiated/single-draft and does not auto-save or auto-publish side effects.
+  - Validated residual gaps for auto-remediation enablement remain open: prohibited-transform enforcement, deterministic audit record completeness, bounded edit-size limits, and one-step undo.
+  - Updated `docs/SECURITY_BASELINE.md` with explicit verification outcome and gate decision (**NO-GO for auto-remediation enablement until controls complete**).
+  - Docs-only verification task; no runtime code changes and no build run required.
+
+
 ## task-00118 — UI — generation history panel in Create
 
 - Status: **Done**

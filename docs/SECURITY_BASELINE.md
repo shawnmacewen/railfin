@@ -51,6 +51,52 @@ When introducing any "apply remediation automatically" behavior, implementation 
 
 # Security Baseline Verification
 
+## task-00122 — SEC — Auto-remediation phase 1 verification pass
+
+Review scope:
+- `src/ui/editor-shell.tsx`
+- `src/ui/compliance-panel.tsx`
+- `docs/SECURITY_BASELINE.md` (task-00119 baseline controls)
+
+### Verification against task-00119 baseline
+
+1. **Scope limits (partial pass):**
+   - Current remediation actions remain user-initiated from selected finding context.
+   - Apply action mutates only in-memory editor content; no automatic save/publish side effects observed.
+   - `Apply + Regenerate Draft` performs full draft regeneration in-editor (single-draft context), so output may replace broad content and must remain operator-reviewed before save.
+
+2. **Prohibited transforms (not fully enforced):**
+   - No explicit runtime guard currently blocks legal/disclaimer/citation section alteration during `Apply + Regenerate Draft`.
+   - No explicit deny rule found for broad overwrite behavior beyond current UI flow intent.
+
+3. **Determinism + auditability (gap):**
+   - Session-local apply history exists in UI (`issue`, `severity`, `location`, `hint`, `appliedAt`), but required diagnostics-grade audit record fields from task-00119 are incomplete (no actor, draft id/context id, before/after hash/diff summary, outcome status persistence).
+   - Before/after context preview exists for remediation block application only.
+   - One-step undo for last apply action is not implemented.
+
+4. **Validation + fail-closed behavior (partial pass):**
+   - Selected-finding requirement is enforced by disabled actions and selection state checks.
+   - No bounded edit-size enforcement exists for remediation apply/regenerate path in current implementation.
+   - Internal API calls used in this flow retain authenticated route guard + `no-store` controls (per prior baseline checks).
+
+### Gate decision (task-00122)
+
+- **Auto-remediation enablement status:** **NO-GO (controls incomplete)**
+- Rationale: task-00119 mandatory controls are not fully met yet (prohibited-transform enforcement, deterministic audit record completeness, bounded-edit limits, and undo control).
+
+### Required follow-up before any auto-remediation enablement
+
+- Add explicit prohibited-transform protections for legal/disclaimer/citation-sensitive regions.
+- Add deterministic audit event schema + persistence for each apply attempt/outcome (actor, context, before/after summary/hash, status).
+- Add bounded-edit-size guard with fail-closed operator-visible error.
+- Add one-step undo for last apply action.
+
+### Verification outcome (task-00122)
+
+- Outcome: **PASS (verification complete, gate remains NO-GO)**
+- Code changes: none
+- Build: not run (docs-only verification task)
+
 ## task-00115 — SEC — Auth compat operational guardrails + rollback triggers
 
 Review scope:
