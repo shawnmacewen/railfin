@@ -1,5 +1,17 @@
 # Tasks
 
+## task-00119 — SEC — safety guardrails for automated remediation apply actions
+
+- Status: **Done**
+- Branch: `chore/sec/task-00119-remediation-autofix-safety-plan`
+- Scope delivered:
+  - Defined mandatory safety boundaries for upcoming "apply remediation automatically" behavior: strict scope limits, prohibited transforms, deterministic auditability requirements, and fail-closed validation controls.
+  - Added implementation gate checklist covering required unit/integration/negative-path/security validation before auto-remediation can be enabled.
+  - Added explicit GO/NO-GO enablement rule requiring single-draft, user-confirmed, reversible behavior and complete control evidence.
+  - Updated `docs/SECURITY_BASELINE.md` with the task-00119 control baseline and verification outcome.
+  - Docs-only update; no runtime code changes in this task.
+
+
 ## task-00116 — DEV — OpenAI API primary runtime refactor for generate + compliance
 
 - Status: **Done**

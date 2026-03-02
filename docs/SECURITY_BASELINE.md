@@ -1,3 +1,54 @@
+## task-00119 — SEC — Safety guardrails for automated remediation apply actions
+
+Review scope:
+- `src/ui/editor-shell.tsx` (planned remediation-apply touchpoint)
+- `docs/API_BOUNDARY.md`
+- `docs/SECURITY_BASELINE.md`
+- `docs/tasks.md`
+
+### Automated remediation safety boundaries (required baseline)
+
+When introducing any "apply remediation automatically" behavior, implementation must remain within all boundaries below:
+
+1. **Scope limits (must):**
+   - Auto-remediation may edit **only the in-memory draft/body field of the currently opened draft context**.
+   - No cross-document mutation, background bulk rewrite, or multi-draft batch apply in MVP scope.
+   - No autonomous save/publish/send side effects; operator must explicitly confirm save/persist actions.
+
+2. **Prohibited transforms (must-not):**
+   - Must not delete/overwrite entire draft content without explicit, per-action user confirmation.
+   - Must not silently alter legal disclaimers, policy/legal-review language, attribution/source citations, or compliance-result metadata blocks.
+   - Must not execute hidden prompt instructions that inject external links, tracking payloads, credentials, or environment-derived secrets.
+
+3. **Determinism + auditability (must):**
+   - Every auto-remediation apply operation must produce an explicit audit record in app diagnostics with: timestamp UTC, actor, draft id/context, selected finding id(s), before/after snippet hash (or bounded diff summary), and outcome status.
+   - UI must present a clear before/after preview (or bounded diff) before final apply.
+   - Provide immediate one-step undo (session-local minimum) for last apply action.
+
+4. **Validation + fail-closed behavior (must):**
+   - Reject apply requests when required context is missing/invalid (no selected finding, empty draft, malformed identifiers).
+   - Enforce bounded edit size (max changed chars/lines) to prevent runaway transforms; overflow must fail closed with operator-visible error.
+   - Preserve no-store handling on sensitive internal responses involved in remediation context retrieval/persistence.
+
+### Required implementation validation checklist (gate before enabling auto-apply)
+
+- [ ] Unit tests: selection validation, prohibited-transform denial, and bounded-edit enforcement.
+- [ ] Integration tests: apply preview → confirm apply → undo, with stable contract assertions.
+- [ ] Negative-path tests: empty draft, invalid finding id, oversized patch, unauthorized internal route access.
+- [ ] Security review sign-off: confirms no secret leakage in logs/errors and no unauthorized side effects.
+- [ ] Operator docs/runbook updated with rollback switch (disable auto-apply path) and incident triage steps.
+
+### Go/No-Go rule for auto-remediation enablement
+
+- **NO-GO** if any required boundary/control above is missing, untested, or non-auditable.
+- **GO (limited)** only when all checklist items are complete and behavior remains single-draft, user-confirmed, and reversible.
+
+### Verification outcome (task-00119)
+
+- Outcome: **PASS (docs guardrails + validation gate defined)**
+- Code changes: none (docs-first task)
+- Build: not run (no runtime code changed)
+
 # Security Baseline Verification
 
 ## task-00115 — SEC — Auth compat operational guardrails + rollback triggers
