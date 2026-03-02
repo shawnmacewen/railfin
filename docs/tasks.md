@@ -1,5 +1,15 @@
 # Tasks
 
+## task-00100 — SEC — API authz hardening phase 1 for /api/internal
+
+- Status: **Done**
+- Branch: `chore/sec/task-00100-api-authz-hardening-phase1`
+- Scope delivered:
+  - Audited `/api/internal/content/*`, `/api/internal/compliance/check`, and `/api/internal/configure/policy` route handlers for server-authoritative authz assumptions.
+  - Added shared internal API auth guard (`requireInternalApiAuth`) that enforces cookie-backed auth checks at route boundary and fails closed with `401`.
+  - Applied auth guard to content/compliance/configure internal endpoints and standardized `Cache-Control: no-store` headers on success/error responses.
+  - Preserved safe error payloads (`Unauthorized`, validation errors, blocked metadata) without secret/body echoing.
+
 ## task-00097 — SEC — Security hardening sweep phase 1
 
 - Status: **Done**

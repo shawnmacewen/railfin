@@ -1,5 +1,36 @@
 # Security Baseline Verification
 
+## task-00100 — SEC — API authz hardening phase 1 for /api/internal
+
+Review scope:
+- `src/app/api/internal/content/generate/route.ts`
+- `src/app/api/internal/content/list/route.ts`
+- `src/app/api/internal/content/draft/route.ts`
+- `src/app/api/internal/compliance/check/route.ts`
+- `src/app/api/internal/configure/policy/route.ts`
+- `src/app/api/internal/_auth.ts`
+
+### Findings + hardening outcome
+
+1. **Server-authoritative authz gap (fixed in phase 1):**
+   - Prior state relied on `/app/:path*` page middleware only, leaving direct `/api/internal/*` invocation path without route-level auth checks.
+   - Added `requireInternalApiAuth(request)` route-boundary guard and applied it to internal content/compliance/configure handlers.
+   - Guard is fail-closed: unauthenticated calls now return `401 { ok:false, error:"Unauthorized" }` with `Cache-Control: no-store`.
+
+2. **Sensitive-response caching consistency (fixed in phase 1):**
+   - Standardized `Cache-Control: no-store` headers across touched internal handlers (success + error responses), including compliance and generation outputs.
+
+3. **Error hygiene / secret leakage check (confirmed):**
+   - New auth path returns generic unauthorized response only.
+   - No auth-secret values are echoed in API errors; provider-chain diagnostics remain metadata-only.
+
+### Verification outcome (task-00100)
+
+- Outcome: **PASS**
+- Type: Runtime authz hardening + sensitive response handling
+- Residual follow-up:
+  - Replace placeholder cookie-presence auth with real server-side session verification and role claims (`getCurrentAuthContext`) once Supabase auth integration is enabled.
+
 ## task-00097 — SEC — Security hardening sweep phase 1
 
 Review scope:
