@@ -97,6 +97,15 @@ function parseFindingsFromCompletion(completion: string): RawFinding[] {
   });
 }
 
+
+function buildComplianceFallbackDetails(errorKind?: string): string {
+  if (errorKind === "provider_config") {
+    return "AI compliance providers are unavailable due to missing/invalid credentials. Check CODEX_API_KEY/OPENAI_API_KEY runtime config.";
+  }
+
+  return "AI compliance providers were unavailable or returned invalid output. Returning safe fallback output.";
+}
+
 function buildCompliancePrompt(input: {
   content: string;
   contentType: string;
@@ -224,7 +233,7 @@ export async function POST(request: NextRequest) {
       severity: "unknown",
       issue: "Compliance scan unavailable",
       details:
-        "AI compliance providers were unavailable or returned invalid output. Returning safe fallback output.",
+        buildComplianceFallbackDetails(runtime.diagnostic.attempts[0]?.errorKind),
       suggestion: "Retry shortly or review content manually before publishing.",
       location: "unknown:0:0",
     },

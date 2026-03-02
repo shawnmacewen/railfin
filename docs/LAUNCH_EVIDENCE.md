@@ -124,3 +124,17 @@ Required artifact payload when collected:
 - Completion label:
   - `Launch Evidence: COMPLETE` when all MVP-critical items are `Verified: YES` under active policy semantics.
   - Current status: **COMPLETE (MVP-critical evidence satisfied)**.
+
+
+## Runtime diagnostics evidence capture note (task-00113)
+
+Local verification capture (non-secret) for AI-backed internal routes should record:
+- endpoint (`/api/internal/content/generate` or `/api/internal/compliance/check`)
+- timestamp (UTC)
+- response booleans: `ok`, `meta.degraded` (or `generationMeta.degraded`)
+- `providerChain.primary`, `providerChain.fallbackDeferred`, and first-attempt outcome (`ok` + `errorKind` only)
+
+2026-03-02 local verification snapshot:
+- Both endpoints returned codex-primary diagnostics with one codex attempt and `fallbackDeferred: true`.
+- Both were degraded with first-attempt `errorKind: provider_config` in this local runtime context.
+- No secret values were logged or stored in evidence notes.

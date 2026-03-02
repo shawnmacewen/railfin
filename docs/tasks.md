@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00113 — DEV — Codex runtime verification + quality pass
+
+- Status: **Done**
+- Branch: `feat/dev/task-00113-codex-runtime-verification`
+- Scope delivered:
+  - Re-ran live endpoint verification for `POST /api/internal/content/generate` and `POST /api/internal/compliance/check` against local Next runtime using internal-auth test cookie and captured provider-chain diagnostics.
+  - Confirmed both endpoints remain codex-primary with deferred fallback wiring and contract-safe degraded outputs when provider configuration is unavailable.
+  - Added concise evidence-capture notes for provider diagnostics in `docs/LAUNCH_EVIDENCE.md` and `docs/API_BOUNDARY.md`.
+  - Applied non-breaking quality tuning to degraded-path messaging so `provider_config` failures return actionable non-secret runtime-hint text.
+  - Rebuilt project with `npm run build` (pass).
+
 ## task-00114 — UI — Content + review UX polish for live AI runtime
 
 - Status: **Done**

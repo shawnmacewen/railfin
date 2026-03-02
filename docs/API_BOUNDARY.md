@@ -59,6 +59,7 @@ Response JSON:
 - Fallback provider wiring (`chatgpt-api`) remains documented but execution is explicitly deferred/non-blocking for this phase
 - If Codex fails or times out, endpoint returns safe fallback findings to keep UI response handling stable
 - Runtime diagnostics are returned in `meta.providerChain` (provider names + classified attempt outcomes only; no prompt/body/secret data), including `fallbackDeferred: true`
+- Evidence capture rule: when verifying runtime health, record only `providerChain.primary`, `fallbackDeferred`, and first-attempt `{ ok, errorKind }` plus degraded flag; do not record prompts, generated body text, or secrets.
 
 ## AI Service Contract Decision (task-00087)
 
@@ -133,6 +134,7 @@ Response JSON:
   - invalid `controlProfile` value -> `Invalid controlProfile`
   - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle` values -> `Invalid controls`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
+- Degraded quality hint: when diagnostics classify primary failure as `provider_config`, generation notes include a non-secret operator hint to check `CODEX_API_KEY/OPENAI_API_KEY` runtime configuration.
 
 Strict response validation behavior:
 

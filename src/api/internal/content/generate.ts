@@ -370,6 +370,14 @@ function createFallbackDraft(input: { prompt: string; contentType: ContentType }
   };
 }
 
+function buildDegradedGenerationNote(errorKind?: string): string {
+  if (errorKind === "provider_config") {
+    return "AI generation unavailable: provider credentials missing or invalid. Check CODEX_API_KEY/OPENAI_API_KEY runtime config.";
+  }
+
+  return "AI generation unavailable or invalid output; fallback response used.";
+}
+
 export async function internalContentGenerate(request: {
   method: "POST";
   body?: GenerateRequestBody;
@@ -478,7 +486,7 @@ export async function internalContentGenerate(request: {
       draft: createFallbackDraft({ prompt, contentType }),
       generationMeta: {
         provider: "fallback",
-        notes: "AI generation unavailable or invalid output; fallback response used.",
+        notes: buildDegradedGenerationNote(runtime.diagnostic.attempts[0]?.errorKind),
         providerChain: runtime.diagnostic,
         degraded: true,
       },
