@@ -23,9 +23,9 @@ Notes:
 - `next` is optional and sanitized to internal redirects only (`/` fallback).
 - No real Supabase credential verification or session issuance happens at this stage.
 
-## Compliance Check Contract (AI-backed, codex-primary)
+## Compliance Check Contract (AI-backed, openai-primary)
 
-`POST /api/internal/compliance/check` is an AI-backed endpoint with Codex as the authoritative runtime path.
+`POST /api/internal/compliance/check` is an AI-backed endpoint with OpenAI API as the authoritative runtime path.
 
 Request JSON:
 
@@ -55,9 +55,9 @@ Response JSON:
 
 ### Provider behavior
 
-- Authoritative provider path: `codex` (always selected in runtime)
-- Fallback provider wiring (`chatgpt-api`) remains documented but execution is explicitly deferred/non-blocking for this phase
-- If Codex fails or times out, endpoint returns safe fallback findings to keep UI response handling stable
+- Authoritative provider path: `openai-api` (always selected in runtime)
+- Fallback provider wiring (`codex`) remains documented but execution is explicitly deferred/non-blocking for this phase
+- If OpenAI runtime fails or times out, endpoint returns safe fallback findings to keep UI response handling stable
 - Runtime diagnostics are returned in `meta.providerChain` (provider names + classified attempt outcomes only; no prompt/body/secret data), including `fallbackDeferred: true`
 - Evidence capture rule: when verifying runtime health, record only `providerChain.primary`, `fallbackDeferred`, and first-attempt `{ ok, errorKind }` plus degraded flag; do not record prompts, generated body text, or secrets.
 
@@ -72,9 +72,9 @@ This is an architecture boundary rule to prevent drift and accidental contract c
 
 ### Shared key/env path (both services)
 
-- Shared provider-selection env: `AI_PROVIDER` (currently ignored for production runtime; codex is pinned as primary)
-- Shared primary key path: `CODEX_API_KEY` (or `OPENAI_API_KEY` as accepted by Codex provider)
-- Shared fallback key path: `CHATGPT_API_KEY` (fallback execution deferred in this phase)
+- Shared provider-selection env: `AI_PROVIDER` (currently ignored for production runtime; openai-api is pinned as primary)
+- Shared primary key path: `OPENAI_API_KEY`
+- Shared fallback key path: `CODEX_API_KEY` (fallback execution deferred in this phase)
 
 Operational rule:
 
@@ -94,10 +94,10 @@ Generate and Compliance must not reuse one another’s response type as a shortc
 
 ### Provider behavior (applies to both services)
 
-- Runtime primary is pinned to Codex for production (`codex` authoritative path).
-- Attempt Codex provider first.
+- Runtime primary is pinned to OpenAI API for production (`openai-api` authoritative path).
+- Attempt OpenAI provider first.
 - Secondary provider wiring remains in codebase but fallback execution is deferred for this phase.
-- On Codex error/timeout/invalid response, return each service’s safe degraded contract output (service-specific; contract-preserving).
+- On OpenAI runtime error/timeout/invalid response, return each service’s safe degraded contract output (service-specific; contract-preserving).
 
 ### Generate contract (`POST /api/internal/content/generate`)
 
@@ -134,7 +134,7 @@ Response JSON:
   - invalid `controlProfile` value -> `Invalid controlProfile`
   - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle` values -> `Invalid controls`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
-- Degraded quality hint: when diagnostics classify primary failure as `provider_config`, generation notes include a non-secret operator hint to check `CODEX_API_KEY/OPENAI_API_KEY` runtime configuration.
+- Degraded quality hint: when diagnostics classify primary failure as `provider_config`, generation notes include a non-secret operator hint to check `OPENAI_API_KEY` runtime configuration.
 
 Strict response validation behavior:
 

@@ -3,7 +3,7 @@ import { ChatGPTApiProvider } from "../providers/ChatGPTApiProvider";
 import { CodexProvider } from "../providers/CodexProvider";
 import { getAIProviderFromEnv } from "../../config/aiProvider";
 
-export type RuntimeProviderName = "codex" | "chatgpt-api";
+export type RuntimeProviderName = "openai-api" | "codex";
 
 export type ProviderRuntimeErrorKind =
   | "provider_error"
@@ -37,15 +37,15 @@ export type ProviderChainFailure = {
 type ProviderFactory = (name: RuntimeProviderName, env: NodeJS.ProcessEnv) => AIProvider;
 
 function selectPrimary(_env = process.env): RuntimeProviderName {
-  return "codex";
+  return "openai-api";
 }
 
 function secondaryProviderName(primary: RuntimeProviderName): RuntimeProviderName {
-  return primary === "codex" ? "chatgpt-api" : "codex";
+  return primary === "openai-api" ? "codex" : "openai-api";
 }
 
 function instantiateProvider(name: RuntimeProviderName, env = process.env): AIProvider {
-  if (name === "chatgpt-api") {
+  if (name === "openai-api") {
     return new ChatGPTApiProvider();
   }
 

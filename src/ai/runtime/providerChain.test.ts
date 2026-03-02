@@ -19,40 +19,40 @@ test("provider chain returns primary success without fallback attempt", async ()
   const result = await completeWithDeterministicFallback({
     flow: "content-generate",
     prompt: "hello",
-    env: { AI_PROVIDER: "codex" } as NodeJS.ProcessEnv,
-    providerFactory: makeFactory({ codex: "ok", "chatgpt-api": "fail" }),
+    env: { AI_PROVIDER: "openai-api" } as NodeJS.ProcessEnv,
+    providerFactory: makeFactory({ "openai-api": "ok", codex: "fail" }),
   });
 
   assert.ok("completion" in result);
   assert.equal(result.diagnostic.attempts.length, 1);
-  assert.deepEqual(result.diagnostic.attempts[0], { provider: "codex", ok: true });
+  assert.deepEqual(result.diagnostic.attempts[0], { provider: "openai-api", ok: true });
 });
 
-test("provider chain defers fallback when codex primary fails", async () => {
+test("provider chain defers fallback when openai primary fails", async () => {
   const result = await completeWithDeterministicFallback({
     flow: "content-generate",
     prompt: "hello",
-    env: { AI_PROVIDER: "codex" } as NodeJS.ProcessEnv,
-    providerFactory: makeFactory({ codex: "fail", "chatgpt-api": "ok" }),
+    env: { AI_PROVIDER: "openai-api" } as NodeJS.ProcessEnv,
+    providerFactory: makeFactory({ "openai-api": "fail", codex: "ok" }),
   });
 
   assert.ok(!("completion" in result));
   assert.equal(result.diagnostic.fallbackDeferred, true);
   assert.equal(result.diagnostic.attempts.length, 1);
-  assert.equal(result.diagnostic.attempts[0]?.provider, "codex");
+  assert.equal(result.diagnostic.attempts[0]?.provider, "openai-api");
   assert.equal(result.diagnostic.attempts[0]?.ok, false);
 });
 
-test("provider chain ignores AI_PROVIDER override and remains codex-first", async () => {
+test("provider chain ignores AI_PROVIDER override and remains openai-first", async () => {
   const result = await completeWithDeterministicFallback({
     flow: "content-generate",
     prompt: "hello",
-    env: { AI_PROVIDER: "chatgpt-api" } as NodeJS.ProcessEnv,
-    providerFactory: makeFactory({ codex: "ok", "chatgpt-api": "fail" }),
+    env: { AI_PROVIDER: "codex" } as NodeJS.ProcessEnv,
+    providerFactory: makeFactory({ "openai-api": "ok", codex: "fail" }),
   });
 
   assert.ok("completion" in result);
-  assert.equal(result.diagnostic.primary, "codex");
+  assert.equal(result.diagnostic.primary, "openai-api");
   assert.equal(result.diagnostic.attempts.length, 1);
-  assert.equal(result.diagnostic.attempts[0]?.provider, "codex");
+  assert.equal(result.diagnostic.attempts[0]?.provider, "openai-api");
 });

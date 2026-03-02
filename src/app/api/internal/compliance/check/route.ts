@@ -100,7 +100,7 @@ function parseFindingsFromCompletion(completion: string): RawFinding[] {
 
 function buildComplianceFallbackDetails(errorKind?: string): string {
   if (errorKind === "provider_config") {
-    return "AI compliance providers are unavailable due to missing/invalid credentials. Check CODEX_API_KEY/OPENAI_API_KEY runtime config.";
+    return "AI compliance providers are unavailable due to missing/invalid credentials. Check OPENAI_API_KEY runtime config.";
   }
 
   return "AI compliance providers were unavailable or returned invalid output. Returning safe fallback output.";

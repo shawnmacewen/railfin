@@ -67,14 +67,14 @@ async function callChatCompletions(options: {
 
 export class ChatGPTApiProvider implements AIProvider {
   async complete(prompt: string): Promise<string> {
-    const apiKey = process.env.CHATGPT_API_KEY ?? process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY ?? process.env.CHATGPT_API_KEY;
 
     if (!apiKey) {
-      throw new Error('ChatGPT provider is missing API key (CHATGPT_API_KEY or OPENAI_API_KEY).');
+      throw new Error('OpenAI provider is missing API key (OPENAI_API_KEY).');
     }
 
-    const baseUrl = process.env.CHATGPT_API_BASE_URL ?? 'https://api.openai.com/v1';
-    const model = process.env.CHATGPT_API_MODEL ?? 'gpt-4o-mini';
+    const baseUrl = process.env.OPENAI_API_BASE_URL ?? process.env.CHATGPT_API_BASE_URL ?? 'https://api.openai.com/v1';
+    const model = process.env.OPENAI_MODEL ?? process.env.CHATGPT_API_MODEL ?? 'gpt-4o-mini';
     const timeoutMs = parseTimeoutMs(process.env.AI_PROVIDER_TIMEOUT_MS, 8000);
 
     return callChatCompletions({
