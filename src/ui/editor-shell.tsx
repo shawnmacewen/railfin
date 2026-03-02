@@ -9,6 +9,20 @@ type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 
+type RemediationContextResult = {
+  nextContent: string;
+  previousBlock: string | null;
+  appliedBlock: string;
+};
+
+type RemediationPreview = {
+  issue: string;
+  severity: string;
+  location: string;
+  previousBlock: string | null;
+  appliedBlock: string;
+};
+
 const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
 const REMEDIATION_BLOCK_END = "[/Compliance Remediation Draft Context]";
 
@@ -52,17 +66,27 @@ type ConfigurePolicyResponse = {
   error?: string;
 };
 
-function injectControlledRemediationContext(current: string, nextBlock: string) {
+function applyControlledRemediationContext(current: string, nextBlock: string): RemediationContextResult {
   const start = current.indexOf(REMEDIATION_BLOCK_START);
   const end = current.indexOf(REMEDIATION_BLOCK_END);
 
   if (start !== -1 && end !== -1 && end > start) {
+    const endWithMarker = end + REMEDIATION_BLOCK_END.length;
+    const previousBlock = current.slice(start, endWithMarker);
     const prefix = current.slice(0, start).trimEnd();
-    return `${prefix}\n\n${nextBlock}`;
+    return {
+      nextContent: `${prefix}\n\n${nextBlock}`,
+      previousBlock,
+      appliedBlock: nextBlock,
+    };
   }
 
   const base = current.trimEnd();
-  return base ? `${base}\n\n${nextBlock}` : nextBlock;
+  return {
+    nextContent: base ? `${base}\n\n${nextBlock}` : nextBlock,
+    previousBlock: null,
+    appliedBlock: nextBlock,
+  };
 }
 
 function buildRemediationBlock(hint: string, finding: ComplianceFinding) {
@@ -94,6 +118,7 @@ export function EditorShell() {
   const [contentType, setContentType] = useState<ContentType>("blog");
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
+  const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -248,6 +273,7 @@ export function EditorShell() {
       const notes = payload.data?.generationMeta?.notes?.trim();
       setGenerationFeedback(notes || "Draft generated. Review and save when ready.");
       setReviewFeedback(null);
+      setRemediationPreview(null);
       setStatus("idle");
       setFeedback(null);
     } catch (err) {
@@ -312,8 +338,20 @@ export function EditorShell() {
 
   const onApplyRemediationHint = (hint: string, finding: ComplianceFinding) => {
     const remediationBlock = buildRemediationBlock(hint, finding);
-    setContent((current) => injectControlledRemediationContext(current, remediationBlock));
-    setReviewFeedback("Selected remediation hint applied to draft context. Review and revise before saving.");
+
+    setContent((current) => {
+      const result = applyControlledRemediationContext(current, remediationBlock);
+      setRemediationPreview({
+        issue: finding.issue || "unknown issue",
+        severity: (finding.severity || "unknown").toLowerCase(),
+        location: finding.location || "N/A",
+        previousBlock: result.previousBlock,
+        appliedBlock: result.appliedBlock,
+      });
+      return result.nextContent;
+    });
+
+    setReviewFeedback("Selected remediation context applied. Compare previous/new context, then revise the draft above.");
   };
 
   const onRemindRemediationHint = (hint: string) => {
@@ -404,6 +442,28 @@ export function EditorShell() {
         <p className="rf-status rf-status-muted" role="status">
           {reviewFeedback}
         </p>
+      ) : null}
+
+      {remediationPreview ? (
+        <section className="rf-remediation-preview" aria-label="Applied remediation context preview">
+          <h3>Applied Remediation Context</h3>
+          <p className="rf-status rf-status-muted" role="status">
+            Issue: {remediationPreview.issue} · Severity: {remediationPreview.severity} · Location: {remediationPreview.location}
+          </p>
+          <div className="rf-remediation-preview-grid">
+            <div>
+              <h4>Previous Context</h4>
+              <pre>
+                {remediationPreview.previousBlock ||
+                  "No prior remediation context block. This was added as a new block."}
+              </pre>
+            </div>
+            <div>
+              <h4>Applied Context</h4>
+              <pre>{remediationPreview.appliedBlock}</pre>
+            </div>
+          </div>
+        </section>
       ) : null}
 
       <CompliancePanel

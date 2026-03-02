@@ -32,6 +32,16 @@
   - Updated security baseline with a concise hardening checklist, findings, and residual follow-ups for route-level authz and sensitive endpoint cache semantics.
   - Marked docs/task ledger completion for task-00097.
 
+## task-00099 — UI — Review tools UX phase 3
+
+- Status: **Done**
+- Branch: `feat/ui/task-00099-review-tools-ux-phase3`
+- Scope delivered:
+  - Improved remediation usability in `src/ui/editor-shell.tsx` with an explicit **Applied Remediation Context** preview showing before/after remediation block context.
+  - Strengthened selected-finding flow in `src/ui/compliance-panel.tsx` by keeping selection actions centralized, persistent, and low-friction with disabled-until-selected controls.
+  - Refined review-tool styling in `src/app/globals.css` using existing `rf-*` conventions, including stronger selected-action panel prominence and remediation context preview styling.
+  - Preserved existing generation, save, and compliance request/response behaviors and disclaimer/status messaging (no API contract changes).
+
 ## task-00096 — UI — Review tools UX phase 2
 
 - Status: **Done**
