@@ -1,12 +1,24 @@
 # Tasks
 
+## task-00116 — DEV — OpenAI API primary runtime refactor for generate + compliance
+
+- Status: **Done**
+- Branch: `feat/dev/task-00116-openai-primary-refactor`
+- Scope delivered:
+  - Refactored shared AI runtime provider-chain to be explicitly OpenAI-first (`openai-api` primary) for both `/api/internal/content/generate` and `/api/internal/compliance/check`, with deferred fallback preserved.
+  - Removed codex-primary user-facing assumptions from diagnostics/notes and updated degraded operator hints to reference `OPENAI_API_KEY` as primary credential path.
+  - Updated OpenAI provider config resolution to prioritize `OPENAI_API_KEY` and OpenAI-specific env names (`OPENAI_MODEL`, `OPENAI_API_BASE_URL`) while keeping compatibility fallback envs non-primary.
+  - Updated boundary/security/launch docs to reflect OpenAI-primary posture and refreshed provider evidence wording.
+  - Rebuilt project with `npm run build` (pass).
+
+
 ## task-00113 — DEV — Codex runtime verification + quality pass
 
 - Status: **Done**
 - Branch: `feat/dev/task-00113-codex-runtime-verification`
 - Scope delivered:
   - Re-ran live endpoint verification for `POST /api/internal/content/generate` and `POST /api/internal/compliance/check` against local Next runtime using internal-auth test cookie and captured provider-chain diagnostics.
-  - Confirmed both endpoints remain codex-primary with deferred fallback wiring and contract-safe degraded outputs when provider configuration is unavailable.
+  - Confirmed both endpoints remain openai-primary with deferred fallback wiring and contract-safe degraded outputs when provider configuration is unavailable.
   - Added concise evidence-capture notes for provider diagnostics in `docs/LAUNCH_EVIDENCE.md` and `docs/API_BOUNDARY.md`.
   - Applied non-breaking quality tuning to degraded-path messaging so `provider_config` failures return actionable non-secret runtime-hint text.
   - Rebuilt project with `npm run build` (pass).
@@ -63,10 +75,10 @@
   - Added rollout guardrails (feature flag, staged endpoint migration, telemetry, and compat retirement criteria) in `docs/SECURITY_BASELINE.md`.
   - Docs-only update; no runtime code changes in this task.
 
-## task-00109 — DEV — Codex-primary runtime wiring for generate + compliance
+## task-00109 — DEV — OpenAI-primary runtime wiring for generate + compliance
 
 - Status: **Done**
-- Branch: `feat/dev/task-00109-codex-primary-wiring`
+- Branch: `feat/dev/task-00109-openai-primary-wiring`
 - Scope delivered:
   - Pinned provider-chain runtime primary to Codex for production execution in both content generation and compliance checks.
   - Made fallback behavior explicit as deferred/non-blocking (`fallbackDeferred: true`) while preserving contract-safe degraded responses.

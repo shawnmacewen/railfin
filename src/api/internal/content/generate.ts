@@ -372,7 +372,7 @@ function createFallbackDraft(input: { prompt: string; contentType: ContentType }
 
 function buildDegradedGenerationNote(errorKind?: string): string {
   if (errorKind === "provider_config") {
-    return "AI generation unavailable: provider credentials missing or invalid. Check CODEX_API_KEY/OPENAI_API_KEY runtime config.";
+    return "AI generation unavailable: provider credentials missing or invalid. Check OPENAI_API_KEY runtime config.";
   }
 
   return "AI generation unavailable or invalid output; fallback response used.";

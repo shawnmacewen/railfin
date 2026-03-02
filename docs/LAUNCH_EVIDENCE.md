@@ -40,7 +40,7 @@ Implication for launch decisioning now:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY`
 - AI vars are conditional at MVP stage under Option B:
-  - If AI runtime is intentionally enabled for this release window, also capture configured key path (`CODEX_API_KEY` and/or fallback path `OPENAI_API_KEY`/`CHATGPT_API_KEY`).
+  - If AI runtime is intentionally enabled for this release window, also capture configured key path (`OPENAI_API_KEY` and optional fallback path `CODEX_API_KEY`).
   - If AI runtime is intentionally deferred/disabled for MVP, record explicit deferral semantics in artifact payload.
 - Operator steps:
   1. Open Vercel Project → Settings → Environment Variables (Production).
@@ -87,9 +87,9 @@ Required artifact payload when collected:
 - `artifactType: ai-runtime-primary-fallback`
 - `capturedAtUtc: <YYYY-MM-DDTHH:mm:ssZ>`
 - `capturedBy: <operator>`
-- `primaryProvider: codex|chatgpt`
+- `primaryProvider: openai-api|codex`
 - `primaryArtifactRef: <logs/response proof>`
-- `fallbackProvider: codex|chatgpt`
+- `fallbackProvider: codex|openai-api`
 - `fallbackTriggerMethod: <controlled failure mechanism>`
 - `fallbackArtifactRef: <logs/response proof>`
 - `contractStable: true|false`
@@ -135,6 +135,6 @@ Local verification capture (non-secret) for AI-backed internal routes should rec
 - `providerChain.primary`, `providerChain.fallbackDeferred`, and first-attempt outcome (`ok` + `errorKind` only)
 
 2026-03-02 local verification snapshot:
-- Both endpoints returned codex-primary diagnostics with one codex attempt and `fallbackDeferred: true`.
+- Both endpoints returned openai-primary diagnostics with one openai-api attempt and `fallbackDeferred: true`.
 - Both were degraded with first-attempt `errorKind: provider_config` in this local runtime context.
 - No secret values were logged or stored in evidence notes.

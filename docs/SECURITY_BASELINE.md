@@ -97,7 +97,7 @@ Review scope:
 - Code changes: none (docs-first task)
 - Build: not run (no runtime code changed)
 
-## task-00109 — DEV — Codex-primary runtime wiring for generate + compliance
+## task-00109 — DEV — OpenAI-primary runtime wiring for generate + compliance
 
 Review scope:
 - `src/ai/runtime/providerChain.ts`
@@ -509,7 +509,7 @@ Rerun executed against the canonical repository path: `/home/node/railfin`.
 | Legal-approval wording control | Guardrail documented in this baseline; UI/legal-disclaimer language previously verified in hosted smoke rerun context. | **PASS** | Current docs/code context does not present model output as legal sign-off. |
 | Failure-mode behavior | `src/app/api/internal/compliance/check/route.ts` returns safe fallback finding when provider chain throws. | **PASS** | Degraded path is explicit and non-silent; no missing-code-path blocker. |
 | Logging/redaction controls | Guardrail documented at policy level; no contradictory broad raw-payload logger found in current checked files. | **PASS (docs/code baseline)** | Baseline control definition remains intact in canonical code/doc context. |
-| Operational readiness evidence | Runtime env in this rerun has no visible provider credential variables (`CODEX_API_KEY`/`OPENAI_API_KEY`/`CHATGPT_API_KEY`) and no named on-call escalation artifact in checked launch docs. | **BLOCKED (environment)** | Blocker is deployment environment readiness evidence, not repository path/code absence. |
+| Operational readiness evidence | Runtime env in this rerun has no visible provider credential variables (`OPENAI_API_KEY`/`CODEX_API_KEY`) and no named on-call escalation artifact in checked launch docs. | **BLOCKED (environment)** | Blocker is deployment environment readiness evidence, not repository path/code absence. |
 
 ### Rerun outcome (task-00057)
 
@@ -549,7 +549,7 @@ Recheck executed on latest `main` commit `b7b9097` from canonical path `/home/no
 1. Provide deploy-time env evidence for:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - AI provider key(s): `CODEX_API_KEY` and/or fallback key path (`OPENAI_API_KEY`/`CHATGPT_API_KEY`)
+   - AI provider key(s): `OPENAI_API_KEY` and optional fallback path (`CODEX_API_KEY`)
 2. Confirm `public.drafts` exists and is writable/readable by service role (apply SQL from `src/lib/supabase/drafts.ts` if missing).
 3. Attach named incident owner + escalation path for AI provider degraded mode in launch/runbook artifacts.
 4. Re-run launch gate once items (1)-(3) are evidenced in target runtime.
@@ -882,7 +882,7 @@ Repository inspected from canonical path `/home/node/railfin`.
 
 - Active route used by UI: `POST /api/internal/compliance/check` in `src/app/api/internal/compliance/check/route.ts`.
 - Provider chain is implemented in code:
-  - Primary selected by `AI_PROVIDER` (`codex` default)
+  - Primary selected by runtime policy (`openai-api` default)
   - Secondary fallback hard-wired to the other provider
   - Both providers call `/chat/completions` with JSON-only expectation (`response_format: json_object`)
 - If both providers fail/time out/missing keys, endpoint still returns `200 { ok: true, findings: ["Compliance scan unavailable"] }` safe fallback guidance (non-blocking API contract).
@@ -953,8 +953,8 @@ Decision scope: architecture and security boundary documentation (docs-first, no
 
 - Shared env path for AI provider chain:
   - `AI_PROVIDER` (primary selector)
-  - `CODEX_API_KEY` (primary key path)
-  - `OPENAI_API_KEY` or `CHATGPT_API_KEY` (fallback key path)
+  - `OPENAI_API_KEY` (primary key path)
+  - `CODEX_API_KEY` (fallback key path)
 - Primary/fallback behavior expectation for both services:
   - primary provider attempt → secondary retry on error/timeout/invalid output → service-specific safe degraded response if both fail.
 
