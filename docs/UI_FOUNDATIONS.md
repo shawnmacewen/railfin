@@ -1,5 +1,13 @@
 # UI Foundations
 
+## task-00124 — Auto-remediation UX phase 2
+
+- `src/ui/editor-shell.tsx` now includes an explicit **Undo Last Apply** action in Review Workbench (manual, single-step rollback of the most recent remediation apply).
+- Added protected/prohibited transform-zone warnings in Create remediation workflow when selected finding context suggests sensitive regions (legal/disclaimer, citation/attribution, compliance metadata).
+- `src/ui/compliance-panel.tsx` now surfaces the same protected-zone warning at both finding-card level and selected-finding action panel for clearer operator visibility before apply actions.
+- Preserved existing create/save/generate/compliance/history flows and endpoint contracts; changes remain additive and low-friction under existing `rf-*` style conventions.
+
+
 ## task-00121 — Auto-remediation UX phase 1
 
 - `src/ui/editor-shell.tsx` now exposes a clearer manual-only auto-remediation affordance in Review Workbench:

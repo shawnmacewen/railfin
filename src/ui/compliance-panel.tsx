@@ -55,6 +55,31 @@ function getFindingKey(finding: ComplianceFinding, severity: string, index: numb
   return `${finding.issue || "issue"}-${severity}-${index}`;
 }
 
+
+function getProtectedZoneWarning(finding: ComplianceFinding): string | null {
+  const source = [finding.issue, finding.details, finding.suggestion, finding.location]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (!source) return null;
+
+  const legalZone = ["legal", "policy", "legal-review", "terms", "disclaimer"].some((token) => source.includes(token));
+  const citationZone = ["citation", "attribution", "source", "footnote"].some((token) => source.includes(token));
+  const metadataZone = ["metadata", "compliance-result", "audit", "header"].some((token) => source.includes(token));
+
+  if (!legalZone && !citationZone && !metadataZone) {
+    return null;
+  }
+
+  const zones: string[] = [];
+  if (legalZone) zones.push("legal/disclaimer");
+  if (citationZone) zones.push("citation/attribution");
+  if (metadataZone) zones.push("compliance metadata");
+
+  return `Protected/prohibited transform zone detected (${zones.join(", ")}). Apply manually with extra review.`;
+}
+
 export type SelectedFindingContext = {
   findingId: string;
   issue: string;
@@ -138,6 +163,11 @@ export function CompliancePanel({
 
     return null;
   }, [groupedFindings, selectedFindingKey]);
+
+  const selectedProtectedZoneWarning = useMemo(() => {
+    if (!selectedFindingMeta) return null;
+    return getProtectedZoneWarning(selectedFindingMeta.finding);
+  }, [selectedFindingMeta]);
 
   useEffect(() => {
     if (!onSelectedFindingChange) {
@@ -287,6 +317,11 @@ export function CompliancePanel({
                   <p>
                     <strong>Location:</strong> {selectedFindingMeta.finding.location || "N/A"}
                   </p>
+                  {selectedProtectedZoneWarning ? (
+                    <p className="rf-status rf-status-error" role="alert">
+                      {selectedProtectedZoneWarning}
+                    </p>
+                  ) : null}
                 </>
               ) : (
                 <p className="rf-status rf-status-muted">Select a finding below to unlock remediation actions.</p>
@@ -353,6 +388,9 @@ export function CompliancePanel({
                       <p>
                         <strong>Location:</strong> {finding.location || "N/A"}
                       </p>
+                      {getProtectedZoneWarning(finding) ? (
+                        <p className="rf-status rf-status-error">{getProtectedZoneWarning(finding)}</p>
+                      ) : null}
                     </li>
                   );
                 })}

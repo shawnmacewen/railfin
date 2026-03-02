@@ -10,6 +10,16 @@
 
 # Tasks
 
+## task-00124 — UI — remediation UX phase 2
+
+- Status: **Done**
+- Branch: `feat/ui/task-00124-remediation-ux-phase2`
+- Scope delivered:
+  - Added explicit manual one-step **Undo Last Apply** action in Create Review Workbench (`src/ui/editor-shell.tsx`).
+  - Added clearer warnings for selected findings in protected/prohibited transform zones (legal/disclaimer, citation/attribution, compliance metadata) in both selected-finding and finding-card UX (`src/ui/compliance-panel.tsx`, `src/ui/editor-shell.tsx`).
+  - Preserved all existing create/save/generate/compliance/history flows and kept UI updates aligned with existing `rf-*` conventions.
+  - Updated `docs/UI_FOUNDATIONS.md` and re-ran `npm run build` (pass).
+
 ## task-00121 — UI — auto-remediation UX phase 1
 
 - Status: **Done**

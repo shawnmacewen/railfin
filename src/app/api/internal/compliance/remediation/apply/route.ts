@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { applySingleFindingRemediation } from "../../../../../../api/internal/compliance/remediation";
+import { putUndoRecordForSession } from "../../../../../../api/internal/compliance/remediation-undo-store";
 import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuth } from "../../../_auth";
 
 type RemediationApplyRequestBody = {
@@ -38,6 +39,11 @@ export async function POST(request: NextRequest) {
       },
     );
   }
+
+  putUndoRecordForSession(request.cookies.getAll(), {
+    undoToken: result.data.undoToken,
+    previousContent: (body.currentContent || "").trim(),
+  });
 
   console.info("[remediation-apply]", result.data.audit);
 
