@@ -38,12 +38,30 @@ export type DraftListResult = {
   q: string;
 };
 
+export type DraftRemediationAuditEvent = {
+  id: string;
+  type: "apply" | "undo";
+  timestampUtc: string;
+  actor: string;
+  draftContextId: string;
+  findingId: string;
+  beforeHash: string;
+  afterHash: string;
+  changedChars: number;
+  changedLines: number;
+  outcome: "applied" | "undone" | "failed";
+  undoLinkId?: string;
+  context?: { source?: string; sessionScope?: string };
+};
+
 const REQUIRED_ENV = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 const REQUIRED_SQL = `create table if not exists public.drafts (
   id text primary key,
   title text not null,
   body text not null default '',
+  metadata jsonb not null default '{}'::jsonb,
+  history jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default timezone('utc', now())
 );`;
 
@@ -239,6 +257,29 @@ export async function listDraftsFromTable(
       q: normalized.q,
     },
   };
+}
+
+export async function appendDraftRemediationAuditEvent(input: {
+  draftId: string;
+  event: DraftRemediationAuditEvent;
+}): Promise<{ ok: true } | { ok: false; blocked: DraftPersistenceBlocked }> {
+  const draftClient = getDraftClientOrBlocked();
+  if (!draftClient.ok) return { ok: false, blocked: draftClient.blocked };
+
+  const { data, error } = await draftClient.client.from("drafts").select("metadata, history").eq("id", input.draftId).maybeSingle();
+  if (error) return { ok: false, blocked: blockedTableAccess("read", error) };
+  if (!data) return { ok: true };
+
+  const metadata = data.metadata && typeof data.metadata === "object" ? (data.metadata as Record<string, unknown>) : {};
+  const history = Array.isArray(data.history) ? data.history : [];
+  const currentRemediationAudit = metadata.remediationAudit && typeof metadata.remediationAudit === "object" ? (metadata.remediationAudit as Record<string, unknown>) : {};
+
+  const nextMetadata = { ...metadata, remediationAudit: { ...currentRemediationAudit, lastEventId: input.event.id, lastEventAt: input.event.timestampUtc, lastOutcome: input.event.outcome } };
+  const nextHistory = [...history, input.event].slice(-200);
+
+  const { error: updateError } = await draftClient.client.from("drafts").update({ metadata: nextMetadata, history: nextHistory }).eq("id", input.draftId);
+  if (updateError) return { ok: false, blocked: blockedTableAccess("write", updateError) };
+  return { ok: true };
 }
 
 export const DRAFTS_REQUIRED_SQL = REQUIRED_SQL;

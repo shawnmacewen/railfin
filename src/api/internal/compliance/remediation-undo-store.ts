@@ -4,6 +4,9 @@ type UndoRecord = {
   undoToken: string;
   previousContent: string;
   createdAt: number;
+  auditEventId?: string;
+  draftContextId?: string;
+  findingId?: string;
 };
 
 const undoStore = new Map<string, UndoRecord>();
@@ -16,31 +19,27 @@ function sessionScopeKey(cookiePairs: Array<{ name: string; value: string }>): s
 
 export function putUndoRecordForSession(
   cookiePairs: Array<{ name: string; value: string }>,
-  record: { undoToken: string; previousContent: string },
+  record: { undoToken: string; previousContent: string; auditEventId?: string; draftContextId?: string; findingId?: string },
 ): void {
-  const key = sessionScopeKey(cookiePairs);
-  undoStore.set(key, {
-    ...record,
-    createdAt: Date.now(),
-  });
+  undoStore.set(sessionScopeKey(cookiePairs), { ...record, createdAt: Date.now() });
 }
 
 export function consumeUndoRecordForSession(
   cookiePairs: Array<{ name: string; value: string }>,
   undoToken: string,
-): { previousContent: string } | null {
+): { previousContent: string; auditEventId?: string; draftContextId?: string; findingId?: string } | null {
   const key = sessionScopeKey(cookiePairs);
   const record = undoStore.get(key);
-
-  if (!record || record.undoToken !== undoToken) {
-    return null;
-  }
-
+  if (!record || record.undoToken !== undoToken) return null;
   if (Date.now() - record.createdAt > UNDO_TTL_MS) {
     undoStore.delete(key);
     return null;
   }
-
   undoStore.delete(key);
-  return { previousContent: record.previousContent };
+  return {
+    previousContent: record.previousContent,
+    auditEventId: record.auditEventId,
+    draftContextId: record.draftContextId,
+    findingId: record.findingId,
+  };
 }

@@ -85,7 +85,7 @@ Response JSON:
 - Success: `{ ok: true, data: { nextContent, previousBlock, appliedBlock, summary, undoToken, audit } }`
   - `summary`: bounded diff summary with `changedChars`, `changedLines`, `findingId`, `draftContextId`
   - `undoToken`: one-step undo token for the most recent apply in the current session scope
-  - `audit`: deterministic apply audit metadata (UTC timestamp, actor, context id, finding id, before/after snippet hash, outcome)
+  - `audit`: deterministic apply audit metadata (id, UTC timestamp, actor, context id, finding id, before/after snippet hash, outcome, undo linkage id)
 - Error: `400` with fail-closed validation payload as above
 
 `POST /api/internal/compliance/remediation/undo` reverts the last successful apply for the current session scope only.

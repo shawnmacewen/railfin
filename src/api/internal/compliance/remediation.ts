@@ -18,6 +18,21 @@ type UndoRemediationInput = {
   currentContent?: string;
 };
 
+export type RemediationAuditRecord = {
+  id: string;
+  timestampUtc: string;
+  actor: string;
+  draftContextId: string;
+  findingId: string;
+  beforeHash: string;
+  afterHash: string;
+  changedChars: number;
+  changedLines: number;
+  outcome: "applied" | "undone" | "failed";
+  undoLinkId?: string;
+  context?: { source?: string; sessionScope?: string };
+};
+
 type ApplyRemediationResult =
   | {
       ok: true;
@@ -32,17 +47,7 @@ type ApplyRemediationResult =
           draftContextId: string;
         };
         undoToken: string;
-        audit: {
-          timestampUtc: string;
-          actor: string;
-          draftContextId: string;
-          findingId: string;
-          beforeHash: string;
-          afterHash: string;
-          changedChars: number;
-          changedLines: number;
-          outcome: "applied";
-        };
+        audit: RemediationAuditRecord;
       };
     }
   | {
@@ -321,7 +326,9 @@ export function applySingleFindingRemediation(input: ApplyRemediationInput): App
   }
 
   const timestampUtc = new Date().toISOString();
-  const audit = {
+  const undoToken = createUndoToken();
+  const audit: RemediationAuditRecord = {
+    id: randomUUID(),
     timestampUtc,
     actor: "operator-ui",
     draftContextId,
@@ -330,7 +337,9 @@ export function applySingleFindingRemediation(input: ApplyRemediationInput): App
     afterHash: hashSnippet(result.nextContent),
     changedChars,
     changedLines,
-    outcome: "applied" as const,
+    outcome: "applied",
+    undoLinkId: undoToken,
+    context: { source: "api/internal/compliance/remediation/apply" },
   };
 
   return {
@@ -345,7 +354,7 @@ export function applySingleFindingRemediation(input: ApplyRemediationInput): App
         findingId,
         draftContextId,
       },
-      undoToken: createUndoToken(),
+      undoToken,
       audit,
     },
   };

@@ -1,3 +1,12 @@
+## task-00126 — DEV — remediation audit trail persistence phase 1
+
+- Status: Done
+- Branch: `feat/dev/task-00126-remediation-audit-trail-persistence`
+- Summary:
+  - Persisted remediation audit structures for draft metadata/history in Supabase draft layer.
+  - Extended remediation audit payload shape with event id + undo linkage id.
+
+
 ## task-00123 — DEV — auto-remediation engine phase 2 hardening
 
 - Status: ✅ Done
