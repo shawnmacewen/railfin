@@ -21,7 +21,15 @@ type RemediationPreview = {
   location: string;
   previousBlock: string | null;
   appliedBlock: string;
+  summary?: {
+    changedChars: number;
+    changedLines: number;
+    findingId: string;
+    draftContextId: string;
+  };
 };
+
+type RemediationApplyStatus = "idle" | "applying" | "applied" | "error";
 
 type RemediationApplyHistoryEntry = {
   issue: string;
@@ -156,6 +164,7 @@ export function EditorShell() {
   const [generationFeedback, setGenerationFeedback] = useState<string | null>(null);
   const [generationDegraded, setGenerationDegraded] = useState<boolean | null>(null);
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null);
+  const [remediationApplyStatus, setRemediationApplyStatus] = useState<RemediationApplyStatus>("idle");
   const [contentType, setContentType] = useState<ContentType>("blog");
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
@@ -463,9 +472,13 @@ export function EditorShell() {
     const location = finding.location || "N/A";
 
     if (!selectedFindingContext) {
-      setReviewFeedback("Select a finding before applying remediation.");
+      setRemediationApplyStatus("error");
+      setReviewFeedback("Select a single finding before applying auto-remediation.");
       return;
     }
+
+    setRemediationApplyStatus("applying");
+    setReviewFeedback("Applying auto-remediation preview for selected finding...");
 
     try {
       const applied = await applyRemediationViaApi(selectedFindingContext);
@@ -476,6 +489,7 @@ export function EditorShell() {
         location,
         previousBlock: applied.previousBlock,
         appliedBlock: applied.appliedBlock,
+        summary: applied.summary,
       });
 
       setRemediationApplyHistory((current) => [
@@ -489,8 +503,10 @@ export function EditorShell() {
         ...current,
       ].slice(0, 5));
 
-      setReviewFeedback("Selected remediation context applied. Compare previous/new context, then revise the draft above.");
+      setRemediationApplyStatus("applied");
+      setReviewFeedback("Auto-remediation preview applied. Review before/after summary, then save or regenerate manually.");
     } catch (err) {
+      setRemediationApplyStatus("error");
       setReviewFeedback(err instanceof Error ? err.message : "Unable to apply remediation automatically.");
     }
   };
@@ -520,11 +536,13 @@ export function EditorShell() {
       suggestion: selectedFindingContext.remediationHint,
     };
 
-    let applied: { nextContent: string; previousBlock: string | null; appliedBlock: string; };
+    let applied: { nextContent: string; previousBlock: string | null; appliedBlock: string; summary?: { changedChars: number; changedLines: number; findingId: string; draftContextId: string; }; };
 
+    setRemediationApplyStatus("applying");
     try {
       applied = await applyRemediationViaApi(selectedFindingContext);
     } catch (err) {
+      setRemediationApplyStatus("error");
       setReviewFeedback(err instanceof Error ? err.message : "Unable to apply remediation automatically.");
       return;
     }
@@ -536,6 +554,7 @@ export function EditorShell() {
       location: finding.location || "N/A",
       previousBlock: applied.previousBlock,
       appliedBlock: applied.appliedBlock,
+      summary: applied.summary,
     });
     setRemediationApplyHistory((current) => [
       {
@@ -547,6 +566,7 @@ export function EditorShell() {
       },
       ...current,
     ].slice(0, 5));
+    setRemediationApplyStatus("applied");
     setReviewFeedback("Selected remediation context applied. Regenerating draft from selected finding context...");
 
     await runGenerate(applied.nextContent, "Draft regenerated from selected remediation context. Review and save when ready.");
@@ -706,6 +726,9 @@ export function EditorShell() {
             ) : (
               <p className="rf-status rf-status-muted">Select a finding in Compliance to stage remediation context.</p>
             )}
+            <p className="rf-status rf-status-muted" role="status">
+              Auto-remediation apply is manual-only and runs for one selected finding at a time.
+            </p>
             <div className="rf-review-workbench-actions" aria-label="Selected finding quick workflow">
               <button
                 type="button"
@@ -758,6 +781,15 @@ export function EditorShell() {
           <p className="rf-status rf-status-muted" role="status">
             Issue: {remediationPreview.issue} · Severity: {remediationPreview.severity} · Location: {remediationPreview.location}
           </p>
+          {remediationPreview.summary ? (
+            <p className="rf-status rf-status-success" role="status">
+              Summary: {remediationPreview.summary.changedChars} chars changed · {remediationPreview.summary.changedLines} lines changed.
+            </p>
+          ) : (
+            <p className="rf-status rf-status-muted" role="status">
+              Summary: preview applied with bounded context replacement.
+            </p>
+          )}
           <div className="rf-remediation-preview-grid">
             <div>
               <h4>Previous Context</h4>

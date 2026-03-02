@@ -1,5 +1,16 @@
 # Tasks
 
+## task-00121 — UI — auto-remediation UX phase 1
+
+- Status: **Done**
+- Branch: `feat/ui/task-00121-auto-remediation-ux-phase1`
+- Scope delivered:
+  - Added explicit manual-only apply affordance for auto-remediation in Create Review Workbench (single selected finding context only).
+  - Added clearer before/after remediation preview summary (changed chars/lines when available) and stronger operator status feedback during apply.
+  - Preserved existing generation/save/compliance/history workflows and endpoint contracts.
+  - Kept UI changes aligned with existing `rf-*` naming/style patterns.
+  - Updated `docs/UI_FOUNDATIONS.md` and re-ran `npm run build` (pass).
+
 ## task-00122 — SEC — verification pass for auto-remediation phase 1 changes
 
 - Status: **Done**
