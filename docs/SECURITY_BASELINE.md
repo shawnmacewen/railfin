@@ -1,5 +1,52 @@
 # Security Baseline Verification
 
+## task-00103 — SEC — Authz hardening phase 2 follow-through
+
+Review scope:
+- `src/app/api/internal/**/route.ts`
+- `src/app/api/internal/_auth.ts`
+- `docs/tasks.md`
+
+### Verification findings
+
+1. **Route guard coverage check (complete):**
+   - Enumerated current app-router internal API surface under `src/app/api/internal`.
+   - Verified every live `route.ts` handler references `requireInternalApiAuth(request)` at route boundary.
+   - Current covered routes:
+     - `src/app/api/internal/content/generate/route.ts`
+     - `src/app/api/internal/content/list/route.ts`
+     - `src/app/api/internal/content/draft/route.ts`
+     - `src/app/api/internal/compliance/check/route.ts`
+     - `src/app/api/internal/configure/policy/route.ts`
+
+2. **Residual gap assessment:**
+   - No remaining unguarded `/api/internal` route handlers found in current tree.
+   - No low-risk code patch required in phase 2.
+
+### Internal route auth guard checklist (docs-backed, for future routes)
+
+When adding any new `src/app/api/internal/**/route.ts` handler:
+
+- [ ] Import `requireInternalApiAuth` and `INTERNAL_SENSITIVE_NO_STORE_HEADERS` from `src/app/api/internal/_auth.ts`.
+- [ ] Call guard at top of each verb handler (`GET/POST/...`) before body parsing or side effects:
+  - `const unauthorized = requireInternalApiAuth(request);`
+  - `if (unauthorized) return unauthorized;`
+- [ ] Ensure all success and error JSON responses include `Cache-Control: no-store` via `INTERNAL_SENSITIVE_NO_STORE_HEADERS`.
+- [ ] Keep unauthorized contract fail-closed and stable (`401`, `{ ok:false, error:"Unauthorized" }`), with no cookie/session detail leakage.
+- [ ] Add a task-level verification note in `docs/tasks.md` and `docs/SECURITY_BASELINE.md` for any newly introduced internal route.
+
+Quick verification command (before merge):
+
+- `find src/app/api/internal -type f -name 'route.ts' | sort`
+- For each file, confirm `requireInternalApiAuth` usage and no-store headers on all response paths.
+
+### Verification outcome (task-00103)
+
+- Outcome: **PASS**
+- Type: Follow-through verification + prevention checklist
+- Residual follow-up:
+  - Keep phase-1 residual open item: replace cookie-presence check with authoritative session/role verification once auth integration is available.
+
 ## task-00100 — SEC — API authz hardening phase 1 for /api/internal
 
 Review scope:

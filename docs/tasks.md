@@ -1,5 +1,15 @@
 # Tasks
 
+## task-00103 — SEC — Authz hardening phase 2 follow-through
+
+- Status: **Done**
+- Branch: `chore/sec/task-00103-authz-hardening-phase2`
+- Scope delivered:
+  - Re-verified `/api/internal` app-router surface and confirmed route-level guard coverage remains complete for all current `src/app/api/internal/**/route.ts` handlers.
+  - Confirmed no additional low-risk authz gap remained to patch in this phase.
+  - Added a docs-backed implementation checklist in `docs/SECURITY_BASELINE.md` for enforcing `requireInternalApiAuth` + `no-store` semantics on all future internal routes.
+  - Recorded phase-2 verification outcome and residual follow-up continuity (future upgrade from cookie-presence auth to authoritative session/role auth context).
+
 ## task-00100 — SEC — API authz hardening phase 1 for /api/internal
 
 - Status: **Done**
