@@ -39,6 +39,11 @@ type RemediationApplyHistoryEntry = {
   appliedAt: string;
 };
 
+type RemediationUndoState = {
+  previousContent: string;
+  preview: RemediationPreview | null;
+};
+
 type GenerationHistoryEntry = {
   id: string;
   text: string;
@@ -154,6 +159,26 @@ function buildRemediationBlock(hint: string, finding: ComplianceFinding) {
   ].join("\n");
 }
 
+function getProtectedZoneWarning(sourceValues: Array<string | undefined>) {
+  const source = sourceValues.filter(Boolean).join(" ").toLowerCase();
+  if (!source) return null;
+
+  const legalZone = ["legal", "policy", "legal-review", "terms", "disclaimer"].some((token) => source.includes(token));
+  const citationZone = ["citation", "attribution", "source", "footnote"].some((token) => source.includes(token));
+  const metadataZone = ["metadata", "compliance-result", "audit", "header"].some((token) => source.includes(token));
+
+  if (!legalZone && !citationZone && !metadataZone) {
+    return null;
+  }
+
+  const zones: string[] = [];
+  if (legalZone) zones.push("legal/disclaimer");
+  if (citationZone) zones.push("citation/attribution");
+  if (metadataZone) zones.push("compliance metadata");
+
+  return `Protected/prohibited transform zone detected (${zones.join(", ")}). Review edits manually before apply/regenerate.`;
+}
+
 export function EditorShell() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId")?.trim() ?? "";
@@ -171,6 +196,7 @@ export function EditorShell() {
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
   const [selectedFindingContext, setSelectedFindingContext] = useState<SelectedFindingContext | null>(null);
   const [remediationApplyHistory, setRemediationApplyHistory] = useState<RemediationApplyHistoryEntry[]>([]);
+  const [remediationUndoState, setRemediationUndoState] = useState<RemediationUndoState | null>(null);
   const [generationHistory, setGenerationHistory] = useState<GenerationHistoryEntry[]>([]);
 
   const generationHistoryContextKey = draftId || "session-new";
@@ -482,6 +508,10 @@ export function EditorShell() {
 
     try {
       const applied = await applyRemediationViaApi(selectedFindingContext);
+      setRemediationUndoState({
+        previousContent: content,
+        preview: remediationPreview,
+      });
       setContent(applied.nextContent);
       setRemediationPreview({
         issue,
@@ -524,6 +554,27 @@ export function EditorShell() {
     setGenerationFeedback("Restored from generation history. Review, edit, and save when ready.");
   };
 
+  const selectedProtectedZoneWarning = useMemo(() => {
+    if (!selectedFindingContext) return null;
+    return getProtectedZoneWarning([
+      selectedFindingContext.issue,
+      selectedFindingContext.location,
+      selectedFindingContext.remediationHint,
+    ]);
+  }, [selectedFindingContext]);
+
+  const onUndoLastRemediation = () => {
+    if (!remediationUndoState) {
+      return;
+    }
+
+    setContent(remediationUndoState.previousContent);
+    setRemediationPreview(remediationUndoState.preview);
+    setRemediationUndoState(null);
+    setRemediationApplyStatus("idle");
+    setReviewFeedback("Last remediation apply was undone. Review and continue manually.");
+  };
+
   const onApplyAndRegenerate = async () => {
     if (!selectedFindingContext || generationStatus === "generating") {
       return;
@@ -547,6 +598,10 @@ export function EditorShell() {
       return;
     }
 
+    setRemediationUndoState({
+      previousContent: content,
+      preview: remediationPreview,
+    });
     setContent(applied.nextContent);
     setRemediationPreview({
       issue: finding.issue || "unknown issue",
@@ -729,6 +784,11 @@ export function EditorShell() {
             <p className="rf-status rf-status-muted" role="status">
               Auto-remediation apply is manual-only and runs for one selected finding at a time.
             </p>
+            {selectedProtectedZoneWarning ? (
+              <p className="rf-status rf-status-error" role="alert">
+                {selectedProtectedZoneWarning}
+              </p>
+            ) : null}
             <div className="rf-review-workbench-actions" aria-label="Selected finding quick workflow">
               <button
                 type="button"
@@ -754,6 +814,13 @@ export function EditorShell() {
                 disabled={!selectedFindingContext || generationStatus === "generating"}
               >
                 {generationStatus === "generating" ? "Applying + Regenerating..." : "Apply + Regenerate Draft"}
+              </button>
+              <button
+                type="button"
+                onClick={onUndoLastRemediation}
+                disabled={!remediationUndoState || remediationApplyStatus === "applying" || generationStatus === "generating"}
+              >
+                Undo Last Apply
               </button>
             </div>
           </div>

@@ -1,3 +1,13 @@
+## task-00123 — DEV — auto-remediation engine phase 2 hardening
+
+- Status: ✅ Done
+- Branch: `feat/dev/task-00123-auto-remediation-engine-phase2`
+- Summary:
+  - Added prohibited-transform enforcement for legal/disclaimer/citation-sensitive regions in remediation apply path.
+  - Refined bounded edit-size enforcement to use true changed-region calculations (chars + lines) rather than simple length delta.
+  - Added one-step undo token flow (session-scoped, non-persistent) with new undo endpoint for last apply operation.
+  - Preserved manual-trigger-only remediation behavior and existing request contracts (backward compatible additive fields only).
+
 # Tasks
 
 ## task-00121 — UI — auto-remediation UX phase 1
