@@ -5,6 +5,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as {
     prompt?: string;
     contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
+    template?: "default" | "conversion";
   };
 
   const result = await internalContentGenerate({

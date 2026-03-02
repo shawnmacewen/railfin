@@ -1,5 +1,17 @@
 # Tasks
 
+## task-00097 — SEC — Security hardening sweep phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00097-hardening-sweep1`
+- Scope delivered:
+  - Audited newly touched Create/review flows for authorization boundaries, input bounds, and fail-closed behavior (`/api/internal/content/generate`, `/api/internal/compliance/check`, draft/list/read paths, and Create UI integrations).
+  - Added low-risk server-side input bounds and reject-by-default validation in compliance and generation paths:
+    - `POST /api/internal/compliance/check`: max content length, content-type allowlist enforcement, policy-set length cap.
+    - `internalContentGenerate`: max prompt length with structured validation failure contract.
+  - Updated security baseline with a concise hardening checklist, findings, and residual follow-ups for route-level authz and sensitive endpoint cache semantics.
+  - Marked docs/task ledger completion for task-00097.
+
 ## task-00094 — DEV/UI — Review tools actions phase 1
 
 - Status: **Done**
@@ -700,3 +712,13 @@
   - Preserved existing save-draft and compliance-check flows, including compliance legal-guardrail language.
   - Added deterministic provider-chain coverage tests for primary success, fallback success, and full-failure degraded diagnostics.
   - Updated API/UI/task documentation for the new generation capability and coverage.
+
+## task-00095 — DEV — Content tools phase 2
+
+- Status: **Done**
+- Branch: `feat/dev/task-00095-content-tools-phase2`
+- Scope delivered:
+  - Added template-aware generation controls in internal generate path with strict template validation.
+  - Introduced two generation templates (`default`, `conversion`) with explicit prompt guidance injection.
+  - Preserved existing UI response contract (`{ ok, data: { draft, generationMeta } }`) and fallback behavior.
+  - Updated API boundary docs for optional template input and validation semantics.

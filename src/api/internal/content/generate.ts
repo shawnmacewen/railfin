@@ -3,10 +3,14 @@ import { completeWithDeterministicFallback } from "../../../ai/runtime/providerC
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 
 const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
+const MAX_PROMPT_LENGTH = 12000;
+
+type GenerateTemplateId = "default" | "conversion";
 
 type GenerateRequestBody = {
   prompt?: string;
   contentType?: ContentType;
+  template?: GenerateTemplateId;
 };
 
 type GenerateModelOutput = {
@@ -14,11 +18,54 @@ type GenerateModelOutput = {
   notes?: string;
 };
 
+type GenerationTemplate = {
+  id: GenerateTemplateId;
+  label: string;
+  guidance: string[];
+};
+
+const GENERATION_TEMPLATES: Record<GenerateTemplateId, GenerationTemplate> = {
+  default: {
+    id: "default",
+    label: "Baseline Draft",
+    guidance: [
+      "Produce clear, on-brand marketing copy suitable for first-pass editing.",
+      "Use concise structure and avoid unverifiable claims.",
+    ],
+  },
+  conversion: {
+    id: "conversion",
+    label: "Conversion Focus",
+    guidance: [
+      "Optimize for action and conversion while staying factual and compliant.",
+      "Include one clear call-to-action and emphasize audience value.",
+    ],
+  },
+};
+
+const DEFAULT_TEMPLATE: GenerateTemplateId = "default";
+
 function isContentType(value: unknown): value is ContentType {
   return typeof value === "string" && CONTENT_TYPES.includes(value as ContentType);
 }
 
-function buildGenerationPrompt(input: { prompt: string; contentType: ContentType }): string {
+function isGenerateTemplateId(value: unknown): value is GenerateTemplateId {
+  return typeof value === "string" && value in GENERATION_TEMPLATES;
+}
+
+function resolveTemplate(value: unknown): GenerationTemplate | null {
+  if (value === undefined) {
+    return GENERATION_TEMPLATES[DEFAULT_TEMPLATE];
+  }
+
+  if (!isGenerateTemplateId(value)) {
+    return null;
+  }
+
+  return GENERATION_TEMPLATES[value];
+}
+
+function buildGenerationPrompt(input: { prompt: string; contentType: ContentType; template: GenerationTemplate }): string {
   return [
     "You are a content generation engine for marketing copy.",
     "Return strict JSON only.",
@@ -29,6 +76,9 @@ function buildGenerationPrompt(input: { prompt: string; contentType: ContentType
     "- text must be non-empty plain text",
     "- notes is optional",
     `Content type: ${input.contentType}`,
+    `Template: ${input.template.id} (${input.template.label})`,
+    "Template guidance:",
+    ...input.template.guidance.map((item) => `- ${item}`),
     "Prompt:",
     input.prompt,
   ].join("\n");
@@ -90,6 +140,19 @@ export async function internalContentGenerate(request: {
     };
   }
 
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    return {
+      ok: false,
+      error: "Validation failed",
+      fieldErrors: [
+        {
+          field: "prompt",
+          message: `Prompt must be ${MAX_PROMPT_LENGTH} characters or fewer.`,
+        },
+      ],
+    };
+  }
+
   if (!isContentType(request.body?.contentType)) {
     return {
       ok: false,
@@ -98,9 +161,18 @@ export async function internalContentGenerate(request: {
   }
 
   const contentType = request.body.contentType;
+  const template = resolveTemplate(request.body?.template);
+
+  if (!template) {
+    return {
+      ok: false,
+      error: "Invalid template",
+    };
+  }
+
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
-    prompt: buildGenerationPrompt({ prompt, contentType }),
+    prompt: buildGenerationPrompt({ prompt, contentType, template }),
   });
 
   if ("completion" in runtime) {

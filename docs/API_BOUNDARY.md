@@ -107,6 +107,7 @@ Request JSON:
 
 - Required: `prompt: string`
 - Required: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
+- Optional: `template: "default" | "conversion"` (defaults to `default`)
 
 Response JSON:
 
@@ -116,6 +117,7 @@ Response JSON:
 - Validation error: `{ ok: false, error: string }` with `400`
   - missing/blank prompt -> `Missing prompt`
   - missing/invalid `contentType` -> `Invalid contentType`
+  - invalid `template` -> `Invalid template`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
 
 Strict response validation behavior:
