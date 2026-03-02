@@ -1,5 +1,18 @@
 # UI Foundations
 
+## task-00121 — Auto-remediation UX phase 1
+
+- `src/ui/editor-shell.tsx` now exposes a clearer manual-only auto-remediation affordance in Review Workbench:
+  - explicit note that apply is manual and scoped to one selected finding
+  - apply actions remain disabled unless a single finding context is selected
+- Added stronger remediation status/preview feedback in Create flow:
+  - explicit apply-in-progress/apply-error/apply-success review feedback messages
+  - before/after remediation preview now includes bounded change summary (`changedChars`/`changedLines`) when returned by the API
+- Preserved existing workflows and contracts:
+  - generate/save/compliance/history paths unchanged
+  - existing remediation apply history and apply+regenerate flow remain available
+- Styling and naming remain aligned to existing `rf-*` conventions (no shell/layout redesign).
+
 ## task-00118 — Create generation history panel
 
 - `src/ui/editor-shell.tsx` now tracks an in-session generation history (last MAX_GENERATION_HISTORY outputs) scoped to the current Create context (active draft when `draftId` is present, otherwise current new-draft session).
