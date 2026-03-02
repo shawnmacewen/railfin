@@ -1,14 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { internalContentDraft } from "../../../../../api/internal/content/draft";
+import { requireInternalApiAuth, INTERNAL_SENSITIVE_NO_STORE_HEADERS } from "../../_auth";
 
 type DraftPostBody = {
   title?: string;
   body?: string;
-};
-
-const SENSITIVE_NO_STORE_HEADERS = {
-  "Cache-Control": "no-store",
 };
 
 const UUID_V4_OR_COMPAT_REGEX =
@@ -18,7 +15,12 @@ function isValidDraftId(value: string): boolean {
   return UUID_V4_OR_COMPAT_REGEX.test(value);
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const unauthorized = requireInternalApiAuth(request);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const url = new URL(request.url);
   const id = url.searchParams.get("id") ?? undefined;
 
@@ -28,7 +30,7 @@ export async function GET(request: Request) {
         ok: false,
         error: "Draft id is required",
       },
-      { status: 400, headers: SENSITIVE_NO_STORE_HEADERS },
+      { status: 400, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
     );
   }
 
@@ -44,7 +46,7 @@ export async function GET(request: Request) {
           },
         ],
       },
-      { status: 400, headers: SENSITIVE_NO_STORE_HEADERS },
+      { status: 400, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
     );
   }
 
@@ -56,14 +58,19 @@ export async function GET(request: Request) {
   if (!result.ok) {
     return NextResponse.json(result, {
       status: result.error === "Draft not found" ? 404 : 500,
-      headers: SENSITIVE_NO_STORE_HEADERS,
+      headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS,
     });
   }
 
-  return NextResponse.json(result, { headers: SENSITIVE_NO_STORE_HEADERS });
+  return NextResponse.json(result, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const unauthorized = requireInternalApiAuth(request);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = (await request.json().catch(() => ({}))) as DraftPostBody;
   const result = await internalContentDraft({
     method: "POST",
@@ -71,8 +78,8 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    return NextResponse.json(result, { status: 500, headers: SENSITIVE_NO_STORE_HEADERS });
+    return NextResponse.json(result, { status: 500, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
   }
 
-  return NextResponse.json(result, { headers: SENSITIVE_NO_STORE_HEADERS });
+  return NextResponse.json(result, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }

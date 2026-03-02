@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getCurrentConfigurePolicy } from "../../../../../api/internal/configure/policy";
 import { completeWithDeterministicFallback } from "../../../../../ai/runtime/providerChain";
+import { requireInternalApiAuth, INTERNAL_SENSITIVE_NO_STORE_HEADERS } from "../../_auth";
 
 type RawFinding = {
   severity?: string;
@@ -118,12 +119,20 @@ function buildCompliancePrompt(input: {
   ].join("\n");
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const unauthorized = requireInternalApiAuth(request);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = (await request.json().catch(() => ({}))) as ComplianceRequestBody;
   const content = body.content?.trim() ?? "";
 
   if (!content) {
-    return NextResponse.json({ ok: false, error: "Missing content" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Missing content" },
+      { status: 400, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
+    );
   }
 
   if (content.length > MAX_COMPLIANCE_CONTENT_LENGTH) {
@@ -138,7 +147,7 @@ export async function POST(request: Request) {
           },
         ],
       },
-      { status: 400 },
+      { status: 400, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
     );
   }
 
@@ -154,7 +163,7 @@ export async function POST(request: Request) {
           },
         ],
       },
-      { status: 400 },
+      { status: 400, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
     );
   }
 
@@ -172,7 +181,7 @@ export async function POST(request: Request) {
           },
         ],
       },
-      { status: 400 },
+      { status: 400, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
     );
   }
 
@@ -195,13 +204,16 @@ export async function POST(request: Request) {
     try {
       const findings = parseFindingsFromCompletion(runtime.completion).map(normalizeFinding);
 
-      return NextResponse.json({
-        ok: true,
-        findings,
-        meta: {
-          providerChain: runtime.diagnostic,
+      return NextResponse.json(
+        {
+          ok: true,
+          findings,
+          meta: {
+            providerChain: runtime.diagnostic,
+          },
         },
-      });
+        { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
+      );
     } catch {
       // Keep service contract stable while preserving failure diagnostics metadata.
     }
@@ -218,12 +230,15 @@ export async function POST(request: Request) {
     },
   ];
 
-  return NextResponse.json({
-    ok: true,
-    findings: safeFallbackFindings,
-    meta: {
-      providerChain: runtime.diagnostic,
-      degraded: true,
+  return NextResponse.json(
+    {
+      ok: true,
+      findings: safeFallbackFindings,
+      meta: {
+        providerChain: runtime.diagnostic,
+        degraded: true,
+      },
     },
-  });
+    { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS },
+  );
 }

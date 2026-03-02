@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { internalContentList } from "../../../../../api/internal/content/list";
+import { requireInternalApiAuth, INTERNAL_SENSITIVE_NO_STORE_HEADERS } from "../../_auth";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const unauthorized = requireInternalApiAuth(request);
+  if (unauthorized) {
+    return unauthorized;
+  }
   const url = new URL(request.url);
   const q = url.searchParams.get("q") ?? undefined;
 
@@ -14,8 +19,8 @@ export async function GET(request: Request) {
   const result = await internalContentList({ q, limit, offset });
 
   if (!result.ok) {
-    return NextResponse.json(result, { status: 500 });
+    return NextResponse.json(result, { status: 500, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json(result, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }
