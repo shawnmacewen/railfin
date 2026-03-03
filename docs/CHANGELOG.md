@@ -56,3 +56,8 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Removed package fan-out behavior that previously issued multiple single-mode generate requests.
 - Kept single-draft generation backward compatible and explicit (`mode: "single"` + `contentType`).
 - Added stricter UI-side handling for package responses so empty/malformed package payloads fail clearly.
+
+## 2026-03-03 — Events module kickoff placeholder + PRD
+- Added new `Events` item in app side navigation with `/app/events` placeholder page.
+- Added `docs/PRD_Events_Module_v0.md` capturing event lifecycle scope: creation, promotion content, registration, QR check-in, and attendance-based follow-up logic.
+- Email delivery plumbing remains intentionally deferred for a later integration phase.

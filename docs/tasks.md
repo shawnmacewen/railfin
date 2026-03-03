@@ -1218,3 +1218,13 @@
   - Preserved single-draft behavior and contract compatibility (`mode: "single"` + `contentType`) for existing flows.
   - Added UI-side package response normalization/validation to fail closed when package assets are missing or malformed.
   - Updated API boundary/task/changelog docs and re-ran `npm run build` (pass).
+
+## task-00143 — UI/COO — Events nav placeholder + PRD capture
+
+- Status: **Done**
+- Branch: `feat/ui/task-00143-events-nav-prd`
+- Scope delivered:
+  - Added `Events` item to primary app navigation (`/app/events`).
+  - Added Events placeholder page and shortcut redirect route.
+  - Authored `docs/PRD_Events_Module_v0.md` with human-readable module scope for event creation, content generation, registration, QR check-in, and attendance-based post-event communication.
+  - Updated changelog with Events kickoff entry.
