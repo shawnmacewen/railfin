@@ -1,5 +1,19 @@
 # UI Foundations
 
+## task-00144 — Create page UX refactor (specific product-owner requests)
+
+- `src/ui/editor-shell.tsx` updates Create generation ergonomics and wording per product-owner directives:
+  - removed obsolete helper copy and redundant stage labels
+  - moved draft save-state into a right-aligned header pill
+  - replaced generation mode radios with two large active-state buttons
+  - replaced content type dropdown with exactly four rectangular choices: Blog, Social Post, Article, Newsletter
+  - split **AI Instructions** (prompt input) from **Editor Content** (output/editor area)
+  - moved Generation History to the bottom of the Create page flow
+- Added in-session prompt lock/reference behavior so users can retain the exact submitted prompt while reviewing generated output.
+- `src/app/globals.css` adds additive `rf-*` styles for new pill + large choice-button controls.
+- Roadmap follow-up explicitly documented: prompt submissions must be persisted with user linkage (user/session/model) in backend audit storage; current lock/reference behavior is UI-session scope only.
+
+
 ## task-00142 — Configure Features subpage
 
 - Added a new Configure subpage at `/app/configure/features` and linked it in the Configure subnav between **Policy** and **Change Log**.
