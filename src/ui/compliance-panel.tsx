@@ -174,19 +174,23 @@ export function CompliancePanel({
       return;
     }
 
-    if (!selectedFindingMeta) {
+    if (!selectedFindingMeta || !selectedFindingKey) {
       onSelectedFindingChange(null);
       return;
     }
 
     onSelectedFindingChange({
-      findingId: selectedFindingKey!,
+      findingId: selectedFindingKey,
       issue: selectedFindingMeta.finding.issue || "N/A",
       severity: selectedFindingMeta.severity,
       location: selectedFindingMeta.finding.location || "N/A",
       remediationHint: selectedFindingMeta.remediationHint,
     });
-  }, [onSelectedFindingChange, selectedFindingMeta]);
+  }, [onSelectedFindingChange, selectedFindingKey, selectedFindingMeta]);
+
+  useEffect(() => {
+    setSelectedFindingKey(null);
+  }, [content, contentType, policySet]);
 
   const runComplianceCheck = async () => {
     if (running) return;

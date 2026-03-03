@@ -4,6 +4,27 @@
 - Entries should be concise, dated (`YYYY-MM-DD`), and understandable by non-engineers.
 - Tasks are not considered complete until both `docs/tasks.md` and `docs/CHANGELOG.md` are updated when applicable.
 
+## task-00137 — DEV — UX stabilization support pass for split layout
+
+- Status: **Done**
+- Branch: `fix/dev/task-00137-ux-stability-support`
+- Scope delivered:
+  - Stabilized Create compliance selection state under persistent split layout by clearing selected finding context when editor content/policy context changes, preventing stale apply actions against out-of-date findings.
+  - Hardened selected-finding propagation to parent state by requiring a live selected key and aligning effect dependencies to current selection identity.
+  - Kept API contracts unchanged (`/api/internal/compliance/check`, remediation apply flow) and avoided behavior changes outside low-risk state synchronization fixes.
+  - Updated changelog and re-ran `npm run build` (pass).
+
+## task-00138 — SEC — safety check for UX layout refactor
+
+- Status: **Done**
+- Branch: `chore/sec/task-00138-ux-change-safety-check`
+- Scope delivered:
+  - Re-verified Create layout composition does not hide/suppress safety-critical surfaces (degraded-state notices, protected-zone warnings, legal-disclaimer messaging).
+  - Confirmed remediation actions remain explicit/manual (`Apply Selected Context`, `Apply + Regenerate Draft`, `Undo Last Apply`) and are not auto-triggered by UI rearrangement.
+  - Confirmed selected-finding remediation context is reset on content/context changes, preventing stale context actions after layout persistence changes.
+  - Updated `docs/SECURITY_BASELINE.md` with task-00138 verification findings and gate decision (**GO for layout safety posture**).
+  - Updated `docs/CHANGELOG.md` with a concise security verification note.
+
 ## task-00135 — DEV/UI — Configure Change Log subpage
 
 - Status: **Done**

@@ -2,6 +2,11 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Split layout UX stabilization (Create + Compliance)
+- Fixed stale selected-finding state in the persistent compliance panel so remediation actions cannot target outdated findings after editor content/context changes.
+- Improved Create↔Compliance state synchronization by tightening selected-finding identity propagation to the editor workbench.
+- Kept API behavior/contracts unchanged; this was a low-risk UI state stability pass.
+
 ## 2026-03-03 — Campaign package workflow upgrades
 - Added campaign package generation so teams can create multiple channel-ready variants from one prompt.
 - Added side-by-side variant comparison with quick copy/restore actions in Create history.
