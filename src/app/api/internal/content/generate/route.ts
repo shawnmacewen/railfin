@@ -9,7 +9,14 @@ export async function POST(request: NextRequest) {
   }
   const body = (await request.json().catch(() => ({}))) as {
     prompt?: string;
+    mode?: "single" | "package";
     contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
+    package?: {
+      assets?: Array<{
+        assetType?: "email" | "linkedin" | "x-thread";
+        prompt?: string;
+      }>;
+    };
     template?: "default" | "conversion";
     tone?: "professional" | "friendly" | "bold";
     intent?: "educate" | "engage" | "convert";

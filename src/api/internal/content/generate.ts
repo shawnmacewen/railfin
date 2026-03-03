@@ -1,6 +1,8 @@
 import { completeWithDeterministicFallback } from "../../../ai/runtime/providerChain";
 
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
+type PackageAssetType = "email" | "linkedin" | "x-thread";
+type GenerateMode = "single" | "package";
 
 type GenerateTemplateId = "default" | "conversion";
 type GenerateToneId = "professional" | "friendly" | "bold";
@@ -13,7 +15,14 @@ type GenerateControlProfileId = "social-quick" | "balanced-default" | "deep-outl
 
 type GenerateRequestBody = {
   prompt?: string;
+  mode?: GenerateMode;
   contentType?: ContentType;
+  package?: {
+    assets?: Array<{
+      assetType?: PackageAssetType;
+      prompt?: string;
+    }>;
+  };
   template?: GenerateTemplateId;
   tone?: GenerateToneId;
   intent?: GenerateIntentId;
@@ -73,7 +82,9 @@ type GenerationControlProfile = {
 };
 
 const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
+const PACKAGE_ASSET_TYPES: PackageAssetType[] = ["email", "linkedin", "x-thread"];
 const MAX_PROMPT_LENGTH = 12000;
+const MAX_PACKAGE_ASSETS = 3;
 
 const GENERATION_TEMPLATES: Record<GenerateTemplateId, GenerationTemplate> = {
   default: {
@@ -224,6 +235,14 @@ const DEFAULT_CONTROL_PROFILE: GenerateControlProfileId = "balanced-default";
 
 function isContentType(value: unknown): value is ContentType {
   return typeof value === "string" && CONTENT_TYPES.includes(value as ContentType);
+}
+
+function isGenerateMode(value: unknown): value is GenerateMode {
+  return value === "single" || value === "package";
+}
+
+function isPackageAssetType(value: unknown): value is PackageAssetType {
+  return typeof value === "string" && PACKAGE_ASSET_TYPES.includes(value as PackageAssetType);
 }
 
 function isGenerateTemplateId(value: unknown): value is GenerateTemplateId {
@@ -494,11 +513,163 @@ function validateControlOverrides(body: GenerateRequestBody) {
   return fieldErrors;
 }
 
+function validatePackageRequest(body: GenerateRequestBody, mode: GenerateMode) {
+  const fieldErrors: Array<{ field: string; message: string }> = [];
+
+  if (mode === "single") {
+    if (body.package !== undefined) {
+      fieldErrors.push({ field: "package", message: "package is only allowed when mode is package." });
+    }
+
+    if (!isContentType(body.contentType)) {
+      fieldErrors.push({ field: "contentType", message: "contentType is required when mode is single." });
+    }
+
+    return fieldErrors;
+  }
+
+  if (body.contentType !== undefined) {
+    fieldErrors.push({ field: "contentType", message: "contentType is not allowed when mode is package." });
+  }
+
+  if (!body.package || typeof body.package !== "object" || !hasOnlyKeys(body.package, ["assets"])) {
+    fieldErrors.push({ field: "package", message: "package must be an object with assets." });
+    return fieldErrors;
+  }
+
+  if (!Array.isArray(body.package.assets)) {
+    fieldErrors.push({ field: "package.assets", message: "package.assets must be an array." });
+    return fieldErrors;
+  }
+
+  if (body.package.assets.length === 0 || body.package.assets.length > MAX_PACKAGE_ASSETS) {
+    fieldErrors.push({
+      field: "package.assets",
+      message: 
+        "package.assets must contain between 1 and " + MAX_PACKAGE_ASSETS + " items.",
+    });
+  }
+
+  const seen = new Set<string>();
+
+  body.package.assets.forEach((asset, index) => {
+    const path =       "package.assets[" + index + "]";
+
+    if (!asset || typeof asset !== "object" || !hasOnlyKeys(asset as object, ["assetType", "prompt"])) {
+      fieldErrors.push({ field: path, message: "asset must contain only assetType and optional prompt." });
+      return;
+    }
+
+    if (!isPackageAssetType(asset.assetType)) {
+      fieldErrors.push({ field: path + ".assetType", message: "assetType must be one of email, linkedin, x-thread." });
+      return;
+    }
+
+    if (seen.has(asset.assetType)) {
+      fieldErrors.push({ field: path + ".assetType", message: "assetType must be unique within package assets." });
+    }
+
+    seen.add(asset.assetType);
+
+    if (asset.prompt !== undefined) {
+      if (typeof asset.prompt !== "string" || !asset.prompt.trim()) {
+        fieldErrors.push({ field: path + ".prompt", message: "prompt must be a non-empty string when provided." });
+      } else if (asset.prompt.trim().length > MAX_PROMPT_LENGTH) {
+        fieldErrors.push({
+          field: path + ".prompt",
+          message: "Prompt must be " + MAX_PROMPT_LENGTH + " characters or fewer.",
+        });
+      }
+    }
+  });
+
+  return fieldErrors;
+}
+
+function buildAssetPrompt(basePrompt: string, assetType: PackageAssetType) {
+  const assetConstraintByType: Record<PackageAssetType, string[]> = {
+    email: [
+      "Return a marketing email draft with a short subject line plus body content.",
+      "Keep body around 120-220 words and include one clear call-to-action.",
+    ],
+    linkedin: [
+      "Return a LinkedIn post draft optimized for readability.",
+      "Keep output around 80-180 words and end with a discussion-driving CTA.",
+    ],
+    "x-thread": [
+      "Return an X thread as 4-7 numbered posts.",
+      "Each post should be concise, clear, and avoid redundant hashtags.",
+    ],
+  };
+
+  return [basePrompt, "", "Asset-specific constraints:", ...assetConstraintByType[assetType].map((item) => "- " + item)].join("\n");
+}
+
+type NormalizedGenerationConfig = {
+  template: GenerationTemplate;
+  preset: GenerationPreset;
+  controlProfile: GenerationControlProfile;
+  controls: GenerationControls;
+};
+
+async function generateDraftForContentType(input: {
+  prompt: string;
+  contentType: ContentType;
+  config: NormalizedGenerationConfig;
+}) {
+  const runtime = await completeWithDeterministicFallback({
+    flow: "content-generate",
+    prompt: buildGenerationPrompt({
+      prompt: input.prompt,
+      contentType: input.contentType,
+      template: input.config.template,
+      preset: input.config.preset,
+      controlProfile: input.config.controlProfile,
+      controls: input.config.controls,
+    }),
+  });
+
+  if ("completion" in runtime) {
+    try {
+      const generated = validateGenerateModelOutput(parseJsonCompletion(runtime.completion));
+
+      return {
+        draft: {
+          id: "gen_" + Date.now(),
+          contentType: input.contentType,
+          prompt: input.prompt,
+          text: generated.text,
+          status: "placeholder",
+          createdAt: new Date().toISOString(),
+        },
+        generationMeta: {
+          provider: runtime.diagnostic.attempts.find((attempt) => attempt.ok)?.provider ?? runtime.diagnostic.primary,
+          notes: generated.notes || "Generation completed",
+          providerChain: runtime.diagnostic,
+        },
+      };
+    } catch {
+      // degrade safely
+    }
+  }
+
+  return {
+    draft: createFallbackDraft({ prompt: input.prompt, contentType: input.contentType }),
+    generationMeta: {
+      provider: "fallback",
+      notes: buildDegradedGenerationNote(runtime.diagnostic.attempts[0]?.errorKind),
+      providerChain: runtime.diagnostic,
+      degraded: true,
+    },
+  };
+}
+
 export async function internalContentGenerate(request: {
   method: "POST";
   body?: GenerateRequestBody;
 }) {
-  const prompt = request.body?.prompt?.trim();
+  const body = request.body ?? {};
+  const prompt = body.prompt?.trim();
 
   if (!prompt) {
     return {
@@ -514,22 +685,32 @@ export async function internalContentGenerate(request: {
       fieldErrors: [
         {
           field: "prompt",
-          message: `Prompt must be ${MAX_PROMPT_LENGTH} characters or fewer.`,
+          message: "Prompt must be " + MAX_PROMPT_LENGTH + " characters or fewer.",
         },
       ],
     };
   }
 
-  if (!isContentType(request.body?.contentType)) {
+  const mode: GenerateMode = body.mode === undefined ? "single" : body.mode;
+
+  if (!isGenerateMode(mode)) {
     return {
       ok: false,
-      error: "Invalid contentType",
+      error: "Validation failed",
+      fieldErrors: [{ field: "mode", message: "mode must be single or package." }],
     };
   }
 
-  const body = request.body ?? {};
-  const combinationErrors = validateControlOverrides(body);
+  const packageErrors = validatePackageRequest(body, mode);
+  if (packageErrors.length > 0) {
+    return {
+      ok: false,
+      error: "Validation failed",
+      fieldErrors: packageErrors,
+    };
+  }
 
+  const combinationErrors = validateControlOverrides(body);
   if (combinationErrors.length > 0) {
     return {
       ok: false,
@@ -538,9 +719,7 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  const contentType = request.body.contentType;
   const template = resolveTemplate(body.template);
-
   if (!template) {
     return {
       ok: false,
@@ -549,7 +728,6 @@ export async function internalContentGenerate(request: {
   }
 
   const preset = resolvePreset(body.preset, body.tone, body.intent);
-
   if (!preset) {
     return {
       ok: false,
@@ -558,7 +736,6 @@ export async function internalContentGenerate(request: {
   }
 
   const controlProfile = resolveControlProfile(body.controlProfile);
-
   if (!controlProfile) {
     return {
       ok: false,
@@ -567,7 +744,6 @@ export async function internalContentGenerate(request: {
   }
 
   const controls = resolveControls(body.controls, controlProfile, body.audience, body.objective);
-
   if (!controls) {
     return {
       ok: false,
@@ -575,47 +751,71 @@ export async function internalContentGenerate(request: {
     };
   }
 
-  const runtime = await completeWithDeterministicFallback({
-    flow: "content-generate",
-    prompt: buildGenerationPrompt({ prompt, contentType, template, preset, controlProfile, controls }),
-  });
+  const config: NormalizedGenerationConfig = {
+    template,
+    preset,
+    controlProfile,
+    controls,
+  };
 
-  if ("completion" in runtime) {
-    try {
-      const generated = validateGenerateModelOutput(parseJsonCompletion(runtime.completion));
+  if (mode === "single") {
+    const result = await generateDraftForContentType({
+      prompt,
+      contentType: body.contentType as ContentType,
+      config,
+    });
+
+    return {
+      ok: true,
+      data: {
+        draft: result.draft,
+        generationMeta: result.generationMeta,
+      },
+    };
+  }
+
+  const assets = body.package?.assets ?? [];
+  const packageResults = await Promise.all(
+    assets.map(async (asset) => {
+      const assetType = asset.assetType as PackageAssetType;
+      const assetPrompt = asset.prompt?.trim() || prompt;
+      const mappedContentType: ContentType = assetType === "email" ? "newsletter" : assetType;
+      const result = await generateDraftForContentType({
+        prompt: buildAssetPrompt(assetPrompt, assetType),
+        contentType: mappedContentType,
+        config,
+      });
 
       return {
-        ok: true,
-        data: {
-          draft: {
-            id: `gen_${Date.now()}`,
-            contentType,
-            prompt,
-            text: generated.text,
-            status: "placeholder",
-            createdAt: new Date().toISOString(),
-          },
-          generationMeta: {
-            provider: runtime.diagnostic.attempts.find((attempt) => attempt.ok)?.provider ?? runtime.diagnostic.primary,
-            notes: generated.notes || "Generation completed",
-            providerChain: runtime.diagnostic,
-          },
+        assetType,
+        draft: {
+          ...result.draft,
+          contentType: assetType,
+          prompt: assetPrompt,
         },
+        generationMeta: result.generationMeta,
       };
-    } catch {
-      // keep contract stable and degrade safely
-    }
-  }
+    }),
+  );
+
+  const degraded = packageResults.some((item) => Boolean(item.generationMeta.degraded));
 
   return {
     ok: true,
     data: {
-      draft: createFallbackDraft({ prompt, contentType }),
+      package: {
+        id: "pkg_" + Date.now(),
+        mode: "package",
+        prompt,
+        assets: packageResults,
+        createdAt: new Date().toISOString(),
+      },
       generationMeta: {
-        provider: "fallback",
-        notes: buildDegradedGenerationNote(runtime.diagnostic.attempts[0]?.errorKind),
-        providerChain: runtime.diagnostic,
-        degraded: true,
+        provider: degraded ? "mixed" : packageResults[0]?.generationMeta.provider ?? "unknown",
+        notes: degraded
+          ? "Campaign package generated with one or more degraded assets. Review each variant before use."
+          : "Campaign package generated successfully.",
+        degraded,
       },
     },
   };

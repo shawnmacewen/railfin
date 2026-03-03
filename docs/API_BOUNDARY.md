@@ -148,7 +148,15 @@ Generate and Compliance must not reuse one another’s response type as a shortc
 Request JSON:
 
 - Required: `prompt: string`
-- Required: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
+- Optional: `mode: "single" | "package"` (defaults to `single`)
+- In `single` mode (default):
+  - Required: `contentType: "blog" | "linkedin" | "newsletter" | "x-thread"`
+  - `package` payload is rejected
+- In `package` mode:
+  - `contentType` must be omitted
+  - Required: `package: { assets: Array<{ assetType: "email" | "linkedin" | "x-thread", prompt?: string }> }`
+  - `assets` constraints: 1..3 items, unique `assetType`, strict key validation (`assetType`, optional `prompt` only)
+  - Per-asset `prompt` is optional and must be non-empty when provided; max length matches top-level prompt limit
 - Optional: `template: "default" | "conversion"` (defaults to `default`)
 - Optional: `tone: "professional" | "friendly" | "bold"`
 - Optional: `intent: "educate" | "engage" | "convert"`
@@ -172,11 +180,17 @@ Request JSON:
 
 Response JSON:
 
-- Success: `{ ok: true, data: { draft, generationMeta } }`
+- Success (single mode): `{ ok: true, data: { draft, generationMeta } }`
   - `draft`: `{ id, contentType, prompt, text, status, createdAt }`
   - `generationMeta`: includes `provider`, `notes`, and `providerChain` diagnostics metadata
+- Success (package mode): `{ ok: true, data: { package, generationMeta } }`
+  - `package`: `{ id, mode, prompt, assets, createdAt }`
+  - `assets[]`: `{ assetType, draft, generationMeta }` where `draft` preserves single-draft shape per asset variant
+  - top-level `generationMeta.degraded` signals whether any asset degraded
 - Validation error: `{ ok: false, error: string }` with `400`
   - conflicting top-level+nested control values -> `Validation failed` with `fieldErrors[]`
+  - invalid `mode` value -> `Validation failed` with `fieldErrors[]`
+  - invalid package shape, disallowed single/package field mix, duplicate asset types, or per-asset prompt violations -> `Validation failed` with `fieldErrors[]`
   - missing/blank prompt -> `Missing prompt`
   - missing/invalid `contentType` -> `Invalid contentType`
   - invalid `template` -> `Invalid template`

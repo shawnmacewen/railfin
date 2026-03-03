@@ -132,3 +132,83 @@ test("rejects conflicting top-level and nested values with clear validation fail
   assert.equal(result.error, "Validation failed");
   assert.equal(result.fieldErrors?.[0]?.field, "tone");
 });
+
+test("rejects package payload when mode is single", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      ...VALID_BASE_REQUEST.body,
+      mode: "single",
+      package: {
+        assets: [{ assetType: "email" }],
+      },
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected validation failure");
+  }
+  assert.equal(result.error, "Validation failed");
+  assert.equal(result.fieldErrors?.[0]?.field, "package");
+});
+
+test("rejects package mode when contentType is provided", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      ...VALID_BASE_REQUEST.body,
+      mode: "package",
+      contentType: "blog",
+      package: {
+        assets: [{ assetType: "email" }],
+      },
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected validation failure");
+  }
+  assert.equal(result.error, "Validation failed");
+  assert.equal(result.fieldErrors?.[0]?.field, "contentType");
+});
+
+test("rejects duplicate package asset types", async () => {
+  const result = await internalContentGenerate({
+    ...VALID_BASE_REQUEST,
+    body: {
+      prompt: VALID_BASE_REQUEST.body.prompt,
+      mode: "package",
+      package: {
+        assets: [{ assetType: "email" }, { assetType: "email" }],
+      },
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected validation failure");
+  }
+  assert.equal(result.error, "Validation failed");
+  assert.equal(result.fieldErrors?.[0]?.field, "package.assets[1].assetType");
+});
+
+test("accepts valid package mode payload", async () => {
+  const result = await internalContentGenerate({
+    method: "POST",
+    body: {
+      prompt: "Build a campaign package for Q2 product launch.",
+      mode: "package",
+      package: {
+        assets: [{ assetType: "email" }, { assetType: "linkedin" }, { assetType: "x-thread" }],
+      },
+    },
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail("expected success");
+  }
+  assert.equal(result.data?.package?.assets?.length, 3);
+});

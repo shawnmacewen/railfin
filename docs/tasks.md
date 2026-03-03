@@ -1,3 +1,24 @@
+## task-00129 — DEV — campaign package generator phase 1
+
+- Status: **Done**
+- Branch: `feat/dev/task-00129-campaign-package-generator-phase1`
+- Scope delivered:
+  - Extended `POST /api/internal/content/generate` to support additive `mode: "package"` payloads with multi-asset generation in one request (`email`, `linkedin`, `x-thread`) while preserving existing default single-draft behavior.
+  - Added strict package-mode and per-asset validation (field exclusivity, shape allowlists, unique asset types, bounded prompt constraints).
+  - Preserved backward compatibility for existing single-mode request/response contracts.
+  - Updated API boundary docs for package-mode contract and validation semantics.
+  - Re-ran `npm run build` (pass).
+
+## task-00130 — UI — campaign package UX phase 1
+
+- Status: **Done**
+- Branch: `feat/ui/task-00130-campaign-package-ux-phase1`
+- Scope delivered:
+  - Added Create generation mode controls for **Single draft** vs **Campaign package** (multi-variant generation).
+  - Added structured Generation History cards that preserve package context and list per-variant restore actions.
+  - Kept existing save/history/compliance/review flows intact while extending generation UX with existing `rf-*` patterns.
+  - Updated `docs/UI_FOUNDATIONS.md` and reran `npm run build` (pass).
+
 ## task-00131 — SEC — package-mode safety review phase 1
 
 - Status: **Done**
