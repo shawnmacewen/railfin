@@ -2,6 +2,13 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Create-page UX polish follow-up (task-00145)
+- Removed the top Create workflow shortcut row to reduce visual clutter.
+- Tightened platform visual language to a 2px corner-radius baseline for core controls, cards, and pills.
+- Kept **Campaign Package** visible in mode controls but disabled for now to show upcoming capability without enabling selection.
+- Kept content-type choices (Blog, Social Post, Article, Newsletter) on a single horizontal row for faster scanning.
+- Removed the visible `1. Generate` label while preserving all existing generate/review/remediate/save functionality.
+
 ## 2026-03-03 — Create UX refactor (task-00144)
 - Simplified Create-page copy and hierarchy by removing outdated helper text and redundant stage labels.
 - Moved Draft Status into a right-aligned header pill for faster save-state scanning.

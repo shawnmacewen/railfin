@@ -1,3 +1,16 @@
+## task-00145 — UI — Create-page UX polish follow-up
+
+- Status: **Done**
+- Branch: `feat/ui/task-00145-create-ux-polish-followup`
+- Scope delivered:
+  - Removed Create workflow shortcut row (Generate / Review / Remediate / Save).
+  - Reduced platform corner radius to a 2px baseline for core controls/cards/pills to avoid over-rounded styling.
+  - Kept **Campaign Package** visible in mode controls but disabled/non-selectable with explicit non-interactive affordance.
+  - Rendered content-type options (Blog, Social Post, Article, Newsletter) on a single row.
+  - Removed the explicit `1. Generate` label from the Generate stage.
+  - Preserved generation/save/compliance/remediation behavior and existing endpoint contracts.
+  - Updated docs/changelog and re-ran `npm run build` (pass).
+
 ## task-00144 — UI/DEV — Create page UX refactor (specific product-owner requests)
 
 - Status: **Done**

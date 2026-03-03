@@ -32,7 +32,7 @@ button {
   margin-bottom: 0.8rem;
   padding: 0.6rem 0.7rem;
   border: 1px solid #d8dced;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   background: #fff;
 }
 
@@ -79,7 +79,7 @@ button:disabled {
 }
 
 .rf-brand-logo {
-  border-radius: 0.35rem;
+  border-radius: 2px;
 }
 
 .rf-nav-list {
@@ -88,7 +88,7 @@ button:disabled {
 }
 
 .rf-nav-item {
-  border-radius: 0.55rem;
+  border-radius: 2px;
   padding: 0.5rem 0.65rem;
   color: #3b4259;
   font-weight: 500;
@@ -137,14 +137,14 @@ button:disabled {
 .rf-card {
   background: #fff;
   border: 1px solid #e4e8f5;
-  border-radius: 0.75rem;
+  border-radius: 2px;
   padding: 1rem;
 }
 
 .rf-badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 2px;
   border: 1px dashed #b5bfdc;
   color: #4e5879;
   font-size: 0.78rem;
@@ -205,7 +205,7 @@ button:disabled {
 
 .rf-findings-summary {
   border: 1px solid #e4e8f5;
-  border-radius: 0.6rem;
+  border-radius: 2px;
   padding: 0.7rem;
   background: #f7f9ff;
 }
@@ -226,7 +226,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border-radius: 999px;
+  border-radius: 2px;
   border: 1px solid #d5ddf5;
   background: #ffffff;
   padding: 0.2rem 0.5rem;
@@ -240,7 +240,7 @@ button:disabled {
   top: 0.6rem;
   z-index: 2;
   border: 1px solid #cfdafb;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   background: #ffffff;
   padding: 0.6rem;
   box-shadow: 0 2px 12px rgba(26, 76, 255, 0.08);
@@ -257,7 +257,7 @@ button:disabled {
 
 .rf-finding-group {
   border: 1px solid #e4e8f5;
-  border-radius: 0.6rem;
+  border-radius: 2px;
   padding: 0.7rem;
   background: #fff;
 }
@@ -277,7 +277,7 @@ button:disabled {
 
 .rf-finding-card {
   border: 1px solid #e4e8f5;
-  border-radius: 0.6rem;
+  border-radius: 2px;
   background: #fafbff;
   padding: 0.65rem;
 }
@@ -302,7 +302,7 @@ button:disabled {
 .rf-finding-actions button {
   margin: 0;
   padding: 0.35rem 0.55rem;
-  border-radius: 0.45rem;
+  border-radius: 2px;
   border: 1px solid #c9d2f2;
   background: #eef2ff;
   color: #1b378a;
@@ -312,7 +312,7 @@ button:disabled {
 .rf-severity-badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 2px;
   border: 1px solid transparent;
   font-size: 0.72rem;
   font-weight: 700;
@@ -348,7 +348,7 @@ button:disabled {
 .rf-review-workbench {
   margin: 0.9rem 0;
   border: 1px solid #dbe4ff;
-  border-radius: 0.65rem;
+  border-radius: 2px;
   background: #f8faff;
   padding: 0.75rem;
 }
@@ -365,7 +365,7 @@ button:disabled {
 
 .rf-review-workbench-grid > div {
   border: 1px solid #d6def6;
-  border-radius: 0.55rem;
+  border-radius: 2px;
   background: #fff;
   padding: 0.6rem;
 }
@@ -406,7 +406,7 @@ button:disabled {
 
 .rf-review-history-list li {
   border: 1px solid #e5eaf8;
-  border-radius: 0.45rem;
+  border-radius: 2px;
   padding: 0.4rem 0.45rem;
   background: #fafcff;
 }
@@ -420,7 +420,7 @@ button:disabled {
 .rf-remediation-preview {
   margin: 0.8rem 0;
   border: 1px solid #dbe4ff;
-  border-radius: 0.65rem;
+  border-radius: 2px;
   background: #f8faff;
   padding: 0.7rem;
 }
@@ -443,7 +443,7 @@ button:disabled {
 .rf-remediation-preview-grid pre {
   margin: 0;
   border: 1px solid #d8dced;
-  border-radius: 0.45rem;
+  border-radius: 2px;
   background: #fff;
   padding: 0.55rem;
   white-space: pre-wrap;
@@ -481,7 +481,7 @@ button:disabled {
 
 .rf-library-item {
   border: 1px solid #e4e8f5;
-  border-radius: 0.6rem;
+  border-radius: 2px;
   padding: 0.65rem;
   background: #fafbff;
 }
@@ -504,7 +504,7 @@ button:disabled {
 
 .rf-control-group {
   border: 1px solid #e3e9fb;
-  border-radius: 0.55rem;
+  border-radius: 2px;
   background: #fcfdff;
   padding: 0.55rem;
 }
@@ -538,7 +538,7 @@ button:disabled {
 .rf-generation-history {
   margin: 0.8rem 0;
   border: 1px solid #dbe4ff;
-  border-radius: 0.65rem;
+  border-radius: 2px;
   background: #f8faff;
   padding: 0.75rem;
 }
@@ -565,7 +565,7 @@ button:disabled {
 
 .rf-generation-history-item {
   border: 1px solid #d6def6;
-  border-radius: 0.55rem;
+  border-radius: 2px;
   background: #fff;
   padding: 0.55rem;
 }
@@ -597,7 +597,7 @@ button:disabled {
 
 .rf-generation-variant-item {
   border: 1px solid #e3e9fb;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   background: #fcfdff;
   padding: 0.5rem;
 }
@@ -620,7 +620,7 @@ button:disabled {
 .rf-generation-history-actions button {
   margin: 0;
   padding: 0.3rem 0.5rem;
-  border-radius: 0.45rem;
+  border-radius: 2px;
   border: 1px solid #c9d2f2;
   background: #eef2ff;
   color: #1b378a;
@@ -653,7 +653,7 @@ button:disabled {
 
 .rf-configure-subnav-item {
   border: 1px solid #d8dced;
-  border-radius: 999px;
+  border-radius: 2px;
   padding: 0.25rem 0.65rem;
   font-size: 0.82rem;
   color: #2f3a5f;
@@ -683,7 +683,7 @@ button:disabled {
 
 .rf-changelog-section {
   border: 1px solid #e4e8f5;
-  border-radius: 0.6rem;
+  border-radius: 2px;
   background: #fafbff;
   padding: 0.65rem;
 }
@@ -712,7 +712,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   border: 1px solid #c9d2f2;
-  border-radius: 999px;
+  border-radius: 2px;
   background: #eef2ff;
   color: #1b378a;
   font-size: 0.8rem;
@@ -745,7 +745,7 @@ button:disabled {
 
 .rf-create-compliance-card {
   border: 1px solid #dbe4ff;
-  border-radius: 0.7rem;
+  border-radius: 2px;
   background: #f8faff;
   padding: 0.75rem;
   display: grid;
@@ -785,7 +785,7 @@ button:disabled {
     padding: 0.35rem;
     background: rgba(247, 248, 252, 0.96);
     border: 1px solid #dbe4ff;
-    border-radius: 0.7rem;
+    border-radius: 2px;
     backdrop-filter: blur(2px);
   }
 
@@ -803,7 +803,7 @@ button:disabled {
 
 .rf-feature-section {
   border: 1px solid #e4e8f5;
-  border-radius: 0.6rem;
+  border-radius: 2px;
   background: #fafbff;
   padding: 0.65rem;
 }
@@ -831,7 +831,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   border: 1px solid #c7d5ff;
-  border-radius: 999px;
+  border-radius: 2px;
   padding: 0.2rem 0.6rem;
   background: #eef2ff;
   color: #1b378a;
@@ -840,16 +840,26 @@ button:disabled {
   white-space: nowrap;
 }
 
-.rf-generate-mode-buttons,
-.rf-content-type-buttons {
+.rf-generate-mode-buttons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
 }
 
+.rf-content-type-buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.45rem;
+}
+
+.rf-content-type-buttons .rf-choice-button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .rf-choice-button {
   border: 1px solid #c9d2f2;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   background: #f7f9ff;
   color: #2f3a5f;
   font-size: 0.82rem;
@@ -864,5 +874,9 @@ button:disabled {
 }
 
 .rf-choice-button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f8;
+  color: #6c748f;
+  border-color: #d8dced;
 }

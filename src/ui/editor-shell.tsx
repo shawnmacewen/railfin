@@ -819,17 +819,9 @@ export function EditorShell() {
         {policyUpdatedLabel}
       </p>
 
-      <nav className="rf-create-flow-shortcuts" aria-label="Create workflow shortcuts">
-        <a href="#create-generate">Generate</a>
-        <a href="#create-review">Review</a>
-        <a href="#create-remediate">Remediate</a>
-        <a href="#create-save">Save</a>
-      </nav>
-
       <div className="rf-create-layout">
         <div className="rf-create-main">
           <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
-            <h3>1. Generate</h3>
             <div className="rf-generate-controls">
               <section className="rf-control-group" aria-label="Generation mode controls">
                 <h4>Mode</h4>
@@ -847,8 +839,10 @@ export function EditorShell() {
                     type="button"
                     className={`rf-choice-button ${generationMode === "package" ? "is-active" : ""}`}
                     onClick={() => setGenerationMode("package")}
-                    disabled={generationStatus === "generating"}
+                    disabled
+                    aria-disabled="true"
                     aria-pressed={generationMode === "package"}
+                    title="Campaign mode is coming soon."
                   >
                     Campaign Package
                   </button>

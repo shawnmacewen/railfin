@@ -1,5 +1,15 @@
 # UI Foundations
 
+## task-00145 — Create page UX polish follow-up
+
+- `src/ui/editor-shell.tsx` refined Create controls per immediate product request:
+  - removed the top workflow shortcut row (Generate/Review/Remediate/Save)
+  - removed the explicit `1. Generate` stage label
+  - kept **Campaign Package** mode visible but disabled/non-interactive (clear coming-soon affordance)
+  - kept content-type choices as exactly four buttons on one horizontal row: Blog, Social Post, Article, Newsletter
+- `src/app/globals.css` tightened platform shape language to a **2px radius baseline** across core controls/cards/pills to remove the over-rounded visual feel while staying within existing `rf-*` patterns.
+- Existing generation, save, review, remediation, and compliance workflows remain intact (UX polish only, no contract change).
+
 ## task-00144 — Create page UX refactor (specific product-owner requests)
 
 - `src/ui/editor-shell.tsx` updates Create generation ergonomics and wording per product-owner directives:
