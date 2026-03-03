@@ -1,3 +1,14 @@
+## task-00134 — SEC — package export safety review phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00134-package-export-safety-review`
+- Scope delivered:
+  - Reviewed package-mode request/response schema and Create compare UX path for leakage, metadata exposure, and over-sharing risks.
+  - Documented concrete findings: package runtime active, API/UX contract drift (package schema vs single-mode fan-out), and metadata over-sharing surfaces (prompt/per-asset preview/provider diagnostics fields).
+  - Added required sanitization checklist + explicit phase-1 acceptance criteria in `docs/SECURITY_BASELINE.md` as pre-enablement gate for package export/compare flows.
+  - Recorded security gate as **NO-GO** until sanitization controls and contract alignment are complete.
+  - Docs-only security task; no runtime code changes and no build run required.
+
 ## task-00129 — DEV — campaign package generator phase 1
 
 - Status: **Done**

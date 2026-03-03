@@ -1,46 +1,59 @@
-## task-00131 — SEC — package-mode safety review phase 1
+## task-00134 — SEC — package export safety review phase 1
 
 Review scope:
 - `src/api/internal/content/generate.ts`
 - `src/app/api/internal/content/generate/route.ts`
 - `src/ui/editor-shell.tsx`
-- `src/ui/compliance-panel.tsx`
 - `docs/API_BOUNDARY.md`
 - `docs/tasks.md`
 
-### Findings (current implementation posture)
+### Findings (package export schema + compare UX)
 
-1. **No active multi-asset package-mode runtime path found (bounded by absence):**
-   - No package-mode request schema, route surface, or UI controls were found in current `main` paths for content generation.
-   - Current generation contract remains single-output draft oriented (`{ draft, generationMeta }`) and does not expose batch/multi-asset fan-out behavior.
+1. **Package-mode runtime exists (not future/latent):**
+   - `POST /api/internal/content/generate` now accepts `mode: "package"` with `package.assets` and returns `data.package` + per-asset outputs.
+   - Prior baseline assumption ("package mode not implemented") is no longer valid.
 
-2. **Current cross-asset leakage risk is latent (future-introduced):**
-   - Because package-mode is not yet implemented, there is no current runtime that can mix context across multiple generated assets.
-   - Risk becomes material only when a multi-asset request/response surface is introduced; guardrails must exist before enablement.
+2. **Schema/UX mismatch introduces export-safety drift:**
+   - API package schema supports assets `{ email, linkedin, x-thread }` with bounded count + uniqueness.
+   - Create "Campaign package" UX currently fan-outs 4 separate **single-mode** calls (`blog`, `linkedin`, `newsletter`, `x-thread`) instead of one package-mode request.
+   - Result: package guardrails/audit envelope at API level are bypassed by current compare UX flow, increasing risk of inconsistent controls and traceability gaps.
 
-3. **Copy amplification risk remains future-gated:**
-   - There is no current package-level copy propagation path that can replicate unreviewed claims across multiple assets in one action.
-   - Enablement must be blocked until bounded-per-asset controls and operator review checkpoints are in place.
+3. **Over-sharing surface in package payload/history remains high-sensitivity:**
+   - Package responses include top-level `prompt`, per-asset prompts, full generated text, and provider metadata (`provider`, `providerChain` on asset-level generation meta).
+   - UI generation history persists multi-variant previews in-session and renders clipped text for each variant.
+   - This is acceptable for internal authenticated use but requires explicit sanitization rules before any "export/share package" action is enabled.
 
-### Package-mode guardrails (required before any multi-asset enablement)
+4. **Cross-asset leakage controls are partial:**
+   - Per-asset generation executes independently, but all variants can derive from one base prompt and appear together in one UX context.
+   - No explicit package-level redaction/sanitization pass exists before variants are surfaced/restored/exported.
 
-- [ ] **Per-asset isolation:** resolve prompts/context independently per asset; no implicit sharing of draft excerpts, policy snippets, or remediation hints between sibling assets unless explicitly user-provided.
-- [ ] **Bounded batch size:** enforce a strict max asset count per request and fail closed when exceeded.
-- [ ] **Bounded output envelope:** enforce per-asset and total response-size caps (chars/tokens) with deterministic overflow failure.
-- [ ] **Deterministic auditability:** emit per-asset audit entries (asset id/type, input hash, output hash/summary, provider attempt path, outcome).
-- [ ] **No implicit cross-asset rewrite:** disallow hidden “global rewrite all assets” transforms; require explicit operator action per asset (or explicitly enumerated selected subset).
-- [ ] **Sensitive-region protections:** carry existing prohibited-transform protections (legal/disclaimer/citation/compliance metadata) into every asset apply path.
-- [ ] **Preview-before-commit:** show per-asset preview/diff and require user confirmation before persistence/publish actions.
-- [ ] **Safe degraded behavior:** if provider/dependency fails for one asset, return structured per-asset failure without silently fabricating success for the full package.
+### Required sanitization checklist (must pass before package export/compare enablement)
 
-### Gate decision (task-00131)
+- [ ] **Field-level export allowlist:** export payload must include only explicitly approved fields (asset id/type/text + minimal status); strip internal/debug metadata by default.
+- [ ] **Provider metadata minimization:** never export `providerChain` internals, attempt traces, env-hint notes, or non-user-essential diagnostics.
+- [ ] **Prompt hygiene:** strip/redact internal policy snippets, remediation markers, and operator/system guidance from exportable prompt/context fields.
+- [ ] **Sensitive-token scrubbing:** run deterministic redact pass for likely secrets/credentials/URLs with sensitive query params before export.
+- [ ] **Bounded preview exposure:** compare/export UI previews must be length-capped and avoid full-text auto-render unless explicitly opened by operator action.
+- [ ] **Per-asset consent gate:** require explicit asset selection for export; no implicit "export all" default.
+- [ ] **Audit trail completeness:** log export attempts with actor, asset ids, sanitized-field manifest, timestamp, and outcome (success/blocked).
+- [ ] **Fail-closed sanitization errors:** if sanitizer fails/uncertain, block export and return operator-visible reason.
 
-- **Package-mode enablement status:** **NO-GO (pre-implementation guardrail gate)**
-- Rationale: package-mode runtime is not present yet; required multi-asset safety controls are now documented as mandatory preconditions.
+### Acceptance criteria (phase-1 gate)
 
-### Verification outcome (task-00131)
+- [ ] API and UI use a single canonical package contract for compare/export paths (no shadow single-mode fan-out path for package UX).
+- [ ] Sanitized export snapshot tests verify disallowed fields are absent (`providerChain`, raw diagnostics, unsanitized prompt internals).
+- [ ] Negative tests cover oversized payloads, duplicate/invalid assets, and sanitizer-failure blocked behavior.
+- [ ] Security sign-off confirms no unsafe metadata over-sharing in export/compare payloads.
+- [ ] Operator-facing docs define what is intentionally shareable vs internal-only in package outputs.
 
-- Outcome: **PASS (phase-1 review + guardrail checklist defined)**
+### Gate decision (task-00134)
+
+- **Package export/compare enablement status:** **NO-GO (sanitization + contract alignment pending)**
+- Rationale: package runtime exists, but compare UX contract drift and missing explicit export sanitization controls create over-sharing risk.
+
+### Verification outcome (task-00134)
+
+- Outcome: **PASS (phase-1 review complete, gate remains NO-GO)**
 - Code changes: none (docs-only security review)
 - Build: not run (no runtime code changes)
 
