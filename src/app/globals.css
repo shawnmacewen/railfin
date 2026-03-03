@@ -926,3 +926,87 @@ button:disabled {
   color: #6c748f;
   border-color: #d8dced;
 }
+
+.rf-control-group.is-collapsed textarea {
+  display: none;
+}
+
+.rf-prompt-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.rf-prompt-header-row label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.rf-prompt-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.rf-prompt-header-actions button {
+  margin: 0;
+}
+
+.rf-prompt-collapsed-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.rf-richtext-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.35rem 0 0.65rem;
+}
+
+.rf-richtext-toolbar button,
+.rf-richtext-toolbar input {
+  margin: 0;
+}
+
+.rf-richtext-color-picker {
+  font-size: 0.78rem;
+  color: #4e5879;
+}
+
+.rf-editor-content-area {
+  min-height: 30rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.rf-create-compliance {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.rf-create-compliance.is-collapsed {
+  grid-template-columns: 2rem;
+}
+
+.rf-create-compliance-rail-control {
+  border: 1px solid #dbe4ff;
+  border-radius: 2px;
+  background: #eef2ff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0.3rem;
+}
+
+.rf-create-compliance-rail-control button {
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  padding: 0.35rem 0.2rem;
+}

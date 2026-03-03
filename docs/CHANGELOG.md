@@ -2,6 +2,15 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Create single-content focus + prompt-lock accordion + editor/compliance upgrade (task-00147)
+- Removed Create-page Mode switching and focused this workflow on single-content generation only.
+- Moved generation action next to prompt lock and renamed it to **Generate Content** for tighter authoring flow.
+- Added prompt lock accordion behavior so locking can collapse the instructions area and move editor work higher on screen.
+- Expanded editor working space significantly to support longer drafting/remediation sessions.
+- Added right-side compliance panel collapse to a slim rail with a persistent top maximize toggle.
+- Added lightweight rich-text toolbar options for **bold**, **italic**, and **text color** with low-risk implementation.
+- Kept save/compliance/remediation/history-restore flows stable while delivering the UX update.
+
 ## 2026-03-03 — Library tile layout + metadata refinement (task-00146)
 - Updated Library saved drafts to a responsive tile grid with a 4-column desktop layout and smaller-screen fallbacks.
 - Adjusted tile proportions to feel more square and card-like for faster scan in dense libraries.

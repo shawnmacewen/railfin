@@ -1,3 +1,17 @@
+## task-00147 — UI/DEV — Create single-content focus + prompt lock accordion + editor/compliance upgrade
+
+- Status: **Done**
+- Branch: `feat/ui/task-00147-create-single-content-focus-and-editor-upgrade`
+- Scope delivered:
+  - Removed Create "Mode" controls and focused generation UX on single-content flow only.
+  - Moved generation action beside prompt lock and renamed action to **Generate Content**.
+  - Added prompt lock accordion behavior (lock + collapse/minimize with explicit expand control).
+  - Increased editor working area significantly for content drafting/remediation review.
+  - Added right compliance panel collapse-to-rail UX with visible top maximize control.
+  - Added minimal rich-text options in editor toolbar: **bold**, **italic**, and **text color**.
+  - Preserved existing save/compliance/remediation/history-restore workflows with no API contract changes.
+  - Updated UI/docs/changelog and re-ran `npm run build` (pass).
+
 ## task-00146 — UI — Library tile layout and metadata refinement
 
 - Status: **Done**

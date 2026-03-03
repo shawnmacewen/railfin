@@ -1,5 +1,26 @@
 # UI Foundations
 
+## task-00147 — Create single-content focus + prompt lock accordion + editor/compliance workspace upgrade
+
+- `src/ui/editor-shell.tsx` refactors Create generation UX to be **single-content focused only**:
+  - removed Mode selector from Create (no single/package toggle in this workflow).
+  - generation action is colocated with prompt lock control and renamed to **Generate Content**.
+- Prompt lock behavior now includes accordion minimization:
+  - locking prompt sets the prompt field to read-only and collapses/minimizes the prompt input region.
+  - collapsed prompt surface exposes an explicit expand control so users can reopen instructions without losing state.
+- Editor workspace was expanded materially:
+  - larger editor content working area (increased rows + larger min-height styling) for long-form editing and remediation workflows.
+- Compliance panel now supports rail collapse:
+  - right-side panel can collapse to a slim rail with always-visible maximize control at top.
+  - expanded panel behavior remains sticky/persistent for ongoing compliance work.
+- Added minimal in-editor rich-text tooling (no heavy package introduced in this pass):
+  - toolbar actions for **bold**, **italic**, and **text color** insertion over selected text.
+  - implemented as low-risk marker/tag wrapping in the existing editor textarea to avoid destabilizing save/remediation/compliance/history flows.
+- Flow stability preserved (no endpoint contract changes): save draft, compliance run, remediation apply/undo/regenerate, and generation history restore continue to function.
+- Package decision note (short-term vs long-term):
+  - this task intentionally uses a lightweight toolbar strategy for risk control in the current release window.
+  - recommended long-term option: migrate editor surface to a dedicated Next.js-friendly rich-text stack (preferred: Tiptap; alternatives: Lexical, Slate) once data model/storage policy for rich HTML vs markdown is finalized.
+
 ## task-00146 — Library tile layout and metadata refinement
 
 - `src/ui/library-page.tsx` updates Library saved-item cards to a tile-oriented presentation while preserving existing Library → Create handoff behavior.

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { ComplianceFinding, CompliancePanel, SelectedFindingContext } from "./compliance-panel";
@@ -8,7 +8,6 @@ import { ComplianceFinding, CompliancePanel, SelectedFindingContext } from "./co
 type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
-type GenerationMode = "single" | "package";
 type CreateContentOption = "blog" | "social-post" | "article" | "newsletter";
 
 type RemediationContextResult = {
@@ -240,7 +239,10 @@ export function EditorShell() {
   const [promptInput, setPromptInput] = useState("");
   const [lockedPrompt, setLockedPrompt] = useState<string | null>(null);
   const [isPromptLocked, setIsPromptLocked] = useState(false);
-  const [generationMode, setGenerationMode] = useState<GenerationMode>("single");
+  const [isPromptAccordionCollapsed, setIsPromptAccordionCollapsed] = useState(false);
+  const [isComplianceCollapsed, setIsComplianceCollapsed] = useState(false);
+  const [richTextColor, setRichTextColor] = useState("#1a4cff");
+  const editorContentRef = useRef<HTMLTextAreaElement | null>(null);
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
@@ -479,72 +481,41 @@ export function EditorShell() {
     setIsPromptLocked(true);
 
     setGenerationStatus("generating");
-    setGenerationFeedback(generationMode === "package" ? "Generating campaign package variants..." : "Generating draft text...");
+    setGenerationFeedback("Generating draft text...");
     setGenerationDegraded(null);
 
     try {
-      if (generationMode === "single") {
-        const generated = await generateDraftForType(trimmedPrompt, contentType);
-        const variantId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const generated = await generateDraftForType(trimmedPrompt, contentType);
+      const variantId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-        setContent(generated.generatedText);
-        setGenerationStatus("generated");
-        const singleHistoryEntry: GenerationHistoryEntry = {
+      setContent(generated.generatedText);
+      setGenerationStatus("generated");
+      const singleHistoryEntry: GenerationHistoryEntry = {
+        id: variantId,
+        mode: "single",
+        createdAt: new Date().toISOString(),
+        variant: {
           id: variantId,
-          mode: "single",
-          createdAt: new Date().toISOString(),
-          variant: {
-            id: variantId,
-            text: generated.generatedText,
-            contentType,
-            degraded: generated.degraded,
-            provider: generated.provider,
-          },
-        };
-        setGenerationHistory((current) => [singleHistoryEntry, ...current].slice(0, MAX_GENERATION_HISTORY));
+          text: generated.generatedText,
+          contentType,
+          degraded: generated.degraded,
+          provider: generated.provider,
+        },
+      };
+      setGenerationHistory((current) => [singleHistoryEntry, ...current].slice(0, MAX_GENERATION_HISTORY));
 
-        setGenerationDegraded(generated.degraded);
-        setGenerationFeedback(
-          generated.degraded
-            ? generated.notes || "Draft generated in degraded fallback mode. Review carefully before saving."
-            : successMessage || generated.notes || "Draft generated successfully. Review and save when ready.",
-        );
-        setReviewFeedback(
-          generated.degraded
-            ? `Generation runtime: degraded fallback${generated.provider ? ` via ${generated.provider}` : ""}.`
-            : `Generation runtime: success${generated.provider ? ` via ${generated.provider}` : ""}.`,
-        );
-      } else {
-        const generatedPackage = await generatePackageVariants(trimmedPrompt);
-        const variants = generatedPackage.variants;
-
-        const packageId = `pkg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const degraded = variants.some((variant) => variant.degraded);
-        const providers = Array.from(new Set(variants.map((variant) => variant.provider).filter(Boolean))) as string[];
-
-        setContent(variants[0]?.text ?? "");
-        setContentType(variants[0]?.contentType ?? contentType);
-        setGenerationStatus("generated");
-        const packageHistoryEntry: GenerationHistoryEntry = {
-          id: packageId,
-          mode: "package",
-          createdAt: new Date().toISOString(),
-          variants,
-          degraded,
-          providers,
-        };
-        setGenerationHistory((current) => [packageHistoryEntry, ...current].slice(0, MAX_GENERATION_HISTORY));
-
-        setGenerationDegraded(degraded);
-        setGenerationFeedback(
-          degraded
-            ? generatedPackage.notes || "Campaign package generated with one or more degraded variants. Review each variant before saving."
-            : generatedPackage.notes || "Campaign package generated. Select any variant below to restore it into the editor.",
-        );
-        setReviewFeedback(
-          `Package variants ready: ${variants.map((variant) => variant.contentType.toUpperCase()).join(", ")}${providers.length ? ` · providers: ${providers.join(", ")}` : ""}.`,
-        );
-      }
+      setGenerationDegraded(generated.degraded);
+      setGenerationFeedback(
+        generated.degraded
+          ? generated.notes || "Draft generated in degraded fallback mode. Review carefully before saving."
+          : successMessage || generated.notes || "Draft generated successfully. Review and save when ready.",
+      );
+      setReviewFeedback(
+        generated.degraded
+          ? `Generation runtime: degraded fallback${generated.provider ? ` via ${generated.provider}` : ""}.`
+          : `Generation runtime: success${generated.provider ? ` via ${generated.provider}` : ""}.`,
+      );
+      setIsPromptAccordionCollapsed(true);
 
       setRemediationPreview(null);
       setStatus("idle");
@@ -566,6 +537,47 @@ export function EditorShell() {
     await runGenerate(promptInput);
   };
 
+  const onTogglePromptLock = () => {
+    if (isPromptLocked) {
+      setIsPromptLocked(false);
+      setIsPromptAccordionCollapsed(false);
+      return;
+    }
+
+    const trimmed = promptInput.trim();
+    if (!trimmed) {
+      setGenerationStatus("error");
+      setGenerationFeedback("Add AI instructions before locking prompt.");
+      return;
+    }
+
+    setLockedPrompt(trimmed);
+    setPromptInput(trimmed);
+    setIsPromptLocked(true);
+    setIsPromptAccordionCollapsed(true);
+  };
+
+  const applyRichTextWrap = (before: string, after = before) => {
+    const editor = editorContentRef.current;
+    if (!editor) return;
+
+    const start = editor.selectionStart ?? 0;
+    const end = editor.selectionEnd ?? 0;
+    const selected = content.slice(start, end);
+    const wrapped = before + (selected || "text") + after;
+    const next = content.slice(0, start) + wrapped + content.slice(end);
+
+    setContent(next);
+    requestAnimationFrame(() => {
+      editor.focus();
+      const cursor = start + wrapped.length;
+      editor.setSelectionRange(cursor, cursor);
+    });
+  };
+
+  const onApplyTextColor = () => {
+    applyRichTextWrap(`<span style="color: ${richTextColor};">`, "</span>");
+  };
   const onSave = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -823,33 +835,7 @@ export function EditorShell() {
         <div className="rf-create-main">
           <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
             <div className="rf-generate-controls">
-              <section className="rf-control-group" aria-label="Generation mode controls">
-                <h4>Mode</h4>
-                <div className="rf-generate-mode-buttons" role="group" aria-label="Generation mode">
-                  <button
-                    type="button"
-                    className={`rf-choice-button ${generationMode === "single" ? "is-active" : ""}`}
-                    onClick={() => setGenerationMode("single")}
-                    disabled={generationStatus === "generating"}
-                    aria-pressed={generationMode === "single"}
-                  >
-                    Single Draft
-                  </button>
-                  <button
-                    type="button"
-                    className={`rf-choice-button ${generationMode === "package" ? "is-active" : ""}`}
-                    onClick={() => setGenerationMode("package")}
-                    disabled
-                    aria-disabled="true"
-                    aria-pressed={generationMode === "package"}
-                    title="Campaign mode is coming soon."
-                  >
-                    Campaign Package
-                  </button>
-                </div>
-              </section>
-
-              <section className="rf-control-group" aria-label="Primary output controls">
+                            <section className="rf-control-group" aria-label="Primary output controls">
                 <label className="rf-content-type-label">Content Type</label>
                 <div className="rf-content-type-buttons" role="group" aria-label="Content type">
                   {CREATE_CONTENT_OPTIONS.map((option) => (
@@ -858,7 +844,7 @@ export function EditorShell() {
                       type="button"
                       className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
                       onClick={() => setContentType(option.apiType)}
-                      disabled={generationStatus === "generating" || generationMode === "package"}
+                      disabled={generationStatus === "generating"}
                       aria-pressed={selectedContentOption === option.id}
                     >
                       {option.label}
@@ -867,38 +853,40 @@ export function EditorShell() {
                 </div>
               </section>
 
-              <section className="rf-control-group" aria-label="AI prompt input">
-                <label htmlFor="editor-prompt">AI Instructions</label>
-                <textarea
-                  id="editor-prompt"
-                  name="editor-prompt"
-                  value={promptInput}
-                  onChange={(event) => setPromptInput(event.target.value)}
-                  rows={4}
-                  placeholder="Describe what to generate and any constraints."
-                  disabled={isPromptLocked && generationStatus !== "generating"}
-                />
-                <div className="rf-generation-history-actions">
-                  <button type="button" onClick={() => setIsPromptLocked((current) => !current)}>
-                    {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
-                  </button>
+              <section className={`rf-control-group ${isPromptAccordionCollapsed ? "is-collapsed" : ""}`} aria-label="AI prompt input">
+                <div className="rf-prompt-header-row">
+                  <label htmlFor="editor-prompt">AI Instructions</label>
+                  <div className="rf-prompt-header-actions">
+                    <button type="button" onClick={onTogglePromptLock}>
+                      {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
+                    </button>
+                    <button type="button" onClick={onGenerate} disabled={!canGenerate}>
+                      {generationStatus === "generating" ? "Generating..." : "Generate Content"}
+                    </button>
+                  </div>
                 </div>
-                {lockedPrompt ? (
-                  <p className="rf-status rf-status-muted" role="status">Locked prompt saved for reference.</p>
-                ) : null}
+                {isPromptAccordionCollapsed ? (
+                  <div className="rf-prompt-collapsed-summary">
+                    <p className="rf-status rf-status-muted" role="status">Prompt locked. Expand to view or edit instructions.</p>
+                    <button type="button" onClick={() => setIsPromptAccordionCollapsed(false)}>Expand Prompt</button>
+                  </div>
+                ) : (
+                  <>
+                    <textarea
+                      id="editor-prompt"
+                      name="editor-prompt"
+                      value={promptInput}
+                      onChange={(event) => setPromptInput(event.target.value)}
+                      rows={4}
+                      placeholder="Describe what to generate and any constraints."
+                      disabled={isPromptLocked && generationStatus !== "generating"}
+                    />
+                    {lockedPrompt ? (
+                      <p className="rf-status rf-status-muted" role="status">Locked prompt saved for reference.</p>
+                    ) : null}
+                  </>
+                )}
               </section>
-
-              <div className="rf-create-primary-actions" aria-label="Generate actions">
-                <button type="button" onClick={onGenerate} disabled={!canGenerate}>
-                  {generationStatus === "generating"
-                    ? generationMode === "package"
-                      ? "Generating Package..."
-                      : "Generating..."
-                    : generationMode === "package"
-                      ? "Generate Campaign Package"
-                      : "Generate Draft"}
-                </button>
-              </div>
             </div>
           </section>
 
@@ -921,9 +909,23 @@ export function EditorShell() {
             <p className="rf-status rf-status-muted">Save once you are satisfied with review and remediation updates.</p>
             <form onSubmit={onSave} aria-busy={status === "saving"}>
         <label htmlFor="editor-content">Editor Content</label>
+        <div className="rf-richtext-toolbar" role="toolbar" aria-label="Editor formatting">
+          <button type="button" onClick={() => applyRichTextWrap("**")}>Bold</button>
+          <button type="button" onClick={() => applyRichTextWrap("*")}>Italic</button>
+          <label className="rf-richtext-color-picker" htmlFor="editor-color">Text Color</label>
+          <input
+            id="editor-color"
+            type="color"
+            value={richTextColor}
+            onChange={(event) => setRichTextColor(event.target.value)}
+          />
+          <button type="button" onClick={onApplyTextColor}>Apply Color</button>
+        </div>
         <textarea
           id="editor-content"
           name="editor-content"
+          ref={editorContentRef}
+          className="rf-editor-content-area"
           value={content}
           onChange={(event) => {
             setContent(event.target.value);
@@ -940,7 +942,7 @@ export function EditorShell() {
               setReviewFeedback(null);
             }
           }}
-          rows={8}
+          rows={18}
         />
 
         <button type="submit" disabled={!canSave}>
@@ -1156,20 +1158,27 @@ export function EditorShell() {
 
         </div>
 
-        <aside className="rf-create-compliance" aria-label="Compliance feedback panel">
-          <div className="rf-create-compliance-card">
-            <h3>Compliance Feedback</h3>
-            <p className="rf-status rf-status-muted">Persistent review panel while you create.</p>
-            <CompliancePanel
-              activePolicyContext={activePolicyContext}
-              content={content}
-              contentType={contentType}
-              policySet="default"
-              onApplyRemediationHint={onApplyRemediationHint}
-              onRemindRemediationHint={onRemindRemediationHint}
-              onSelectedFindingChange={setSelectedFindingContext}
-            />
+        <aside className={`rf-create-compliance ${isComplianceCollapsed ? "is-collapsed" : ""}`} aria-label="Compliance feedback panel">
+          <div className="rf-create-compliance-rail-control">
+            <button type="button" onClick={() => setIsComplianceCollapsed((current) => !current)}>
+              {isComplianceCollapsed ? "⇤" : "⇥"}
+            </button>
           </div>
+          {!isComplianceCollapsed ? (
+            <div className="rf-create-compliance-card">
+              <h3>Compliance Feedback</h3>
+              <p className="rf-status rf-status-muted">Persistent review panel while you create.</p>
+              <CompliancePanel
+                activePolicyContext={activePolicyContext}
+                content={content}
+                contentType={contentType}
+                policySet="default"
+                onApplyRemediationHint={onApplyRemediationHint}
+                onRemindRemediationHint={onRemindRemediationHint}
+                onSelectedFindingChange={setSelectedFindingContext}
+              />
+            </div>
+          ) : null}
         </aside>
       </div>
     </section>
