@@ -9,6 +9,17 @@
   - Recorded security gate as **NO-GO** until sanitization controls and contract alignment are complete.
   - Docs-only security task; no runtime code changes and no build run required.
 
+## task-00132 — DEV — campaign package export schema phase 1
+
+- Status: **Done**
+- Branch: `feat/dev/task-00132-package-export-schema-phase1`
+- Scope delivered:
+  - Added additive package export payload under `data.package.export` with schema versioning, per-asset metadata, and normalized content blocks for downstream tooling.
+  - Preserved existing package response shape (`package.assets[]` + top-level `generationMeta`) for backward compatibility while extending response data.
+  - Added strict export assembly validation (schema version, asset cardinality, unique asset types, non-empty content fields, and block validation).
+  - Extended generation validation tests to assert export payload presence and normalized block structure.
+  - Updated API boundary docs and re-ran `npm run build` (pass).
+
 ## task-00129 — DEV — campaign package generator phase 1
 
 - Status: **Done**

@@ -46,6 +46,31 @@ type GenerateModelOutput = {
   notes?: string;
 };
 
+type ExportBlockType = "paragraph" | "bullet" | "thread-post";
+
+type PackageExportBlock = {
+  id: string;
+  type: ExportBlockType;
+  text: string;
+  order: number;
+};
+
+type PackageExportAsset = {
+  assetType: PackageAssetType;
+  contentType: ContentType;
+  sourceDraftId: string;
+  prompt: string;
+  text: string;
+  blocks: PackageExportBlock[];
+};
+
+type PackageExport = {
+  schemaVersion: "2026-03-03";
+  generatedAt: string;
+  assetCount: number;
+  assets: PackageExportAsset[];
+};
+
 type GenerationTemplate = {
   id: GenerateTemplateId;
   label: string;
@@ -664,6 +689,151 @@ async function generateDraftForContentType(input: {
   };
 }
 
+function normalizeExportBlocks(input: { assetType: PackageAssetType; text: string }): PackageExportBlock[] {
+  const normalized = input.text
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (normalized.length === 0) {
+    return [
+      {
+        id: `${input.assetType}-block-1`,
+        type: "paragraph",
+        text: input.text.trim(),
+        order: 1,
+      },
+    ];
+  }
+
+  return normalized.map((line, index) => {
+    const bulletLike = /^[-*•]\s+/.test(line);
+    const numberedLike = /^\d+[.)]\s+/.test(line);
+    const type: ExportBlockType =
+      input.assetType === "x-thread" || numberedLike ? "thread-post" : bulletLike ? "bullet" : "paragraph";
+
+    return {
+      id: `${input.assetType}-block-${index + 1}`,
+      type,
+      text: line.replace(/^[-*•]\s+/, "").replace(/^\d+[.)]\s+/, "").trim(),
+      order: index + 1,
+    };
+  });
+}
+
+function assertPackageExportShape(value: PackageExport): PackageExport {
+  const fieldErrors: Array<{ field: string; message: string }> = [];
+
+  if (value.schemaVersion !== "2026-03-03") {
+    fieldErrors.push({ field: "package.export.schemaVersion", message: "schemaVersion must be 2026-03-03." });
+  }
+
+  if (typeof value.generatedAt !== "string" || !value.generatedAt.trim()) {
+    fieldErrors.push({ field: "package.export.generatedAt", message: "generatedAt must be a non-empty string." });
+  }
+
+  if (!Number.isInteger(value.assetCount) || value.assetCount < 1 || value.assetCount > MAX_PACKAGE_ASSETS) {
+    fieldErrors.push({
+      field: "package.export.assetCount",
+      message: "assetCount must be a positive integer within package asset limits.",
+    });
+  }
+
+  if (!Array.isArray(value.assets) || value.assets.length !== value.assetCount) {
+    fieldErrors.push({ field: "package.export.assets", message: "assets must match assetCount." });
+  }
+
+  const seen = new Set<string>();
+
+  value.assets.forEach((asset, index) => {
+    const assetPath = `package.export.assets[${index}]`;
+
+    if (!isPackageAssetType(asset.assetType)) {
+      fieldErrors.push({ field: `${assetPath}.assetType`, message: "assetType is invalid." });
+      return;
+    }
+
+    if (seen.has(asset.assetType)) {
+      fieldErrors.push({ field: `${assetPath}.assetType`, message: "assetType must be unique." });
+    }
+    seen.add(asset.assetType);
+
+    if (!isContentType(asset.contentType)) {
+      fieldErrors.push({ field: `${assetPath}.contentType`, message: "contentType is invalid." });
+    }
+
+    if (typeof asset.sourceDraftId !== "string" || !asset.sourceDraftId.trim()) {
+      fieldErrors.push({ field: `${assetPath}.sourceDraftId`, message: "sourceDraftId must be non-empty." });
+    }
+
+    if (typeof asset.prompt !== "string" || !asset.prompt.trim()) {
+      fieldErrors.push({ field: `${assetPath}.prompt`, message: "prompt must be non-empty." });
+    }
+
+    if (typeof asset.text !== "string" || !asset.text.trim()) {
+      fieldErrors.push({ field: `${assetPath}.text`, message: "text must be non-empty." });
+    }
+
+    if (!Array.isArray(asset.blocks) || asset.blocks.length === 0) {
+      fieldErrors.push({ field: `${assetPath}.blocks`, message: "blocks must contain at least one item." });
+      return;
+    }
+
+    asset.blocks.forEach((block, blockIndex) => {
+      const blockPath = `${assetPath}.blocks[${blockIndex}]`;
+      if (typeof block.id !== "string" || !block.id.trim()) {
+        fieldErrors.push({ field: `${blockPath}.id`, message: "id must be non-empty." });
+      }
+
+      if (!(block.type === "paragraph" || block.type === "bullet" || block.type === "thread-post")) {
+        fieldErrors.push({ field: `${blockPath}.type`, message: "type is invalid." });
+      }
+
+      if (typeof block.text !== "string" || !block.text.trim()) {
+        fieldErrors.push({ field: `${blockPath}.text`, message: "text must be non-empty." });
+      }
+
+      if (!Number.isInteger(block.order) || block.order < 1) {
+        fieldErrors.push({ field: `${blockPath}.order`, message: "order must be a positive integer." });
+      }
+    });
+  });
+
+  if (fieldErrors.length > 0) {
+    throw new Error(`Invalid package export shape: ${fieldErrors[0].field} ${fieldErrors[0].message}`);
+  }
+
+  return value;
+}
+
+function buildPackageExport(input: {
+  packageResults: Array<{
+    assetType: PackageAssetType;
+    draft: {
+      id: string;
+      contentType: PackageAssetType;
+      prompt: string;
+      text: string;
+    };
+  }>;
+}): PackageExport {
+  const exportPayload: PackageExport = {
+    schemaVersion: "2026-03-03",
+    generatedAt: new Date().toISOString(),
+    assetCount: input.packageResults.length,
+    assets: input.packageResults.map((item) => ({
+      assetType: item.assetType,
+      contentType: item.assetType === "email" ? "newsletter" : item.assetType,
+      sourceDraftId: item.draft.id,
+      prompt: item.draft.prompt,
+      text: item.draft.text,
+      blocks: normalizeExportBlocks({ assetType: item.assetType, text: item.draft.text }),
+    })),
+  };
+
+  return assertPackageExportShape(exportPayload);
+}
+
 export async function internalContentGenerate(request: {
   method: "POST";
   body?: GenerateRequestBody;
@@ -808,6 +978,7 @@ export async function internalContentGenerate(request: {
         mode: "package",
         prompt,
         assets: packageResults,
+        export: buildPackageExport({ packageResults }),
         createdAt: new Date().toISOString(),
       },
       generationMeta: {

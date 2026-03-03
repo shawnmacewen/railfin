@@ -210,5 +210,16 @@ test("accepts valid package mode payload", async () => {
   if (!result.ok) {
     assert.fail("expected success");
   }
+
   assert.equal(result.data?.package?.assets?.length, 3);
+  assert.equal(result.data?.package?.export?.schemaVersion, "2026-03-03");
+  assert.equal(result.data?.package?.export?.assetCount, 3);
+  assert.equal(result.data?.package?.export?.assets?.length, 3);
+
+  const exportAsset = result.data?.package?.export?.assets?.[0];
+  assert.ok(exportAsset);
+  assert.equal(typeof exportAsset?.sourceDraftId, "string");
+  assert.ok(Array.isArray(exportAsset?.blocks));
+  assert.ok((exportAsset?.blocks?.length ?? 0) > 0);
+  assert.equal(typeof exportAsset?.blocks?.[0]?.type, "string");
 });

@@ -184,8 +184,12 @@ Response JSON:
   - `draft`: `{ id, contentType, prompt, text, status, createdAt }`
   - `generationMeta`: includes `provider`, `notes`, and `providerChain` diagnostics metadata
 - Success (package mode): `{ ok: true, data: { package, generationMeta } }`
-  - `package`: `{ id, mode, prompt, assets, createdAt }`
+  - `package`: `{ id, mode, prompt, assets, export, createdAt }`
   - `assets[]`: `{ assetType, draft, generationMeta }` where `draft` preserves single-draft shape per asset variant
+  - `export`: structured downstream payload with versioned schema + normalized content blocks:
+    - `{ schemaVersion, generatedAt, assetCount, assets[] }`
+    - `assets[]`: `{ assetType, contentType, sourceDraftId, prompt, text, blocks[] }`
+    - `blocks[]`: `{ id, type: "paragraph" | "bullet" | "thread-post", text, order }`
   - top-level `generationMeta.degraded` signals whether any asset degraded
 - Validation error: `{ ok: false, error: string }` with `400`
   - conflicting top-level+nested control values -> `Validation failed` with `fieldErrors[]`
@@ -199,6 +203,12 @@ Response JSON:
   - invalid `controls` object, unknown controls keys, or unsupported `lengthTarget`/`formatStyle`/`audience`/`objective` values -> `Invalid controls`
 - Provider outage/invalid-output path: still returns `ok: true` with service-specific fallback `draft.text` and `generationMeta.degraded: true`
 - Degraded quality hint: when diagnostics classify primary failure as `provider_config`, generation notes include a non-secret operator hint to check `OPENAI_API_KEY` runtime configuration.
+
+Strict export assembly validation (package mode):
+
+- Export payload assembly is validated before response return (fail-closed on invalid export shape).
+- Enforces schema version pin, asset count/array parity, unique `assetType`, valid mapped `contentType`, and non-empty `sourceDraftId`/`prompt`/`text`.
+- Enforces each normalized block has valid `id`, supported `type`, non-empty `text`, and positive integer `order`.
 
 Strict response validation behavior:
 
