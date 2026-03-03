@@ -184,6 +184,7 @@ Response JSON:
   - `draft`: `{ id, contentType, prompt, text, status, createdAt }`
   - `generationMeta`: includes `provider`, `notes`, and `providerChain` diagnostics metadata
 - Success (package mode): `{ ok: true, data: { package, generationMeta } }`
+- UI contract note: Create package UX issues one package-mode request per generate action (`mode: "package"` + `package.assets`) and does not fan out single-mode calls.
   - `package`: `{ id, mode, prompt, assets, export, createdAt }`
   - `assets[]`: `{ assetType, draft, generationMeta }` where `draft` preserves single-draft shape per asset variant
   - `export`: structured downstream payload with versioned schema + normalized content blocks:
