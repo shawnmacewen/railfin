@@ -1,3 +1,49 @@
+## task-00131 — SEC — package-mode safety review phase 1
+
+Review scope:
+- `src/api/internal/content/generate.ts`
+- `src/app/api/internal/content/generate/route.ts`
+- `src/ui/editor-shell.tsx`
+- `src/ui/compliance-panel.tsx`
+- `docs/API_BOUNDARY.md`
+- `docs/tasks.md`
+
+### Findings (current implementation posture)
+
+1. **No active multi-asset package-mode runtime path found (bounded by absence):**
+   - No package-mode request schema, route surface, or UI controls were found in current `main` paths for content generation.
+   - Current generation contract remains single-output draft oriented (`{ draft, generationMeta }`) and does not expose batch/multi-asset fan-out behavior.
+
+2. **Current cross-asset leakage risk is latent (future-introduced):**
+   - Because package-mode is not yet implemented, there is no current runtime that can mix context across multiple generated assets.
+   - Risk becomes material only when a multi-asset request/response surface is introduced; guardrails must exist before enablement.
+
+3. **Copy amplification risk remains future-gated:**
+   - There is no current package-level copy propagation path that can replicate unreviewed claims across multiple assets in one action.
+   - Enablement must be blocked until bounded-per-asset controls and operator review checkpoints are in place.
+
+### Package-mode guardrails (required before any multi-asset enablement)
+
+- [ ] **Per-asset isolation:** resolve prompts/context independently per asset; no implicit sharing of draft excerpts, policy snippets, or remediation hints between sibling assets unless explicitly user-provided.
+- [ ] **Bounded batch size:** enforce a strict max asset count per request and fail closed when exceeded.
+- [ ] **Bounded output envelope:** enforce per-asset and total response-size caps (chars/tokens) with deterministic overflow failure.
+- [ ] **Deterministic auditability:** emit per-asset audit entries (asset id/type, input hash, output hash/summary, provider attempt path, outcome).
+- [ ] **No implicit cross-asset rewrite:** disallow hidden “global rewrite all assets” transforms; require explicit operator action per asset (or explicitly enumerated selected subset).
+- [ ] **Sensitive-region protections:** carry existing prohibited-transform protections (legal/disclaimer/citation/compliance metadata) into every asset apply path.
+- [ ] **Preview-before-commit:** show per-asset preview/diff and require user confirmation before persistence/publish actions.
+- [ ] **Safe degraded behavior:** if provider/dependency fails for one asset, return structured per-asset failure without silently fabricating success for the full package.
+
+### Gate decision (task-00131)
+
+- **Package-mode enablement status:** **NO-GO (pre-implementation guardrail gate)**
+- Rationale: package-mode runtime is not present yet; required multi-asset safety controls are now documented as mandatory preconditions.
+
+### Verification outcome (task-00131)
+
+- Outcome: **PASS (phase-1 review + guardrail checklist defined)**
+- Code changes: none (docs-only security review)
+- Build: not run (no runtime code changes)
+
 ## task-00119 — SEC — Safety guardrails for automated remediation apply actions
 
 Review scope:

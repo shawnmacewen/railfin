@@ -1,3 +1,15 @@
+## task-00131 — SEC — package-mode safety review phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00131-package-mode-safety-review`
+- Scope delivered:
+  - Reviewed current generation/runtime surfaces for any active multi-asset package-mode behavior and verified current contract remains single-draft output oriented.
+  - Documented phase-1 safety findings for package-mode risk classes (cross-asset leakage and risky copy amplification) in `docs/SECURITY_BASELINE.md`.
+  - Added mandatory pre-enablement package-mode guardrail checklist entries (per-asset isolation, bounded batch/output, per-asset auditability, sensitive-zone protections, preview/confirm flow, fail-closed degraded handling).
+  - Recorded package-mode gate decision as **NO-GO (pre-implementation guardrail gate)** until required controls are implemented.
+  - Docs-only review task; no runtime code changes and no build run required.
+
+
 ## task-00126 — DEV — remediation audit trail persistence phase 1
 
 - Status: Done
