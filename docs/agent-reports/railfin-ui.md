@@ -1,3 +1,4 @@
+- 2026-03-03 task-00148: shipped Lexical editor phase 1 on Create; generate->Lexical + compliance-read + save/load(html) verified in local build path.
 # railfin-ui detailed work log
 
 ## 2026-03-03 01:32 UTC — ui log backfill

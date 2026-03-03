@@ -1010,3 +1010,40 @@ button:disabled {
   min-width: 0;
   padding: 0.35rem 0.2rem;
 }
+
+.rf-lexical-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.35rem 0 0.65rem;
+}
+
+.rf-lexical-toolbar button {
+  margin: 0;
+}
+
+.rf-lexical-editor-shell {
+  position: relative;
+  border: 1px solid #dbe4ff;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.rf-lexical-content-editable {
+  min-height: 30rem;
+  padding: 0.7rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  outline: none;
+}
+
+.rf-lexical-placeholder {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  color: #6a7394;
+  margin: 0;
+  pointer-events: none;
+  font-size: 0.9rem;
+}

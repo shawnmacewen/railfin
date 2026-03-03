@@ -1,3 +1,10 @@
+## 2026-03-03 — Lexical editor phase 1 for Create (task-00148)
+- Replaced Create’s textarea editor with Lexical as the primary authoring editor.
+- Added baseline rich formatting controls: bold, italic, heading, paragraph, bullet list, and numbered list.
+- Wired AI generation output to populate Lexical reliably and kept compliance checks reading current editor text.
+- Standardized draft persistence to HTML serialization for rich-text retention across save/open flows.
+- Deferred remediation apply/regenerate integration in this phase by disabling those actions with clear temporary guidance (no broken path).
+
 # Railfin Change Log
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.

@@ -1,3 +1,16 @@
+## task-00148 — UI/DEV — Lexical integration phase 1 (AI + compliance workflow)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00148-lexical-phase1-ai-compliance`
+- Scope delivered:
+  - Replaced Create textarea editor with Lexical editor as primary content surface.
+  - Added baseline formatting toolbar (bold/italic/heading/lists/paragraph).
+  - Wired AI generate output into Lexical editor hydration path.
+  - Kept compliance check flow working by reading current Lexical plain text.
+  - Standardized draft persistence to HTML serialization for rich text retention; load/open path hydrates stored HTML back into Lexical.
+  - Deferred remediation apply/regenerate actions safely (disabled with explicit temporary note).
+  - Updated UI/API/changelog docs and re-ran `npm run build` (pass).
+
 ## task-00147 — UI/DEV — Create single-content focus + prompt lock accordion + editor/compliance upgrade
 
 - Status: **Done**

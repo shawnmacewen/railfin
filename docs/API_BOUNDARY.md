@@ -1,3 +1,10 @@
+## task-00148 update — Create editor serialization contract (Lexical phase 1)
+
+- Create editor persistence remains on `POST /api/internal/content/draft` with unchanged envelope shape, but `body` now stores Lexical-authored **HTML** (serialized rich text) rather than plain textarea text for new/updated drafts.
+- Compliance contract remains unchanged: `POST /api/internal/compliance/check` continues to receive a plain `content` string; UI now derives this from Lexical text content extraction before request submission.
+- Generate contract remains unchanged: UI receives generated plain text and maps it into Lexical HTML for editor hydration.
+- Backward compatibility: existing plain-text draft bodies still load (treated as text content by the Lexical loader path).
+
 # API Boundary
 
 ## Internal Protected Operations

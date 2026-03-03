@@ -1,3 +1,13 @@
+## task-00148 — Lexical phase 1 (Create workflow integration for AI + Compliance)
+
+- Replaced Create page textarea editor with a Lexical-based rich text editor (`src/ui/lexical-editor.tsx`) and made it the primary authoring surface.
+- Added practical baseline formatting controls in-editor: **bold**, **italic**, **heading**, **paragraph**, **bullet list**, **numbered list**.
+- Wired AI Generate flow to hydrate Lexical reliably by converting generated plain text into editor HTML and syncing state back from Lexical on every change.
+- Compliance now reads the current Lexical editor content via extracted plain text, preserving end-to-end compliance-check behavior.
+- Save Draft now persists Lexical content as serialized HTML (`body`), and draft open/load hydrates that HTML back into Lexical.
+- Library card previews now strip HTML tags from saved draft bodies so saved Lexical content remains readable in list/tile previews.
+- Remediation apply/regenerate actions are intentionally deferred in this phase: controls remain visible but disabled with a clear temporary note to avoid broken paths while Generate+Compliance+Save flow is stabilized.
+
 # UI Foundations
 
 ## task-00147 — Create single-content focus + prompt lock accordion + editor/compliance workspace upgrade
