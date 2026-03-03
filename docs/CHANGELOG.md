@@ -2,6 +2,14 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Create UX refactor (task-00144)
+- Simplified Create-page copy and hierarchy by removing outdated helper text and redundant stage labels.
+- Moved Draft Status into a right-aligned header pill for faster save-state scanning.
+- Split generation flow into separate AI Instructions input and Editor Content output areas.
+- Replaced mode/content-type controls with large active-state buttons (including the 4-option content type set: Blog, Social Post, Article, Newsletter).
+- Moved Generation History to the bottom of Create and added in-session prompt lock/reference behavior after generation.
+- Documented next milestone: persist every submitted prompt with user-linked audit metadata (user/session/model) in backend storage.
+
 ## 2026-03-03 — Configure Features page
 - Added a new **Features** page under Configure to clearly explain what the app can do today in plain language.
 - Included the new page in Configure navigation so Policy, Features, and Change Log are easy to browse together.

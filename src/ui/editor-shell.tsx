@@ -9,6 +9,7 @@ type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 type GenerationMode = "single" | "package";
+type CreateContentOption = "blog" | "social-post" | "article" | "newsletter";
 
 type RemediationContextResult = {
   nextContent: string;
@@ -71,6 +72,20 @@ type GenerationHistoryEntry =
 
 const MAX_GENERATION_HISTORY = 6;
 const PACKAGE_REQUEST_ASSETS: PackageAssetType[] = ["email", "linkedin", "x-thread"];
+
+const CREATE_CONTENT_OPTIONS: Array<{ id: CreateContentOption; label: string; apiType: ContentType }> = [
+  { id: "blog", label: "Blog", apiType: "blog" },
+  { id: "social-post", label: "Social Post", apiType: "linkedin" },
+  { id: "article", label: "Article", apiType: "x-thread" },
+  { id: "newsletter", label: "Newsletter", apiType: "newsletter" },
+];
+
+const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
+  blog: "Blog",
+  linkedin: "Social Post",
+  "x-thread": "Article",
+  newsletter: "Newsletter",
+};
 
 const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
 const REMEDIATION_BLOCK_END = "[/Compliance Remediation Draft Context]";
@@ -222,6 +237,9 @@ export function EditorShell() {
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null);
   const [remediationApplyStatus, setRemediationApplyStatus] = useState<RemediationApplyStatus>("idle");
   const [contentType, setContentType] = useState<ContentType>("blog");
+  const [promptInput, setPromptInput] = useState("");
+  const [lockedPrompt, setLockedPrompt] = useState<string | null>(null);
+  const [isPromptLocked, setIsPromptLocked] = useState(false);
   const [generationMode, setGenerationMode] = useState<GenerationMode>("single");
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
@@ -312,7 +330,11 @@ export function EditorShell() {
   }, [generationHistoryContextKey]);
 
   const canSave = content.trim().length > 0 && status !== "saving";
-  const canGenerate = content.trim().length > 0 && generationStatus !== "generating";
+  const canGenerate = promptInput.trim().length > 0 && generationStatus !== "generating";
+
+  const selectedContentOption = useMemo(() => {
+    return CREATE_CONTENT_OPTIONS.find((option) => option.apiType === contentType)?.id ?? "blog";
+  }, [contentType]);
 
   const saveStatusText = useMemo(() => {
     if (status === "saving") {
@@ -449,9 +471,12 @@ export function EditorShell() {
 
     if (!trimmedPrompt || generationStatus === "generating") {
       setGenerationStatus("error");
-      setGenerationFeedback("Add some source content before generating.");
+      setGenerationFeedback("Add AI instructions before generating.");
       return;
     }
+
+    setLockedPrompt(trimmedPrompt);
+    setIsPromptLocked(true);
 
     setGenerationStatus("generating");
     setGenerationFeedback(generationMode === "package" ? "Generating campaign package variants..." : "Generating draft text...");
@@ -534,11 +559,11 @@ export function EditorShell() {
   const onGenerate = async () => {
     if (!canGenerate) {
       setGenerationStatus("error");
-      setGenerationFeedback("Add some source content before generating.");
+      setGenerationFeedback("Add AI instructions before generating.");
       return;
     }
 
-    await runGenerate(content);
+    await runGenerate(promptInput);
   };
 
   const onSave = async (event: FormEvent) => {
@@ -683,8 +708,9 @@ export function EditorShell() {
   const onRestoreGenerationHistory = (variant: PackageVariantEntry, entry: GenerationHistoryEntry) => {
     setContent(variant.text);
     setContentType(variant.contentType);
+    setPromptInput(lockedPrompt ?? promptInput);
     setStatus("idle");
-    setFeedback(`Restored ${variant.contentType.toUpperCase()} variant from ${new Date(entry.createdAt).toLocaleString()}.`);
+    setFeedback(`Restored ${CONTENT_TYPE_LABELS[variant.contentType]} variant from ${new Date(entry.createdAt).toLocaleString()}.`);
     setGenerationStatus("generated");
     setGenerationDegraded(variant.degraded);
     setGenerationFeedback("Restored from generation history. Review, edit, and save when ready.");
@@ -701,7 +727,7 @@ export function EditorShell() {
       await navigator.clipboard.writeText(variant.text);
       setGenerationStatus("generated");
       setGenerationDegraded(variant.degraded);
-      setGenerationFeedback(`Copied ${variant.contentType.toUpperCase()} variant to clipboard.`);
+      setGenerationFeedback(`Copied ${CONTENT_TYPE_LABELS[variant.contentType]} variant to clipboard.`);
     } catch {
       setGenerationStatus("error");
       setGenerationFeedback("Unable to copy variant to clipboard. Restore variant to editor and copy manually.");
@@ -783,15 +809,12 @@ export function EditorShell() {
 
   return (
     <section aria-live="polite">
-      <header className="rf-page-header">
+      <header className="rf-page-header rf-page-header-create">
         <h2 className="rf-page-title">Create</h2>
-        <p className="rf-page-subtitle">Draft content, save progress, and run compliance checks.</p>
+        <span className="rf-status-pill" role="status" aria-label={saveStatusText}>{saveStatusText}</span>
       </header>
 
       {loadedDraftTitle ? <p className="rf-editor-opened">Editing: {loadedDraftTitle}</p> : null}
-      <p className="rf-status rf-status-muted" role="status">
-        {saveStatusText}
-      </p>
       <p className="rf-status rf-status-muted" role="status">
         {policyUpdatedLabel}
       </p>
@@ -807,52 +830,68 @@ export function EditorShell() {
         <div className="rf-create-main">
           <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
             <h3>1. Generate</h3>
-            <p className="rf-status rf-status-muted">Generate or restore draft variants before review.</p>
             <div className="rf-generate-controls">
               <section className="rf-control-group" aria-label="Generation mode controls">
                 <h4>Mode</h4>
-                <p className="rf-status rf-status-muted">Start simple, then switch to package only when needed.</p>
-                <div className="rf-generate-mode" role="radiogroup" aria-label="Generation mode">
-                  <label>
-                    <input
-                      type="radio"
-                      name="generation-mode"
-                      value="single"
-                      checked={generationMode === "single"}
-                      onChange={() => setGenerationMode("single")}
-                      disabled={generationStatus === "generating"}
-                    />
-                    Single draft
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="generation-mode"
-                      value="package"
-                      checked={generationMode === "package"}
-                      onChange={() => setGenerationMode("package")}
-                      disabled={generationStatus === "generating"}
-                    />
-                    Campaign package (Blog, LinkedIn, Newsletter, X)
-                  </label>
+                <div className="rf-generate-mode-buttons" role="group" aria-label="Generation mode">
+                  <button
+                    type="button"
+                    className={`rf-choice-button ${generationMode === "single" ? "is-active" : ""}`}
+                    onClick={() => setGenerationMode("single")}
+                    disabled={generationStatus === "generating"}
+                    aria-pressed={generationMode === "single"}
+                  >
+                    Single Draft
+                  </button>
+                  <button
+                    type="button"
+                    className={`rf-choice-button ${generationMode === "package" ? "is-active" : ""}`}
+                    onClick={() => setGenerationMode("package")}
+                    disabled={generationStatus === "generating"}
+                    aria-pressed={generationMode === "package"}
+                  >
+                    Campaign Package
+                  </button>
                 </div>
               </section>
 
               <section className="rf-control-group" aria-label="Primary output controls">
-                <h4>Primary Output</h4>
-                <label htmlFor="editor-content-type">Content Type</label>
-                <select
-                  id="editor-content-type"
-                  name="editor-content-type"
-                  value={contentType}
-                  onChange={(event) => setContentType(event.target.value as ContentType)}
-                  disabled={generationStatus === "generating" || generationMode === "package"}
-                >
-                  <option value="blog">Blog</option>
-                  <option value="linkedin">LinkedIn</option>
-                  <option value="newsletter">Newsletter</option>
-                  <option value="x-thread">X Thread</option>
-                </select>
+                <label className="rf-content-type-label">Content Type</label>
+                <div className="rf-content-type-buttons" role="group" aria-label="Content type">
+                  {CREATE_CONTENT_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
+                      onClick={() => setContentType(option.apiType)}
+                      disabled={generationStatus === "generating" || generationMode === "package"}
+                      aria-pressed={selectedContentOption === option.id}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rf-control-group" aria-label="AI prompt input">
+                <label htmlFor="editor-prompt">AI Instructions</label>
+                <textarea
+                  id="editor-prompt"
+                  name="editor-prompt"
+                  value={promptInput}
+                  onChange={(event) => setPromptInput(event.target.value)}
+                  rows={4}
+                  placeholder="Describe what to generate and any constraints."
+                  disabled={isPromptLocked && generationStatus !== "generating"}
+                />
+                <div className="rf-generation-history-actions">
+                  <button type="button" onClick={() => setIsPromptLocked((current) => !current)}>
+                    {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
+                  </button>
+                </div>
+                {lockedPrompt ? (
+                  <p className="rf-status rf-status-muted" role="status">Locked prompt saved for reference.</p>
+                ) : null}
               </section>
 
               <div className="rf-create-primary-actions" aria-label="Generate actions">
@@ -867,78 +906,6 @@ export function EditorShell() {
                 </button>
               </div>
             </div>
-
-      <section className="rf-generation-history" aria-label="Generation history">
-        <div className="rf-generation-history-header">
-          <h3>Generation History</h3>
-          <p className="rf-status rf-status-muted" role="status">
-            Last {MAX_GENERATION_HISTORY} outputs for this {draftId ? "draft" : "session"}, including package variants.
-          </p>
-        </div>
-
-        {generationHistory.length ? (
-          <ul className="rf-generation-history-list">
-            {generationHistory.map((entry) => {
-              const variants = entry.mode === "single" ? [entry.variant] : entry.variants;
-
-              return (
-                <li key={entry.id} className="rf-generation-history-item">
-                  <div className="rf-generation-history-meta">
-                    <span className="rf-badge">{entry.mode === "single" ? "SINGLE" : "PACKAGE"}</span>
-                    <span
-                      className={`rf-severity-badge is-${
-                        entry.mode === "single" ? (entry.variant.degraded ? "medium" : "low") : entry.degraded ? "medium" : "low"
-                      }`}
-                    >
-                      {entry.mode === "single" ? (entry.variant.degraded ? "DEGRADED" : "OK") : entry.degraded ? "MIXED" : "OK"}
-                    </span>
-                    <span>{new Date(entry.createdAt).toLocaleString()}</span>
-                    {entry.mode === "single" ? (
-                      entry.variant.provider ? (
-                        <span>via {entry.variant.provider}</span>
-                      ) : null
-                    ) : entry.providers.length ? (
-                      <span>via {entry.providers.join(", ")}</span>
-                    ) : null}
-                  </div>
-
-                  <div
-                    className={`rf-generation-variants ${entry.mode === "package" ? "is-compare" : ""}`}
-                    aria-label={entry.mode === "package" ? "Package variant compare" : "Generated variants"}
-                  >
-                    {variants.map((variant) => {
-                      const preview = variant.text.replace(/\s+/g, " ").trim();
-
-                      return (
-                        <article key={variant.id} className="rf-generation-variant-item">
-                          <div className="rf-generation-variant-meta">
-                            <span className="rf-badge">{variant.contentType.toUpperCase()}</span>
-                            <span className={`rf-severity-badge is-${variant.degraded ? "medium" : "low"}`}>
-                              {variant.degraded ? "DEGRADED" : "OK"}
-                            </span>
-                            {variant.provider ? <span>via {variant.provider}</span> : null}
-                          </div>
-                          <p>{preview.slice(0, 180)}{preview.length > 180 ? "…" : ""}</p>
-                          <div className="rf-generation-history-actions">
-                            <button type="button" onClick={() => void onCopyGenerationVariant(variant)}>
-                              Copy {variant.contentType.toUpperCase()}
-                            </button>
-                            <button type="button" onClick={() => onRestoreGenerationHistory(variant, entry)}>
-                              Restore {variant.contentType.toUpperCase()}
-                            </button>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="rf-status rf-status-muted">No generated drafts in this context yet.</p>
-        )}
-      </section>
           </section>
 
           {generationFeedback ? (
@@ -957,7 +924,6 @@ export function EditorShell() {
       ) : null}
 
       <section id="create-save" className="rf-create-stage" aria-label="Save draft stage">
-            <h3>4. Save</h3>
             <p className="rf-status rf-status-muted">Save once you are satisfied with review and remediation updates.</p>
             <form onSubmit={onSave} aria-busy={status === "saving"}>
         <label htmlFor="editor-content">Editor Content</label>
@@ -1120,6 +1086,79 @@ export function EditorShell() {
           </div>
         </section>
       ) : null}
+
+
+          <section className="rf-generation-history" aria-label="Generation history">
+                  <div className="rf-generation-history-header">
+                    <h3>Generation History</h3>
+                    <p className="rf-status rf-status-muted" role="status">
+                      Last {MAX_GENERATION_HISTORY} outputs for this {draftId ? "draft" : "session"}, including package variants.
+                    </p>
+                  </div>
+          
+                  {generationHistory.length ? (
+                    <ul className="rf-generation-history-list">
+                      {generationHistory.map((entry) => {
+                        const variants = entry.mode === "single" ? [entry.variant] : entry.variants;
+          
+                        return (
+                          <li key={entry.id} className="rf-generation-history-item">
+                            <div className="rf-generation-history-meta">
+                              <span className="rf-badge">{entry.mode === "single" ? "SINGLE" : "PACKAGE"}</span>
+                              <span
+                                className={`rf-severity-badge is-${
+                                  entry.mode === "single" ? (entry.variant.degraded ? "medium" : "low") : entry.degraded ? "medium" : "low"
+                                }`}
+                              >
+                                {entry.mode === "single" ? (entry.variant.degraded ? "DEGRADED" : "OK") : entry.degraded ? "MIXED" : "OK"}
+                              </span>
+                              <span>{new Date(entry.createdAt).toLocaleString()}</span>
+                              {entry.mode === "single" ? (
+                                entry.variant.provider ? (
+                                  <span>via {entry.variant.provider}</span>
+                                ) : null
+                              ) : entry.providers.length ? (
+                                <span>via {entry.providers.join(", ")}</span>
+                              ) : null}
+                            </div>
+          
+                            <div
+                              className={`rf-generation-variants ${entry.mode === "package" ? "is-compare" : ""}`}
+                              aria-label={entry.mode === "package" ? "Package variant compare" : "Generated variants"}
+                            >
+                              {variants.map((variant) => {
+                                const preview = variant.text.replace(/\s+/g, " ").trim();
+          
+                                return (
+                                  <article key={variant.id} className="rf-generation-variant-item">
+                                    <div className="rf-generation-variant-meta">
+                                      <span className="rf-badge">{CONTENT_TYPE_LABELS[variant.contentType]}</span>
+                                      <span className={`rf-severity-badge is-${variant.degraded ? "medium" : "low"}`}>
+                                        {variant.degraded ? "DEGRADED" : "OK"}
+                                      </span>
+                                      {variant.provider ? <span>via {variant.provider}</span> : null}
+                                    </div>
+                                    <p>{preview.slice(0, 180)}{preview.length > 180 ? "…" : ""}</p>
+                                    <div className="rf-generation-history-actions">
+                                      <button type="button" onClick={() => void onCopyGenerationVariant(variant)}>
+                                        Copy {CONTENT_TYPE_LABELS[variant.contentType]}
+                                      </button>
+                                      <button type="button" onClick={() => onRestoreGenerationHistory(variant, entry)}>
+                                        Restore {CONTENT_TYPE_LABELS[variant.contentType]}
+                                      </button>
+                                    </div>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="rf-status rf-status-muted">No generated drafts in this context yet.</p>
+                  )}
+                </section>
 
         </div>
 

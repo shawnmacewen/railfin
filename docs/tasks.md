@@ -1,3 +1,19 @@
+## task-00144 — UI/DEV — Create page UX refactor (specific product-owner requests)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00144-create-page-ux-refactor-specific`
+- Scope delivered:
+  - Removed deprecated helper/instruction copy in Create Generate header and Generate section.
+  - Moved Draft Status into a right-aligned header pill for faster at-a-glance save-state visibility.
+  - Split generation controls into separate **AI Instructions** input and **Editor Content** output areas.
+  - Added prompt lock/unlock behavior and retained the last submitted prompt in-session for user reference after generation.
+  - Replaced mode radio controls with two large selectable buttons (Single Draft / Campaign Package) with explicit active state.
+  - Replaced content-type selector with four rectangular choices only: Blog, Social Post, Article, Newsletter (removed LinkedIn/X-thread labels from selector).
+  - Removed visible "Primary Output" and "4. Save" labels; moved Generation History to the bottom of the Create workflow.
+  - Updated UI docs/changelog and re-ran `npm run build` (pass).
+- Follow-up milestone (explicit):
+  - Every AI prompt submission must be persisted with user linkage (user/session/model identity). Current UI-only prompt lock is in-session reference only; backend audit persistence with full user linkage remains a required next implementation milestone.
+
 ## Change log contribution rule (effective immediately)
 
 - Every shipped feature, fix, security change, or docs-visible behavior update **must** include a human-readable entry in `docs/CHANGELOG.md` as part of the same PR/task.
