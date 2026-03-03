@@ -1,3 +1,13 @@
+## task-00154 — UI — Lexical toolbar icon-only solid row
+
+- Status: **Done**
+- Branch: `feat/ui/task-00154-toolbar-icon-only-solid-row`
+- Scope delivered:
+  - Converted Lexical toolbar controls to icon-only buttons (removed visible text labels) while preserving per-control `aria-label` and existing commands/behavior.
+  - Removed inter-button/group spacing so the toolbar reads as one continuous neutral control strip.
+  - Enforced single-row toolbar layout with horizontal overflow on narrow widths (no wrapping).
+  - Preserved active-state clarity and neutral styling treatment.
+  - Updated docs/lane report and validated with `npm run build` (pass).
 ## task-00153 — UI — Lexical toolbar common options expansion
 
 - Status: **Done**

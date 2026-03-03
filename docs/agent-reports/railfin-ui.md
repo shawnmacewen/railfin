@@ -47,3 +47,4 @@
 - task-00136 | Done | `feat/ui/task-00136-create-layout-split`
 - task-00139 | Done | `feat/ui/task-00139-ux-stabilization-phase2`
 <!-- HISTORICAL_TASK_COVERAGE_END -->
+- 2026-03-03 06:43 UTC task-00154: refined Lexical toolbar to icon-only controls and contiguous no-gap strip, enforced one-row no-wrap with horizontal overflow fallback, preserved aria-label/accessibility semantics and command behavior; build passed.

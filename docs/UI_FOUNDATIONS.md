@@ -1,3 +1,8 @@
+## task-00154 — Lexical toolbar icon-only solid row
+
+- Updated `src/ui/lexical-editor.tsx` toolbar controls to icon-only rendering (no visible text labels) while retaining command wiring and `aria-label` accessibility semantics.
+- Updated `src/app/globals.css` toolbar treatment to a contiguous, no-gap control strip with no wrapping; narrow viewports use horizontal scrolling instead of multi-line wrapping.
+- Kept visual language neutral and preserved active-state clarity (non-CTA, subtle active contrast).
 ## task-00153 — Lexical toolbar common options expansion
 
 - Expanded `src/ui/lexical-editor.tsx` toolbar coverage to practical common rich-text controls while preserving existing editor/data workflows:

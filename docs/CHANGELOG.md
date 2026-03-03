@@ -1,3 +1,8 @@
+## 2026-03-03 — Lexical toolbar icon-only solid row (task-00154)
+- Converted Create editor toolbar controls to icon-only buttons and preserved accessibility labels/pressed semantics.
+- Removed spacing between toolbar controls/groups so the toolbar renders as one continuous neutral strip.
+- Enforced single-row toolbar behavior with horizontal overflow on smaller widths (no wrapping).
+- Kept active-state clarity and existing editor command behavior unchanged.
 ## 2026-03-03 — Lexical toolbar common options expansion (task-00153)
 - Expanded Create editor toolbar with practical common controls: bold/italic/underline/strikethrough, H1/H2/H3/paragraph, bullet/numbered/check lists, blockquote/code block, link/unlink, alignment (left/center/right), undo/redo, and clear formatting.
 - Preserved neutral grey toolbar styling and Lucide icon+label conventions while keeping active-state clarity and accessibility semantics.
