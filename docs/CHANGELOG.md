@@ -1,3 +1,16 @@
+## 2026-03-03 — Lexical UX stabilization pass (task-00149)
+- Aligned Create’s Lexical formatting toolbar to a neutral demo-style bar (grey surface, grouped controls, icon+label feel).
+- Removed primary-blue CTA treatment from formatting controls; active state is now clear but neutral.
+- Improved split-layout editing comfort with sticky desktop toolbar and bounded internal editor scrolling.
+- Added editor-ready guardrails so Prompt Lock / Generate Content / Save Draft wait until Lexical is fully hydrated.
+- Kept save/open/compliance/library preview flows stable while improving editing usability.
+
+## 2026-03-03 — Lexical data-contract hardening (task-00150)
+- Hardened Create editor HTML boundaries with a dedicated normalization/sanitization layer before persistence and hydration.
+- Added safe load-time normalization for malformed/legacy draft bodies so old plain-text drafts and malformed HTML hydrate reliably in Lexical.
+- Made compliance content extraction deterministic and bounded by deriving normalized plain text from sanitized HTML with explicit limits.
+- Kept API request/response envelopes stable while improving internal safety and consistency for editor contract handling.
+
 ## 2026-03-03 — Lexical safety review phase 1 (task-00151)
 - Completed SEC review of Lexical HTML save/load/render path across Create and Library workflows.
 - Confirmed current flow does not use direct HTML injection sinks (no `dangerouslySetInnerHTML` in reviewed surfaces).

@@ -1,5 +1,12 @@
 # railfin-dev detailed work log
 
+## 2026-03-03 06:20 UTC — task-00150 lexical data-contract hardening
+- Hardened Lexical draft boundary handling via new `src/ui/lexical-contract.ts` (sanitize/normalize HTML + bounded payloads).
+- Updated editor change and draft load paths to enforce canonical HTML + deterministic compliance text extraction.
+- Updated docs: API boundary, task ledger, changelog.
+- Build verification: `npm run build` passed.
+
+
 ## 2026-03-03 01:32 UTC — dev log backfill
 - task-00129 ✅ merged `36eab52`: package mode backend (`single|package`) + strict package/per-asset validation.
 - task-00132 ✅ merged `073f876`: additive package export schema (`data.package.export`) + normalized block validation.

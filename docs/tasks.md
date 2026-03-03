@@ -1,3 +1,27 @@
+## task-00149 — UI — Lexical UX stabilization pass (post phase-1)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00149-lexical-ux-stabilization`
+- Scope delivered:
+  - Styled Lexical toolbar to neutral demo-style hierarchy (grey top bar, grouped controls, icon+label affordance, non-primary button treatment).
+  - Added live active-state affordances (`aria-pressed` + visual state) for bold/italic/heading/list tools.
+  - Kept Lexical React setup explicit and conventional (`LexicalComposer`, `RichTextPlugin`, `ContentEditable`, `HistoryPlugin`, `OnChangePlugin` + toolbar update listener).
+  - Tuned editor viewport behavior for split layout: sticky desktop toolbar, bounded editor viewport/internal scrolling, and mobile fallback to normal page flow.
+  - Added editor-ready gating so prompt lock / generate / save stay disabled until Lexical hydration completes.
+  - Preserved currently working save/load/compliance/library-preview flows.
+  - Re-ran `npm run build` (pass after clean `.next`).
+
+## task-00150 — DEV — Lexical data-contract hardening
+
+- Status: **Done**
+- Branch: `feat/dev/task-00150-lexical-data-contract-hardening`
+- Scope delivered:
+  - Hardened Lexical serialization/deserialization boundaries through a dedicated contract utility (`src/ui/lexical-contract.ts`) with HTML sanitization/normalization and bounded payload handling.
+  - Added safe normalization on draft load to handle malformed/legacy body content (including plain-text legacy drafts) before editor hydration.
+  - Made compliance extraction deterministic and bounded by normalizing HTML→text with explicit max-length enforcement.
+  - Updated API boundary + changelog documentation for contract-hardening behavior.
+  - Re-ran npm run build (pass).
+
 ## task-00151 — SEC — Lexical safety review phase 1
 
 - Status: **Done**

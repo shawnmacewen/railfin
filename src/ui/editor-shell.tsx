@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { ComplianceFinding, CompliancePanel, SelectedFindingContext } from "./compliance-panel";
 import { LexicalEditorField } from "./lexical-editor";
+import { normalizeIncomingDraftBody, plainTextToContractHtml } from "./lexical-contract";
 
 type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
@@ -225,28 +226,8 @@ function getProtectedZoneWarning(sourceValues: Array<string | undefined>) {
   return `Protected/prohibited transform zone detected (${zones.join(", ")}). Review edits manually before apply/regenerate.`;
 }
 
-function stripHtmlTags(input: string): string {
-  return input
-    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
-    .replace(/<\/(p|div|h1|h2|h3|li|ul|ol)>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
 function plainTextToHtml(input: string): string {
-  const escaped = input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  const blocks = escaped.split(/\n{2,}/).map((part) => part.replace(/\n/g, "<br />").trim()).filter(Boolean);
-  if (!blocks.length) return "<p></p>";
-  return blocks.map((block) => `<p>${block}</p>`).join("");
+  return plainTextToContractHtml(input);
 }
 
 export function EditorShell() {
@@ -274,6 +255,7 @@ export function EditorShell() {
   const [remediationApplyHistory, setRemediationApplyHistory] = useState<RemediationApplyHistoryEntry[]>([]);
   const [remediationUndoState, setRemediationUndoState] = useState<RemediationUndoState | null>(null);
   const [generationHistory, setGenerationHistory] = useState<GenerationHistoryEntry[]>([]);
+  const [isLexicalReady, setIsLexicalReady] = useState(false);
 
   const generationHistoryContextKey = draftId || "session-new";
 
@@ -332,8 +314,9 @@ export function EditorShell() {
         }
 
         const loadedBody = payload.data.body ?? "";
-        setContentHtml(loadedBody || "<p></p>");
-        setContentText(stripHtmlTags(loadedBody));
+        const normalized = normalizeIncomingDraftBody(loadedBody);
+        setContentHtml(normalized.html);
+        setContentText(normalized.text);
         setLoadedDraftTitle(payload.data.title || "Untitled Draft");
         setStatus("idle");
         setFeedback(`Opened draft: ${payload.data.title || "Untitled Draft"}`);
@@ -357,8 +340,8 @@ export function EditorShell() {
     setGenerationHistory([]);
   }, [generationHistoryContextKey]);
 
-  const canSave = contentText.trim().length > 0 && status !== "saving";
-  const canGenerate = promptInput.trim().length > 0 && generationStatus !== "generating";
+  const canSave = isLexicalReady && contentText.trim().length > 0 && status !== "saving";
+  const canGenerate = isLexicalReady && promptInput.trim().length > 0 && generationStatus !== "generating";
 
   const selectedContentOption = useMemo(() => {
     return CREATE_CONTENT_OPTIONS.find((option) => option.apiType === contentType)?.id ?? "blog";
@@ -496,6 +479,12 @@ export function EditorShell() {
 
   const runGenerate = async (prompt: string, successMessage?: string) => {
     const trimmedPrompt = prompt.trim();
+
+    if (!isLexicalReady) {
+      setGenerationStatus("error");
+      setGenerationFeedback("Editor is still loading. Wait a moment and try again.");
+      return;
+    }
 
     if (!trimmedPrompt || generationStatus === "generating") {
       setGenerationStatus("error");
@@ -868,7 +857,7 @@ export function EditorShell() {
                 <div className="rf-prompt-header-row">
                   <label htmlFor="editor-prompt">AI Instructions</label>
                   <div className="rf-prompt-header-actions">
-                    <button type="button" onClick={onTogglePromptLock}>
+                    <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
                       {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
                     </button>
                     <button type="button" onClick={onGenerate} disabled={!canGenerate}>
@@ -901,6 +890,12 @@ export function EditorShell() {
             </div>
           </section>
 
+          {!isLexicalReady ? (
+            <p className="rf-status rf-status-muted" role="status">
+              Editor is initializing… generate and save controls will enable when ready.
+            </p>
+          ) : null}
+
           {generationFeedback ? (
         <p
           className={`rf-status ${
@@ -923,6 +918,7 @@ export function EditorShell() {
         <LexicalEditorField
           value={contentHtml}
           placeholder="Write or generate content..."
+          onReadyChange={setIsLexicalReady}
           onChange={({ html, text }) => {
             setContentHtml(html);
             setContentText(text);

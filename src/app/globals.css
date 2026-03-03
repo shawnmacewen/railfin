@@ -1047,3 +1047,74 @@ button:disabled {
   pointer-events: none;
   font-size: 0.9rem;
 }
+
+/* task-00149: Lexical toolbar + viewport stabilization */
+.rf-lexical-toolbar {
+  position: sticky;
+  top: 0.25rem;
+  z-index: 2;
+  padding: 0.45rem;
+  border: 1px solid #d7dbe4;
+  border-radius: 2px;
+  background: #f3f4f6;
+}
+
+.rf-lexical-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rf-lexical-toolbar-divider {
+  width: 1px;
+  height: 1.55rem;
+  background: #d1d5db;
+}
+
+.rf-lexical-toolbar button {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.38rem 0.6rem;
+}
+
+.rf-lexical-toolbar button.is-active {
+  border-color: #9ca3af;
+  background: #e5e7eb;
+  color: #111827;
+  box-shadow: inset 0 0 0 1px #d1d5db;
+}
+
+.rf-lexical-editor-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(22rem, 56vh, 40rem);
+  max-height: calc(100vh - 14rem);
+}
+
+.rf-lexical-content-editable {
+  flex: 1 1 auto;
+  min-height: 18rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  line-height: 1.55;
+  scrollbar-gutter: stable;
+}
+
+.rf-lexical-placeholder {
+  top: 0.85rem;
+  left: 0.85rem;
+}
+
+@media (max-width: 959px) {
+  .rf-lexical-editor-shell {
+    max-height: none;
+  }
+
+  .rf-lexical-toolbar {
+    position: static;
+  }
+}
