@@ -15,6 +15,17 @@
   - Recorded gate outcome in `docs/SECURITY_BASELINE.md`: package-alignment closure remains **NO-GO** (drift still open), while UX safety-surface posture remains **GO**.
   - Updated changelog and task ledger; docs-only verification task (no runtime code changes, no build run required).
 
+
+## task-00139 — UI — UX stabilization phase 2 after split layout
+
+- Status: **Done**
+- Branch: `feat/ui/task-00139-ux-stabilization-phase2`
+- Scope delivered:
+  - Improved right compliance panel ergonomics with contained sticky/scroll behavior so run/status/actions remain easier to access during long findings review.
+  - Reduced left-pane cognitive load by grouping generation controls progressively (Mode → Primary Output → Generate action).
+  - Preserved all existing Create capabilities/flows (generate, package variants/history actions, review/remediation actions, save, compliance check).
+  - Updated UI docs/changelog and re-ran `npm run build` (pass).
+
 ## task-00137 — DEV — UX stabilization support pass for split layout
 
 - Status: **Done**
@@ -1187,3 +1198,13 @@
   - Introduced two generation templates (`default`, `conversion`) with explicit prompt guidance injection.
   - Preserved existing UI response contract (`{ ok, data: { draft, generationMeta } }`) and fallback behavior.
   - Updated API boundary docs for optional template input and validation semantics.
+
+## task-00140 — DEV — align UI package flow with package-mode API contract
+
+- Status: **Done**
+- Branch: `feat/dev/task-00140-package-ux-api-alignment`
+- Scope delivered:
+  - Updated Create package generation path to call a single canonical package request (`mode: "package"`, `package.assets`) instead of fan-out single-mode calls.
+  - Preserved single-draft behavior and contract compatibility (`mode: "single"` + `contentType`) for existing flows.
+  - Added UI-side package response normalization/validation to fail closed when package assets are missing or malformed.
+  - Updated API boundary/task/changelog docs and re-ran `npm run build` (pass).

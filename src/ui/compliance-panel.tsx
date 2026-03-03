@@ -261,35 +261,38 @@ export function CompliancePanel({
   const hasContent = Boolean(content?.trim());
 
   return (
-    <section aria-live="polite">
-      <button type="button" onClick={runComplianceCheck} disabled={running || !hasContent}>
-        {running ? "Running Compliance Check..." : "Run Compliance Check"}
-      </button>
+    <section className="rf-compliance-panel" aria-live="polite">
+      <div className="rf-compliance-toolbar">
+        <button type="button" onClick={runComplianceCheck} disabled={running || !hasContent}>
+          {running ? "Running Compliance Check..." : "Run Compliance Check"}
+        </button>
 
-      {activePolicyContext ? (
-        <p className="rf-compliance-policy-context" role="status">
-          Active policy context: {activePolicyContext}
+        {activePolicyContext ? (
+          <p className="rf-compliance-policy-context" role="status">
+            Active policy context: {activePolicyContext}
+          </p>
+        ) : null}
+
+        {runSummary ? (
+          <p className={`rf-status ${runDegraded ? "rf-status-muted" : "rf-status-success"}`} role="status">
+            {runSummary}
+          </p>
+        ) : null}
+
+        <p className="rf-compliance-disclaimer" role="note">
+          AI-backed compliance insights are guidance, not legal approval.
         </p>
-      ) : null}
+      </div>
 
-      {runSummary ? (
-        <p className={`rf-status ${runDegraded ? "rf-status-muted" : "rf-status-success"}`} role="status">
-          {runSummary}
-        </p>
-      ) : null}
+      <div className="rf-compliance-results" aria-label="Compliance findings region">
+        {error ? (
+          <p role="alert" aria-live="polite">
+            {error}
+          </p>
+        ) : null}
 
-      <p className="rf-compliance-disclaimer" role="note">
-        AI-backed compliance insights are guidance, not legal approval.
-      </p>
-
-      {error ? (
-        <p role="alert" aria-live="polite">
-          {error}
-        </p>
-      ) : null}
-
-      {groupedFindings.length ? (
-        <div className="rf-findings-groups" aria-label="Compliance findings">
+        {groupedFindings.length ? (
+          <div className="rf-findings-groups" aria-label="Compliance findings">
           <section className="rf-findings-summary" aria-label="Findings summary">
             <h3>Findings Summary</h3>
             <p className="rf-status rf-status-muted" role="status">
@@ -401,8 +404,9 @@ export function CompliancePanel({
               </ul>
             </section>
           ))}
-        </div>
-      ) : null}
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

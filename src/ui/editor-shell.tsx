@@ -70,7 +70,7 @@ type GenerationHistoryEntry =
     };
 
 const MAX_GENERATION_HISTORY = 6;
-const PACKAGE_CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
+const PACKAGE_REQUEST_ASSETS: PackageAssetType[] = ["email", "linkedin", "x-thread"];
 
 const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
 const REMEDIATION_BLOCK_END = "[/Compliance Remediation Draft Context]";
@@ -90,12 +90,26 @@ type DraftResponse = {
   }>;
 };
 
+type PackageAssetType = "email" | "linkedin" | "x-thread";
+
 type GenerateResponse = {
   ok: boolean;
   data?: {
     draft?: {
       text?: string;
       contentType?: ContentType;
+    };
+    package?: {
+      assets?: Array<{
+        assetType?: PackageAssetType;
+        draft?: {
+          text?: string;
+        };
+        generationMeta?: {
+          degraded?: boolean;
+          provider?: string;
+        };
+      }>;
     };
     generationMeta?: {
       notes?: string;
@@ -353,6 +367,7 @@ export function EditorShell() {
       },
       body: JSON.stringify({
         prompt,
+        mode: "single",
         contentType: requestedType,
       }),
     });
@@ -369,6 +384,63 @@ export function EditorShell() {
       notes: payload.data?.generationMeta?.notes?.trim(),
       degraded: Boolean(payload.data?.generationMeta?.degraded),
       provider: payload.data?.generationMeta?.provider?.trim() || null,
+    };
+  };
+
+
+  const packageAssetTypeToContentType = (assetType: PackageAssetType): ContentType => {
+    return assetType === "email" ? "newsletter" : assetType;
+  };
+
+  const generatePackageVariants = async (prompt: string): Promise<{ variants: PackageVariantEntry[]; notes?: string }> => {
+    const response = await fetch("/api/internal/content/generate", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt,
+        mode: "package",
+        package: {
+          assets: PACKAGE_REQUEST_ASSETS.map((assetType) => ({ assetType })),
+        },
+      }),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as GenerateResponse;
+    const packageAssets = payload.data?.package?.assets ?? [];
+
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error || "Unable to generate campaign package.");
+    }
+
+    const variants = packageAssets
+      .map((asset) => {
+        const assetType = asset.assetType;
+        const text = asset.draft?.text?.trim() ?? "";
+
+        if (!assetType || !text) {
+          return null;
+        }
+
+        return {
+          id: `${Date.now()}-${assetType}-${Math.random().toString(36).slice(2, 8)}`,
+          text,
+          contentType: packageAssetTypeToContentType(assetType),
+          degraded: Boolean(asset.generationMeta?.degraded),
+          provider: asset.generationMeta?.provider?.trim() || null,
+        };
+      })
+      .filter((item): item is PackageVariantEntry => Boolean(item));
+
+    if (variants.length === 0) {
+      throw new Error(payload.error || "Unable to generate campaign package.");
+    }
+
+    return {
+      variants,
+      notes: payload.data?.generationMeta?.notes?.trim(),
     };
   };
 
@@ -418,18 +490,8 @@ export function EditorShell() {
             : `Generation runtime: success${generated.provider ? ` via ${generated.provider}` : ""}.`,
         );
       } else {
-        const variants = await Promise.all(
-          PACKAGE_CONTENT_TYPES.map(async (variantType) => {
-            const generated = await generateDraftForType(trimmedPrompt, variantType);
-            return {
-              id: `${Date.now()}-${variantType}-${Math.random().toString(36).slice(2, 8)}`,
-              text: generated.generatedText,
-              contentType: variantType,
-              degraded: generated.degraded,
-              provider: generated.provider,
-            };
-          }),
-        );
+        const generatedPackage = await generatePackageVariants(trimmedPrompt);
+        const variants = generatedPackage.variants;
 
         const packageId = `pkg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const degraded = variants.some((variant) => variant.degraded);
@@ -451,8 +513,8 @@ export function EditorShell() {
         setGenerationDegraded(degraded);
         setGenerationFeedback(
           degraded
-            ? "Campaign package generated with one or more degraded variants. Review each variant before saving."
-            : "Campaign package generated. Select any variant below to restore it into the editor.",
+            ? generatedPackage.notes || "Campaign package generated with one or more degraded variants. Review each variant before saving."
+            : generatedPackage.notes || "Campaign package generated. Select any variant below to restore it into the editor.",
         );
         setReviewFeedback(
           `Package variants ready: ${variants.map((variant) => variant.contentType.toUpperCase()).join(", ")}${providers.length ? ` · providers: ${providers.join(", ")}` : ""}.`,
@@ -747,54 +809,64 @@ export function EditorShell() {
             <h3>1. Generate</h3>
             <p className="rf-status rf-status-muted">Generate or restore draft variants before review.</p>
             <div className="rf-generate-controls">
-        <div className="rf-generate-mode" role="radiogroup" aria-label="Generation mode">
-          <label>
-            <input
-              type="radio"
-              name="generation-mode"
-              value="single"
-              checked={generationMode === "single"}
-              onChange={() => setGenerationMode("single")}
-              disabled={generationStatus === "generating"}
-            />
-            Single draft
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="generation-mode"
-              value="package"
-              checked={generationMode === "package"}
-              onChange={() => setGenerationMode("package")}
-              disabled={generationStatus === "generating"}
-            />
-            Campaign package (Blog, LinkedIn, Newsletter, X)
-          </label>
-        </div>
+              <section className="rf-control-group" aria-label="Generation mode controls">
+                <h4>Mode</h4>
+                <p className="rf-status rf-status-muted">Start simple, then switch to package only when needed.</p>
+                <div className="rf-generate-mode" role="radiogroup" aria-label="Generation mode">
+                  <label>
+                    <input
+                      type="radio"
+                      name="generation-mode"
+                      value="single"
+                      checked={generationMode === "single"}
+                      onChange={() => setGenerationMode("single")}
+                      disabled={generationStatus === "generating"}
+                    />
+                    Single draft
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="generation-mode"
+                      value="package"
+                      checked={generationMode === "package"}
+                      onChange={() => setGenerationMode("package")}
+                      disabled={generationStatus === "generating"}
+                    />
+                    Campaign package (Blog, LinkedIn, Newsletter, X)
+                  </label>
+                </div>
+              </section>
 
-        <label htmlFor="editor-content-type">Primary Content Type</label>
-        <select
-          id="editor-content-type"
-          name="editor-content-type"
-          value={contentType}
-          onChange={(event) => setContentType(event.target.value as ContentType)}
-          disabled={generationStatus === "generating" || generationMode === "package"}
-        >
-          <option value="blog">Blog</option>
-          <option value="linkedin">LinkedIn</option>
-          <option value="newsletter">Newsletter</option>
-          <option value="x-thread">X Thread</option>
-        </select>
-        <button type="button" onClick={onGenerate} disabled={!canGenerate}>
-          {generationStatus === "generating"
-            ? generationMode === "package"
-              ? "Generating Package..."
-              : "Generating..."
-            : generationMode === "package"
-              ? "Generate Campaign Package"
-              : "Generate Draft"}
-        </button>
-      </div>
+              <section className="rf-control-group" aria-label="Primary output controls">
+                <h4>Primary Output</h4>
+                <label htmlFor="editor-content-type">Content Type</label>
+                <select
+                  id="editor-content-type"
+                  name="editor-content-type"
+                  value={contentType}
+                  onChange={(event) => setContentType(event.target.value as ContentType)}
+                  disabled={generationStatus === "generating" || generationMode === "package"}
+                >
+                  <option value="blog">Blog</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="newsletter">Newsletter</option>
+                  <option value="x-thread">X Thread</option>
+                </select>
+              </section>
+
+              <div className="rf-create-primary-actions" aria-label="Generate actions">
+                <button type="button" onClick={onGenerate} disabled={!canGenerate}>
+                  {generationStatus === "generating"
+                    ? generationMode === "package"
+                      ? "Generating Package..."
+                      : "Generating..."
+                    : generationMode === "package"
+                      ? "Generate Campaign Package"
+                      : "Generate Draft"}
+                </button>
+              </div>
+            </div>
 
       <section className="rf-generation-history" aria-label="Generation history">
         <div className="rf-generation-history-header">

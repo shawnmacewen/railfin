@@ -2,6 +2,11 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Create UX stabilization phase 2 (split layout ergonomics)
+- Improved right-side compliance panel scroll ergonomics so key run/status controls stay visible while findings remain scrollable.
+- Reduced left-pane control clutter by grouping generation setup progressively (mode, output target, then action).
+- Preserved all existing Create workflows and capabilities (generation modes/history, remediation actions, save/compliance flow) with no feature removals.
+
 ## 2026-03-03 — Post-alignment security verification (package API/UX + UX phase2)
 - Re-ran security verification for package-mode API/UX alignment after recent Create UX work.
 - Confirmed package-mode drift identified in task-00134 is still open: Create package flow still fans out single-mode calls instead of using canonical `mode: "package"` API request.
@@ -40,3 +45,9 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Delivered usable Library draft browse/search flow and Create draft save wiring.
 - Added Configure baseline, policy endpoint contract, and policy-to-compliance context plumbing.
 - Introduced authentication/middleware baseline guardrails and initial security gate documentation.
+
+## 2026-03-03 — Package UX/API contract alignment (task-00140)
+- Updated Create package generation to use the canonical package-mode API request (`mode: "package"` with `package.assets`) in one call.
+- Removed package fan-out behavior that previously issued multiple single-mode generate requests.
+- Kept single-draft generation backward compatible and explicit (`mode: "single"` + `contentType`).
+- Added stricter UI-side handling for package responses so empty/malformed package payloads fail clearly.

@@ -1,5 +1,14 @@
 # UI Foundations
 
+## task-00139 — UX stabilization phase 2 (post split-layout)
+
+- Refined Create’s split-layout ergonomics while preserving existing flows:
+  - right compliance column now has stronger sticky/contained-scroll behavior to keep compliance tooling stable during long finding lists.
+  - compliance run/status area remains visible while findings scroll, reducing repeated top-jumps.
+- Reduced cognitive load in the left Create pane by progressively grouping generation controls into compact “Mode” and “Primary Output” control groups before action execution.
+- Kept all existing capabilities intact (generate modes, history compare/copy/restore, review/remediation actions, save, compliance check) with no feature removals.
+- Added targeted additive styling only (`rf-control-group`, `rf-create-primary-actions`, compliance panel scroll/sticky refinements) in `src/app/globals.css`.
+
 ## task-00136 — Create layout split (editor + persistent compliance panel)
 
 - Reworked Create into a responsive split workspace in `src/ui/editor-shell.tsx`:
