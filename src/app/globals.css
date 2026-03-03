@@ -586,3 +586,76 @@ button:disabled {
   color: #1b378a;
   font-size: 0.78rem;
 }
+
+.rf-page-header {
+  margin-bottom: 0.65rem;
+}
+
+.rf-page-title {
+  margin: 0;
+}
+
+.rf-page-subtitle {
+  margin: 0.3rem 0 0;
+  color: #4e5879;
+}
+
+.rf-configure-page {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.rf-configure-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.rf-configure-subnav-item {
+  border: 1px solid #d8dced;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.82rem;
+  color: #2f3a5f;
+  background: #fff;
+}
+
+.rf-configure-subnav-item.is-active {
+  background: #e8eeff;
+  color: #1a3ea8;
+  border-color: #c7d5ff;
+}
+
+.rf-configure-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.rf-inline-link {
+  color: #1a4cff;
+  text-decoration: underline;
+}
+
+.rf-changelog-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.rf-changelog-section {
+  border: 1px solid #e4e8f5;
+  border-radius: 0.6rem;
+  background: #fafbff;
+  padding: 0.65rem;
+}
+
+.rf-changelog-section h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.92rem;
+}
+
+.rf-changelog-section ul {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.3rem;
+}

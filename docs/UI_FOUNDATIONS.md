@@ -1,5 +1,18 @@
 # UI Foundations
 
+## task-00135 — Configure Change Log subpage
+
+- Added Configure section-level navigation with two tabs under `/app/configure`:
+  - **Policy** → `/app/configure`
+  - **Change Log** → `/app/configure/changelog`
+- Added new Change Log page that renders human-readable release history from `docs/CHANGELOG.md`.
+- Rendering behavior is intentionally lightweight and stable:
+  - date sections use markdown `##` headings
+  - release highlights use markdown bullet items
+- Styling is additive and aligned with existing `rf-*` patterns:
+  - `rf-configure-subnav*`, `rf-changelog-*`, shared `rf-page-*` heading rhythm.
+- Existing shell navigation and Configure route behavior are preserved (no breaking route/contract changes).
+
 ## task-00133 — Package variant compare UX phase 1
 
 - `src/ui/editor-shell.tsx` extends Create Generation History package entries with a side-by-side compare presentation for generated variants (email/linkedin/x-thread aligned package outputs) while preserving existing single-entry behavior.

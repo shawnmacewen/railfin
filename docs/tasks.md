@@ -1,3 +1,20 @@
+## Change log contribution rule (effective immediately)
+
+- Every shipped feature, fix, security change, or docs-visible behavior update **must** include a human-readable entry in `docs/CHANGELOG.md` as part of the same PR/task.
+- Entries should be concise, dated (`YYYY-MM-DD`), and understandable by non-engineers.
+- Tasks are not considered complete until both `docs/tasks.md` and `docs/CHANGELOG.md` are updated when applicable.
+
+## task-00135 — DEV/UI — Configure Change Log subpage
+
+- Status: **Done**
+- Branch: `feat/dev/task-00135-config-changelog-subpage`
+- Scope delivered:
+  - Added a new Configure subpage at `/app/configure/changelog` and a Configure section subnav (`Policy`, `Change Log`) for discoverability.
+  - Added `docs/CHANGELOG.md` as a human-readable, dated release history source and rendered it in-app on the new Change Log page.
+  - Backfilled major milestones from MVP foundation through latest package-workflow releases in concise non-engineering language.
+  - Added an explicit process rule requiring all future shipped changes to include a `docs/CHANGELOG.md` entry.
+  - Re-ran `npm run build` (pass).
+
 ## task-00134 — SEC — package export safety review phase 1
 
 - Status: **Done**
