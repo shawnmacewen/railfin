@@ -476,6 +476,25 @@ button:disabled {
   color: #4e5879;
 }
 
+.rf-generate-controls {
+  margin: 0.8rem 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.rf-generate-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 0.84rem;
+}
+
+.rf-generate-mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .rf-generation-history {
   margin: 0.8rem 0;
   border: 1px solid #dbe4ff;
@@ -523,6 +542,28 @@ button:disabled {
   gap: 0.35rem;
   align-items: center;
   font-size: 0.76rem;
+  color: #4e5879;
+}
+
+.rf-generation-variants {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.rf-generation-variant-item {
+  border: 1px solid #e3e9fb;
+  border-radius: 0.5rem;
+  background: #fcfdff;
+  padding: 0.5rem;
+}
+
+.rf-generation-variant-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.75rem;
   color: #4e5879;
 }
 

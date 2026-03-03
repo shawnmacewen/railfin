@@ -1,5 +1,17 @@
 # UI Foundations
 
+## task-00130 — Campaign package UX phase 1
+
+- `src/ui/editor-shell.tsx` extends Create generation controls with explicit mode selection:
+  - **Single draft** mode keeps existing one-output generation behavior.
+  - **Campaign package** mode generates a multi-channel set (Blog, LinkedIn, Newsletter, X Thread) from the same source prompt.
+- Generation History now stores/restores outputs in a structured shape:
+  - single generations are shown as one variant entry
+  - package generations are grouped and rendered with per-variant metadata + restore actions
+  - each variant can be restored directly into editor content with matching content-type context
+- Existing flows are preserved (save, compliance, review workbench, remediation apply/undo); changes are additive and low-friction.
+- `src/app/globals.css` adds compact `rf-*` styling for generation mode controls and package variant cards.
+
 ## task-00127 — Review workbench tidy pass 1
 
 - `src/ui/editor-shell.tsx` reduces create-review clutter while preserving all remediation capabilities:
