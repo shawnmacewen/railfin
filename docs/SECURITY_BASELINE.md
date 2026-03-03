@@ -1,3 +1,40 @@
+## task-00151 — SEC — Lexical safety review phase 1 (HTML save/load/render + compliance extraction)
+
+Review scope:
+- `src/ui/lexical-editor.tsx`
+- `src/ui/editor-shell.tsx`
+- `src/ui/compliance-panel.tsx`
+- `src/app/api/internal/content/draft/route.ts`
+- `src/lib/supabase/drafts.ts`
+
+### Findings
+
+1. **Save/load/render path does not execute stored HTML in app surfaces (PASS):**
+   - Draft `body` is stored as text and re-hydrated into Lexical via DOM parse + Lexical node conversion (`$generateNodesFromDOM`), then re-serialized from Lexical state.
+   - User-facing rendering surfaces in reviewed path do not use `dangerouslySetInnerHTML`; library previews strip tags to plain text before render.
+   - Result: no direct script-execution path identified in current Create/Library save-load workflow.
+
+2. **Compliance extraction remains plain-text bounded (PASS):**
+   - Compliance request payload uses `contentText` (plain text), sourced from Lexical `$getRoot().getTextContent()` and trimmed before submit.
+   - Endpoint receives JSON text only (`content`), with existing size/type validation and no HTML rendering behavior.
+   - Result: compliance engine is fed text, not executable markup.
+
+3. **Residual risk: hidden/non-visible HTML text can still influence extracted text (WATCH):**
+   - Draft HTML is not sanitized at persistence boundary; legacy/imported HTML may include non-visible or structurally unexpected markup.
+   - Current strip/parse behavior converts markup into text-oriented content for review/compliance, which is safer than raw HTML execution, but may include text operators did not intend (e.g., hidden nodes represented as text after conversion).
+   - Decision: acceptable for phase-1 with docs-only review; track sanitizer policy hardening in follow-up before any external share/export capability relies on stored HTML fidelity.
+
+### Gate decision (task-00151)
+
+- **Lexical phase-1 safety status:** **GO with follow-up**
+- Rationale: no active XSS execution path found in reviewed flow; compliance path remains plain-text. Residual hidden-markup normalization risk is documented for subsequent hardening.
+
+### Verification outcome (task-00151)
+
+- Outcome: **PASS (docs-first security review complete)**
+- Code changes: none (no tiny critical fix required)
+- Build: not run (no runtime code changes)
+
 ## task-00141 — SEC — post-alignment safety check (package/API-UX + phase2 safety surfaces)
 
 Review scope:

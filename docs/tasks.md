@@ -1,3 +1,14 @@
+## task-00151 — SEC — Lexical safety review phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00151-lexical-safety-review`
+- Scope delivered:
+  - Reviewed Lexical HTML save/load/render path for injection/sanitization risk across Create + Library surfaces.
+  - Verified compliance input extraction remains plain-text based and does not execute HTML/markup in request flow.
+  - Documented residual hidden-markup normalization risk and follow-up hardening recommendation in security baseline.
+  - Updated security docs/changelog and sec lane report; no code change required.
+  - Build not run (docs-only review; no runtime changes).
+
 ## task-00148 — UI/DEV — Lexical integration phase 1 (AI + compliance workflow)
 
 - Status: **Done**

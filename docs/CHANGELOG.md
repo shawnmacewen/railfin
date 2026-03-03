@@ -1,3 +1,10 @@
+## 2026-03-03 — Lexical safety review phase 1 (task-00151)
+- Completed SEC review of Lexical HTML save/load/render path across Create and Library workflows.
+- Confirmed current flow does not use direct HTML injection sinks (no `dangerouslySetInnerHTML` in reviewed surfaces).
+- Confirmed compliance requests are derived from plain text extraction and submitted as JSON text content.
+- Documented residual hidden-markup normalization risk plus follow-up sanitizer hardening recommendation in security baseline.
+- No runtime code changes in this task (docs-first security verification).
+
 ## 2026-03-03 — Lexical editor phase 1 for Create (task-00148)
 - Replaced Create’s textarea editor with Lexical as the primary authoring editor.
 - Added baseline rich formatting controls: bold, italic, heading, paragraph, bullet list, and numbered list.
