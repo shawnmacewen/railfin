@@ -1,3 +1,44 @@
+## task-00138 — SEC — safety check for Create UX layout refactor
+
+Review scope:
+- `src/ui/editor-shell.tsx`
+- `src/ui/compliance-panel.tsx`
+- `src/app/globals.css`
+- `docs/tasks.md`
+
+### Findings (layout safety)
+
+1. **Critical/degraded warnings remain visible and explicit (PASS):**
+   - Generation degraded-state messaging remains operator-visible via explicit status text.
+   - Compliance degraded-state messaging remains explicit and includes runtime/provider context.
+   - Protected/prohibited transform-zone warnings remain visible in selected-finding and finding-card views.
+   - Legal disclaimer remains explicit: compliance output is guidance, not legal approval.
+
+2. **Warning surfaces are not suppressed by layout composition (PASS):**
+   - Review workbench, remediation preview, generation history, and compliance findings remain rendered in normal flow (no hidden/suppressed warning container patterns).
+   - Sticky selected-finding panel remains presentational and does not suppress warning/status rendering.
+
+3. **Remediation actions remain explicit/manual (PASS):**
+   - Remediation apply actions are button-driven and disabled until explicit finding selection.
+   - `Apply Selected Context`, `Apply + Regenerate Draft`, and `Undo Last Apply` remain manual-only controls.
+   - No auto-save or auto-publish side effects are introduced by layout structure.
+
+4. **Auto-trigger regression + stale-context check (PASS):**
+   - No mount/effect path auto-invokes remediation apply endpoints.
+   - Remediation apply calls remain click-handler-only.
+   - Selected finding context is reset on content/context change to prevent stale-action targeting after persistent layout updates.
+
+### Gate decision (task-00138)
+
+- **UX layout safety status:** **GO (warnings visible + manual controls preserved)**
+- Rationale: layout/state changes do not suppress safety-critical notices and do not introduce implicit remediation execution.
+
+### Verification outcome (task-00138)
+
+- Outcome: **PASS**
+- Code changes: tiny UI safety fix + docs verification notes
+- Build: run (`npm run build` pass)
+
 ## task-00134 — SEC — package export safety review phase 1
 
 Review scope:
