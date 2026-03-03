@@ -4,6 +4,16 @@
 - Entries should be concise, dated (`YYYY-MM-DD`), and understandable by non-engineers.
 - Tasks are not considered complete until both `docs/tasks.md` and `docs/CHANGELOG.md` are updated when applicable.
 
+## task-00142 — UI/DEV — Configure Features subpage
+
+- Status: **Done**
+- Branch: `feat/ui/task-00142-config-features-subpage`
+- Scope delivered:
+  - Added Configure subpage route `/app/configure/features` and included it in Configure subnav alongside Policy and Change Log.
+  - Added a human-readable Features page with grouped bullet lists of current capabilities (generation controls, package mode, compliance checks, manual remediation with undo, draft/library workflows, generation history restore/compare, and changelog visibility).
+  - Kept UI style aligned with existing `rf-*` Configure patterns via additive `rf-feature-*` styling only.
+  - Updated docs (`docs/UI_FOUNDATIONS.md`, `docs/CHANGELOG.md`) and re-ran `npm run build` (pass).
+
 ## task-00141 — SEC — post-alignment safety check
 
 - Status: **Done**

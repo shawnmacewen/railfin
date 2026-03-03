@@ -1,5 +1,17 @@
 # UI Foundations
 
+## task-00142 — Configure Features subpage
+
+- Added a new Configure subpage at `/app/configure/features` and linked it in the Configure subnav between **Policy** and **Change Log**.
+- Added a human-readable Features page that summarizes current app capabilities in plain language first, with short technical context where helpful.
+- Coverage includes current workflow highlights across:
+  - content generation and package mode
+  - compliance checks and manual remediation controls (including undo)
+  - draft save/library handoff and generation history restore/compare
+  - Configure visibility surfaces (Policy, Features, Change Log)
+- Styling is additive and consistent with existing Configure patterns using new `rf-feature-*` classes aligned to current `rf-configure-*` card rhythm.
+
+
 ## task-00139 — UX stabilization phase 2 (post split-layout)
 
 - Refined Create’s split-layout ergonomics while preserving existing flows:

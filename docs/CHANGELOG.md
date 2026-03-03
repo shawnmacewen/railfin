@@ -2,6 +2,11 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Configure Features page
+- Added a new **Features** page under Configure to clearly explain what the app can do today in plain language.
+- Included the new page in Configure navigation so Policy, Features, and Change Log are easy to browse together.
+- Captured current capabilities in grouped bullet lists: content generation, campaign package mode, compliance checks, manual remediation actions (including undo), draft save/library handoff, and generation history restore/compare.
+
 ## 2026-03-03 — Create UX stabilization phase 2 (split layout ergonomics)
 - Improved right-side compliance panel scroll ergonomics so key run/status controls stay visible while findings remain scrollable.
 - Reduced left-pane control clutter by grouping generation setup progressively (mode, output target, then action).

@@ -794,3 +794,28 @@ button:disabled {
     padding: 0.3rem 0.35rem;
   }
 }
+
+.rf-feature-list {
+  display: grid;
+  gap: 0.8rem;
+  margin-bottom: 0.7rem;
+}
+
+.rf-feature-section {
+  border: 1px solid #e4e8f5;
+  border-radius: 0.6rem;
+  background: #fafbff;
+  padding: 0.65rem;
+}
+
+.rf-feature-section h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.92rem;
+}
+
+.rf-feature-section ul {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
