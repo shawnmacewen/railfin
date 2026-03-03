@@ -1,5 +1,14 @@
 # UI Foundations
 
+## task-00136 — Create layout split (editor + persistent compliance panel)
+
+- Reworked Create into a responsive split workspace in `src/ui/editor-shell.tsx`:
+  - Desktop/tablet: two-column layout (~2fr editor workflow + ~1fr persistent compliance panel).
+  - Mobile: stacked sections with a sticky workflow shortcut strip (Generate / Review / Remediate / Save).
+- Kept existing behavior intact for generation, history restore/copy, save, review workbench actions, remediation apply/undo, and compliance execution; this is a layout/hierarchy pass, not a contract change.
+- Added clearer stage framing in Create to emphasize operator flow: **1. Generate → 2. Review → 3. Remediate → 4. Save**.
+- Added additive styling in `src/app/globals.css` (`rf-create-*`) for split layout, sticky compliance card, and mobile shortcuts.
+
 ## task-00135 — Configure Change Log subpage
 
 - Added Configure section-level navigation with two tabs under `/app/configure`:
