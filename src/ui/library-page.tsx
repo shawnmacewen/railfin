@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Card } from "./primitives";
@@ -28,15 +29,15 @@ type LoadState = "loading" | "ready" | "empty" | "error";
 function formatCreatedAt(value: string) {
   const asDate = new Date(value);
   if (Number.isNaN(asDate.getTime())) {
-    return "Unknown date";
+    return "Created: Unknown date";
   }
 
-  return asDate.toLocaleString();
+  return `Created: ${asDate.toLocaleString()}`;
 }
 
 function excerpt(text: string) {
   const compact = text.replace(/\s+/g, " ").trim();
-  return compact.length > 140 ? `${compact.slice(0, 140)}…` : compact;
+  return compact.length > 220 ? `${compact.slice(0, 220)}…` : compact;
 }
 
 export function LibraryPageContent() {
@@ -137,7 +138,11 @@ export function LibraryPageContent() {
             <li key={draft.id} className="rf-library-item">
               <h4>{draft.title || "Untitled Draft"}</h4>
               <p className="rf-library-meta">{formatCreatedAt(draft.createdAt)}</p>
-              <p>{excerpt(draft.body) || "(No body content)"}</p>
+              <p className="rf-library-description-label">Description</p>
+              <p className="rf-library-description-preview">{excerpt(draft.body) || "(No body content)"}</p>
+              <Link className="rf-library-open-link" href={`/app/create?draftId=${encodeURIComponent(draft.id)}`}>
+                Open in Create
+              </Link>
             </li>
           ))}
         </ul>

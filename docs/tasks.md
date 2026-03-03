@@ -1,3 +1,16 @@
+## task-00146 — UI — Library tile layout and metadata refinement
+
+- Status: **Done**
+- Branch: `feat/ui/task-00146-library-tile-layout-and-description`
+- Scope delivered:
+  - Updated Library saved items to responsive tile grid layout with desktop 4-column presentation and smaller-screen fallback.
+  - Refined tile proportions to feel more square/card-like instead of tall list rows.
+  - Updated date metadata text to explicit `Created: <date>` format.
+  - Added per-tile **Description** section beneath date metadata.
+  - Applied description preview rules: max 3 visible lines with ellipsis truncation for overflow.
+  - Preserved Library → Create open/edit handoff behavior via existing `draftId` query flow.
+  - Updated docs/changelog and re-ran `npm run build` (pass).
+
 ## task-00145 — UI — Create-page UX polish follow-up
 
 - Status: **Done**

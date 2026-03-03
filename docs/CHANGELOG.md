@@ -2,6 +2,13 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Library tile layout + metadata refinement (task-00146)
+- Updated Library saved drafts to a responsive tile grid with a 4-column desktop layout and smaller-screen fallbacks.
+- Adjusted tile proportions to feel more square and card-like for faster scan in dense libraries.
+- Updated created timestamp labels to explicit `Created: <date>` formatting.
+- Added a dedicated **Description** section on each tile with a concise 3-line preview and ellipsis truncation.
+- Preserved existing Library → Create handoff behavior so opening/editing a draft still routes through `/app/create?draftId=<id>`.
+
 ## 2026-03-03 — Create-page UX polish follow-up (task-00145)
 - Removed the top Create workflow shortcut row to reduce visual clutter.
 - Tightened platform visual language to a 2px corner-radius baseline for core controls, cards, and pills.

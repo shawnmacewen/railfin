@@ -476,7 +476,20 @@ button:disabled {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.65rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+@media (min-width: 720px) {
+  .rf-library-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .rf-library-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .rf-library-item {
@@ -484,16 +497,49 @@ button:disabled {
   border-radius: 2px;
   padding: 0.65rem;
   background: #fafbff;
+  min-height: 15.5rem;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 0.35rem;
 }
 
 .rf-library-item h4 {
   margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .rf-library-meta {
-  margin: 0.25rem 0 0.4rem;
+  margin: 0;
   font-size: 0.82rem;
   color: #4e5879;
+}
+
+.rf-library-description-label {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #4e5879;
+}
+
+.rf-library-description-preview {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.42;
+  color: #223;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+.rf-library-open-link {
+  justify-self: start;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .rf-generate-controls {

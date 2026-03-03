@@ -1,5 +1,17 @@
 # UI Foundations
 
+## task-00146 — Library tile layout and metadata refinement
+
+- `src/ui/library-page.tsx` updates Library saved-item cards to a tile-oriented presentation while preserving existing Library → Create handoff behavior.
+  - Each tile keeps the open/edit path via **Open in Create** linking to `/app/create?draftId=<id>`.
+  - Created date label now has explicit prefix: `Created: <date>` (including safe fallback for invalid timestamps).
+  - Added a dedicated **Description** label + preview area below date metadata for each tile.
+- `src/app/globals.css` refines Library layout and tile proportions using additive `rf-library-*` styles:
+  - responsive tile grid: 1 column (small), 2 columns (tablet), 4 columns (desktop).
+  - square-leaning card proportions via minimum tile height and structured internal row layout.
+  - description preview is line-clamped to 3 lines with ellipsis overflow handling for readable per-tile snippets.
+- Existing Create loading/editing behavior from Library remains unchanged (query handoff via `draftId`).
+
 ## task-00145 — Create page UX polish follow-up
 
 - `src/ui/editor-shell.tsx` refined Create controls per immediate product request:
