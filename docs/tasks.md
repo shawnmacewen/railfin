@@ -9,6 +9,16 @@
   - Updated API boundary docs for package-mode contract and validation semantics.
   - Re-ran `npm run build` (pass).
 
+## task-00133 — UI — package variant compare UX phase 1
+
+- Status: **Done**
+- Branch: `feat/ui/task-00133-package-variant-compare-ux`
+- Scope delivered:
+  - Added side-by-side package variant compare rendering in Create Generation History for multi-variant outputs.
+  - Added quick per-variant **Copy** and **Restore** actions to accelerate reuse while preserving existing history/remediation workflows.
+  - Kept UX aligned to existing `rf-*` conventions with targeted additive styling only (no broad redesign).
+  - Updated `docs/UI_FOUNDATIONS.md` and reran `npm run build` (pass).
+
 ## task-00130 — UI — campaign package UX phase 1
 
 - Status: **Done**

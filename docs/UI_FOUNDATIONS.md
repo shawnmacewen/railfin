@@ -1,5 +1,17 @@
 # UI Foundations
 
+## task-00133 — Package variant compare UX phase 1
+
+- `src/ui/editor-shell.tsx` extends Create Generation History package entries with a side-by-side compare presentation for generated variants (email/linkedin/x-thread aligned package outputs) while preserving existing single-entry behavior.
+- Added quick per-variant actions in compare cards:
+  - **Copy** variant text directly to clipboard for fast reuse.
+  - **Restore** variant into the editor with matching content type context (existing flow preserved).
+- Existing Create safety/flow surfaces remain intact:
+  - generation history retention/scoping unchanged
+  - review workbench and remediation apply/undo interactions unchanged
+  - save/generate/compliance contracts unchanged
+- `src/app/globals.css` adds minimal `rf-*` compare grid/action refinements (no broad layout redesign).
+
 ## task-00130 — Campaign package UX phase 1
 
 - `src/ui/editor-shell.tsx` extends Create generation controls with explicit mode selection:

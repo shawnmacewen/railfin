@@ -628,6 +628,24 @@ export function EditorShell() {
     setGenerationFeedback("Restored from generation history. Review, edit, and save when ready.");
   };
 
+  const onCopyGenerationVariant = async (variant: PackageVariantEntry) => {
+    if (typeof navigator === "undefined" || !navigator.clipboard?.writeText) {
+      setGenerationStatus("error");
+      setGenerationFeedback("Clipboard access unavailable in this browser. Restore variant to editor and copy manually.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(variant.text);
+      setGenerationStatus("generated");
+      setGenerationDegraded(variant.degraded);
+      setGenerationFeedback(`Copied ${variant.contentType.toUpperCase()} variant to clipboard.`);
+    } catch {
+      setGenerationStatus("error");
+      setGenerationFeedback("Unable to copy variant to clipboard. Restore variant to editor and copy manually.");
+    }
+  };
+
   const selectedProtectedZoneWarning = useMemo(() => {
     if (!selectedFindingContext) return null;
     return getProtectedZoneWarning([
@@ -800,7 +818,10 @@ export function EditorShell() {
                     ) : null}
                   </div>
 
-                  <div className="rf-generation-variants" aria-label="Generated variants">
+                  <div
+                    className={`rf-generation-variants ${entry.mode === "package" ? "is-compare" : ""}`}
+                    aria-label={entry.mode === "package" ? "Package variant compare" : "Generated variants"}
+                  >
                     {variants.map((variant) => {
                       const preview = variant.text.replace(/\s+/g, " ").trim();
 
@@ -815,6 +836,9 @@ export function EditorShell() {
                           </div>
                           <p>{preview.slice(0, 180)}{preview.length > 180 ? "…" : ""}</p>
                           <div className="rf-generation-history-actions">
+                            <button type="button" onClick={() => void onCopyGenerationVariant(variant)}>
+                              Copy {variant.contentType.toUpperCase()}
+                            </button>
                             <button type="button" onClick={() => onRestoreGenerationHistory(variant, entry)}>
                               Restore {variant.contentType.toUpperCase()}
                             </button>

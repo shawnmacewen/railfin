@@ -551,6 +551,10 @@ button:disabled {
   margin-top: 0.4rem;
 }
 
+.rf-generation-variants.is-compare {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
 .rf-generation-variant-item {
   border: 1px solid #e3e9fb;
   border-radius: 0.5rem;
@@ -565,6 +569,12 @@ button:disabled {
   align-items: center;
   font-size: 0.75rem;
   color: #4e5879;
+}
+
+.rf-generation-history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .rf-generation-history-actions button {
