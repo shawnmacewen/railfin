@@ -1,3 +1,17 @@
+## task-00149 — Lexical UX stabilization pass (post phase 1)
+
+- `src/ui/lexical-editor.tsx` follows explicit Lexical React setup conventions:
+  - `LexicalComposer`, `RichTextPlugin`, `ContentEditable`, `HistoryPlugin`, and `OnChangePlugin`.
+  - toolbar active-state behavior uses a registered Lexical update listener for state synchronization.
+- Toolbar style aligned to neutral demo approach:
+  - grey top bar, grouped controls, icon+label feel, and non-CTA formatting buttons.
+  - active formatting remains obvious without blue primary styling.
+- `src/app/globals.css` improves split-layout editing comfort:
+  - sticky desktop toolbar, bounded editor viewport with internal scroll.
+  - mobile/smaller viewports fall back to normal page flow.
+- `src/ui/editor-shell.tsx` adds Lexical-ready gating for prompt lock / generate / save controls.
+- Intentional deviation: text+symbol button labels used instead of external SVG icon package to keep dependencies stable in this pass.
+
 ## task-00148 — Lexical phase 1 (Create workflow integration for AI + Compliance)
 
 - Replaced Create page textarea editor with a Lexical-based rich text editor (`src/ui/lexical-editor.tsx`) and made it the primary authoring surface.
