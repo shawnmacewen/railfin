@@ -734,7 +734,19 @@ export function EditorShell() {
         {policyUpdatedLabel}
       </p>
 
-      <div className="rf-generate-controls">
+      <nav className="rf-create-flow-shortcuts" aria-label="Create workflow shortcuts">
+        <a href="#create-generate">Generate</a>
+        <a href="#create-review">Review</a>
+        <a href="#create-remediate">Remediate</a>
+        <a href="#create-save">Save</a>
+      </nav>
+
+      <div className="rf-create-layout">
+        <div className="rf-create-main">
+          <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
+            <h3>1. Generate</h3>
+            <p className="rf-status rf-status-muted">Generate or restore draft variants before review.</p>
+            <div className="rf-generate-controls">
         <div className="rf-generate-mode" role="radiogroup" aria-label="Generation mode">
           <label>
             <input
@@ -855,7 +867,9 @@ export function EditorShell() {
           <p className="rf-status rf-status-muted">No generated drafts in this context yet.</p>
         )}
       </section>
-      {generationFeedback ? (
+          </section>
+
+          {generationFeedback ? (
         <p
           className={`rf-status ${
             generationStatus === "error"
@@ -870,7 +884,10 @@ export function EditorShell() {
         </p>
       ) : null}
 
-      <form onSubmit={onSave} aria-busy={status === "saving"}>
+      <section id="create-save" className="rf-create-stage" aria-label="Save draft stage">
+            <h3>4. Save</h3>
+            <p className="rf-status rf-status-muted">Save once you are satisfied with review and remediation updates.</p>
+            <form onSubmit={onSave} aria-busy={status === "saving"}>
         <label htmlFor="editor-content">Editor Content</label>
         <textarea
           id="editor-content"
@@ -897,9 +914,10 @@ export function EditorShell() {
         <button type="submit" disabled={!canSave}>
           {status === "saving" ? "Saving..." : "Save Draft"}
         </button>
-      </form>
+            </form>
+          </section>
 
-      {feedback ? (
+          {feedback ? (
         <p
           className={`rf-status ${status === "error" ? "rf-status-error" : "rf-status-success"}`}
           role={status === "error" ? "alert" : "status"}
@@ -914,8 +932,9 @@ export function EditorShell() {
         </p>
       ) : null}
 
-      <section className="rf-review-workbench" aria-label="Review workbench">
-        <h3>Review Workbench</h3>
+      <section id="create-review" className="rf-review-workbench rf-create-stage" aria-label="Review workbench">
+            <h3>2. Review</h3>
+            <p className="rf-status rf-status-muted">Select findings and stage remediation actions.</p>
         <div className="rf-review-workbench-grid">
           <div>
             <h4>Selected Finding</h4>
@@ -999,8 +1018,9 @@ export function EditorShell() {
       </section>
 
       {remediationPreview ? (
-        <section className="rf-remediation-preview" aria-label="Applied remediation context preview">
-          <h3>Applied Remediation Context</h3>
+        <section id="create-remediate" className="rf-remediation-preview rf-create-stage" aria-label="Applied remediation context preview">
+          <h3>3. Remediate</h3>
+          <p className="rf-status rf-status-muted">Validate auto-remediation context before final save.</p>
           <p className="rf-status rf-status-muted" role="status">
             Issue: {remediationPreview.issue} · Severity: {remediationPreview.severity} · Location: {remediationPreview.location}
           </p>
@@ -1029,15 +1049,24 @@ export function EditorShell() {
         </section>
       ) : null}
 
-      <CompliancePanel
-        activePolicyContext={activePolicyContext}
-        content={content}
-        contentType={contentType}
-        policySet="default"
-        onApplyRemediationHint={onApplyRemediationHint}
-        onRemindRemediationHint={onRemindRemediationHint}
-        onSelectedFindingChange={setSelectedFindingContext}
-      />
+        </div>
+
+        <aside className="rf-create-compliance" aria-label="Compliance feedback panel">
+          <div className="rf-create-compliance-card">
+            <h3>Compliance Feedback</h3>
+            <p className="rf-status rf-status-muted">Persistent review panel while you create.</p>
+            <CompliancePanel
+              activePolicyContext={activePolicyContext}
+              content={content}
+              contentType={contentType}
+              policySet="default"
+              onApplyRemediationHint={onApplyRemediationHint}
+              onRemindRemediationHint={onRemindRemediationHint}
+              onSelectedFindingChange={setSelectedFindingContext}
+            />
+          </div>
+        </aside>
+      </div>
     </section>
   );
 }

@@ -4,6 +4,18 @@
 - Entries should be concise, dated (`YYYY-MM-DD`), and understandable by non-engineers.
 - Tasks are not considered complete until both `docs/tasks.md` and `docs/CHANGELOG.md` are updated when applicable.
 
+## task-00136 — UI — Create split layout with persistent compliance panel
+
+- Status: **Done**
+- Branch: `feat/ui/task-00136-create-layout-split`
+- Scope delivered:
+  - Implemented responsive Create workspace split with editor workflow on the left (~2/3) and persistent compliance panel on the right (~1/3) for desktop/tablet.
+  - Added mobile-first stacked ordering with sticky workflow shortcuts to keep stage navigation low-friction.
+  - Preserved existing generation/save/review/remediation/history behaviors and endpoint contracts.
+  - Improved visual hierarchy to clarify sequence: Generate → Review → Remediate → Save.
+  - Updated UI docs and changelog; re-ran `npm run build` (pass).
+
+
 ## task-00135 — DEV/UI — Configure Change Log subpage
 
 - Status: **Done**

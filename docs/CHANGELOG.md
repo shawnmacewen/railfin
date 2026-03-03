@@ -2,6 +2,11 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Create workflow layout split for persistent compliance
+- Redesigned the Create workspace into a responsive split view so drafting controls stay in a larger left workspace while compliance feedback remains visible in a dedicated right panel.
+- Added a clearer workflow rhythm in Create (Generate → Review → Remediate → Save) with section shortcuts to reduce context switching.
+- Improved mobile behavior with stacked section ordering and sticky workflow shortcuts for faster navigation on small screens.
+
 ## 2026-03-03 — Campaign package workflow upgrades
 - Added campaign package generation so teams can create multiple channel-ready variants from one prompt.
 - Added side-by-side variant comparison with quick copy/restore actions in Create history.
