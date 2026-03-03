@@ -1,3 +1,14 @@
+## task-00152 — UI — Lexical toolbar Lucide icon pass
+
+- Status: **Done**
+- Branch: `feat/ui/task-00152-lexical-toolbar-lucide`
+- Scope delivered:
+  - Added `lucide-react` dependency and replaced Lexical toolbar text/symbol controls with Lucide icon + label buttons.
+  - Kept toolbar visual language neutral/grey (non-CTA) and aligned with demo-style top editor bar aesthetics.
+  - Preserved active-state and accessibility semantics (`aria-pressed`, visible active treatment, toolbar grouping/labels).
+  - Kept editor behavior/commands unchanged (visual/control layer update only).
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00149 — UI — Lexical UX stabilization pass (post phase-1)
 
 - Status: **Done**

@@ -1,3 +1,10 @@
+## task-00152 — Lexical toolbar Lucide icon pass
+
+- Updated `src/ui/lexical-editor.tsx` toolbar controls to use Lucide React icons with explicit text labels (Bold, Italic, Heading, Paragraph, Bullets, Numbered, Clear).
+- Added reusable toolbar button rendering so icon+label controls keep the same command wiring and keyboard/click behavior.
+- Preserved accessibility and active-state semantics via existing `aria-pressed` behavior for toggled formatting actions.
+- Kept visual style neutral through additive toolbar polish in `src/app/globals.css` (grey bar, subtle active state, no blue CTA treatment).
+
 ## task-00149 — Lexical UX stabilization pass (post phase 1)
 
 - `src/ui/lexical-editor.tsx` follows explicit Lexical React setup conventions:

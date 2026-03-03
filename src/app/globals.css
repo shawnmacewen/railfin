@@ -1073,12 +1073,28 @@ button:disabled {
 }
 
 .rf-lexical-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
   border-color: #d1d5db;
   background: #ffffff;
   color: #1f2937;
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.38rem 0.6rem;
+  line-height: 1;
+  padding: 0.38rem 0.58rem;
+}
+
+.rf-lexical-toolbar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+}
+
+.rf-lexical-toolbar-label {
+  letter-spacing: 0.01em;
 }
 
 .rf-lexical-toolbar button.is-active {
@@ -1086,6 +1102,10 @@ button:disabled {
   background: #e5e7eb;
   color: #111827;
   box-shadow: inset 0 0 0 1px #d1d5db;
+}
+
+.rf-lexical-toolbar button.is-active .rf-lexical-toolbar-icon {
+  color: #111827;
 }
 
 .rf-lexical-editor-shell {

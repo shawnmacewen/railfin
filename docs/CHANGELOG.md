@@ -1,3 +1,8 @@
+## 2026-03-03 — Lexical toolbar Lucide icon pass (task-00152)
+- Replaced Create editor toolbar’s text/symbol formatting controls with Lucide icon + label buttons for clearer affordances.
+- Kept the toolbar’s neutral grey, non-CTA visual style and preserved active-state clarity for formatting toggles.
+- Preserved editor behavior/commands while improving control legibility and consistency.
+
 ## 2026-03-03 — Lexical UX stabilization pass (task-00149)
 - Aligned Create’s Lexical formatting toolbar to a neutral demo-style bar (grey surface, grouped controls, icon+label feel).
 - Removed primary-blue CTA treatment from formatting controls; active state is now clear but neutral.

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -29,6 +29,7 @@ import {
 } from "@lexical/list";
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
 import { normalizeEditorChange, normalizeIncomingDraftBody } from "./lexical-contract";
+import { Bold, Heading2, Italic, List, ListOrdered, ListX, Pilcrow } from "lucide-react";
 
 type LexicalChange = {
   html: string;
@@ -52,6 +53,23 @@ type ToolbarState = {
 
 function normalizeHtml(value: string): string {
   return normalizeIncomingDraftBody(value).html;
+}
+
+type ToolbarButtonProps = {
+  active?: boolean;
+  pressed?: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+};
+
+function ToolbarButton({ active = false, pressed = false, onClick, icon, label }: ToolbarButtonProps) {
+  return (
+    <button type="button" className={active ? "is-active" : ""} aria-pressed={pressed} onClick={onClick}>
+      <span className="rf-lexical-toolbar-icon" aria-hidden="true">{icon}</span>
+      <span className="rf-lexical-toolbar-label">{label}</span>
+    </button>
+  );
 }
 
 function Toolbar() {
@@ -123,19 +141,53 @@ function Toolbar() {
   return (
     <div className="rf-lexical-toolbar" role="toolbar" aria-label="Editor formatting">
       <div className="rf-lexical-toolbar-group" aria-label="Inline formatting">
-        <button type="button" className={toolbarState.bold ? "is-active" : ""} aria-pressed={toolbarState.bold} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}>𝐁 Bold</button>
-        <button type="button" className={toolbarState.italic ? "is-active" : ""} aria-pressed={toolbarState.italic} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}>𝘐 Italic</button>
+        <ToolbarButton
+          active={toolbarState.bold}
+          pressed={toolbarState.bold}
+          onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
+          icon={<Bold size={14} strokeWidth={2} />}
+          label="Bold"
+        />
+        <ToolbarButton
+          active={toolbarState.italic}
+          pressed={toolbarState.italic}
+          onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
+          icon={<Italic size={14} strokeWidth={2} />}
+          label="Italic"
+        />
       </div>
       <div className="rf-lexical-toolbar-divider" aria-hidden="true" />
       <div className="rf-lexical-toolbar-group" aria-label="Block formatting">
-        <button type="button" className={toolbarState.heading ? "is-active" : ""} aria-pressed={toolbarState.heading} onClick={() => setHeading("h2")}>H Heading</button>
-        <button type="button" onClick={setParagraph}>¶ Paragraph</button>
+        <ToolbarButton
+          active={toolbarState.heading}
+          pressed={toolbarState.heading}
+          onClick={() => setHeading("h2")}
+          icon={<Heading2 size={14} strokeWidth={2} />}
+          label="Heading"
+        />
+        <ToolbarButton onClick={setParagraph} icon={<Pilcrow size={14} strokeWidth={2} />} label="Paragraph" />
       </div>
       <div className="rf-lexical-toolbar-divider" aria-hidden="true" />
       <div className="rf-lexical-toolbar-group" aria-label="List formatting">
-        <button type="button" className={toolbarState.bulletList ? "is-active" : ""} aria-pressed={toolbarState.bulletList} onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}>• Bullets</button>
-        <button type="button" className={toolbarState.orderedList ? "is-active" : ""} aria-pressed={toolbarState.orderedList} onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)}>1. Numbered</button>
-        <button type="button" onClick={() => editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined)}>✕ Clear</button>
+        <ToolbarButton
+          active={toolbarState.bulletList}
+          pressed={toolbarState.bulletList}
+          onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
+          icon={<List size={14} strokeWidth={2} />}
+          label="Bullets"
+        />
+        <ToolbarButton
+          active={toolbarState.orderedList}
+          pressed={toolbarState.orderedList}
+          onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)}
+          icon={<ListOrdered size={14} strokeWidth={2} />}
+          label="Numbered"
+        />
+        <ToolbarButton
+          onClick={() => editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined)}
+          icon={<ListX size={14} strokeWidth={2} />}
+          label="Clear"
+        />
       </div>
     </div>
   );
