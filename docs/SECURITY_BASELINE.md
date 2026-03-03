@@ -1,3 +1,40 @@
+## task-00141 — SEC — post-alignment safety check (package/API-UX + phase2 safety surfaces)
+
+Review scope:
+- `src/ui/editor-shell.tsx`
+- `src/ui/compliance-panel.tsx`
+- `src/api/internal/content/generate.ts`
+- `src/app/api/internal/content/generate/route.ts`
+- `docs/tasks.md`
+
+### Re-check outcomes
+
+1. **Package-mode API/UX alignment drift from task-00134 (still OPEN):**
+   - API supports canonical package-mode request/response (`mode: "package"` + `package.assets[]`) in `internalContentGenerate`.
+   - Current Create package UX still fans out four separate single-mode generate calls (`blog|linkedin|newsletter|x-thread`) from `EditorShell` instead of issuing one package-mode request.
+   - Result: previously identified API/UX contract drift is **not fully removed** in current code.
+
+2. **Safety notices visibility after UX phase2 (PASS):**
+   - Compliance disclaimer remains explicit and visible: AI output is guidance, not legal approval.
+   - Degraded-state status messaging remains visible for both generation and compliance runs.
+   - Protected/prohibited transform-zone warnings remain visible in selected-finding and per-finding surfaces.
+
+3. **Manual action constraints after UX phase2 (PASS):**
+   - Remediation actions remain explicit/manual button paths (`Apply Selected Context`, `Apply + Regenerate Draft`, `Undo Last Apply`).
+   - Selected-finding requirement and content/context reset behavior remain in place; no auto-trigger apply regression found.
+
+### Gate decision (task-00141)
+
+- **Package alignment closure status:** **NO-GO (drift still open)**
+- **UX safety surface status:** **GO (notices visible + manual controls preserved)**
+- Rationale: UX phase2 did not regress warning visibility/manual constraints, but canonical package-mode API/UX alignment is not yet complete.
+
+### Verification outcome (task-00141)
+
+- Outcome: **PASS (verification complete; drift remains open by design evidence)**
+- Code changes: none (docs-only security verification)
+- Build: not run (no runtime code changes)
+
 ## task-00138 — SEC — safety check for Create UX layout refactor
 
 Review scope:

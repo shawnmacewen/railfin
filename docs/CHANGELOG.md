@@ -2,6 +2,13 @@
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
+## 2026-03-03 — Post-alignment security verification (package API/UX + UX phase2)
+- Re-ran security verification for package-mode API/UX alignment after recent Create UX work.
+- Confirmed package-mode drift identified in task-00134 is still open: Create package flow still fans out single-mode calls instead of using canonical `mode: "package"` API request.
+- Re-confirmed UX phase2 safety surfaces remain intact: degraded-state notices and legal-disclaimer messaging stay visible.
+- Re-confirmed remediation actions remain explicit/manual-only (apply, apply+regenerate, undo) with no auto-trigger regression.
+- Updated security baseline and task ledger with deterministic gate result: package-alignment closure remains **NO-GO** until canonical API/UX alignment is implemented.
+
 ## 2026-03-03 — Split layout UX stabilization (Create + Compliance)
 - Fixed stale selected-finding state in the persistent compliance panel so remediation actions cannot target outdated findings after editor content/context changes.
 - Improved Create↔Compliance state synchronization by tightening selected-finding identity propagation to the editor workbench.

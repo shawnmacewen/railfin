@@ -4,6 +4,17 @@
 - Entries should be concise, dated (`YYYY-MM-DD`), and understandable by non-engineers.
 - Tasks are not considered complete until both `docs/tasks.md` and `docs/CHANGELOG.md` are updated when applicable.
 
+## task-00141 — SEC — post-alignment safety check
+
+- Status: **Done**
+- Branch: `chore/sec/task-00141-post-alignment-safety-check`
+- Scope delivered:
+  - Re-checked task-00134 package-mode API/UX drift status against current Create generation flow and generate API contract.
+  - Confirmed UX phase2 safety-critical surfaces remain visible (degraded-status messaging, legal-disclaimer copy, protected-zone warnings).
+  - Confirmed remediation controls remain explicit/manual-only (`Apply Selected Context`, `Apply + Regenerate Draft`, `Undo Last Apply`) with no auto-trigger regression.
+  - Recorded gate outcome in `docs/SECURITY_BASELINE.md`: package-alignment closure remains **NO-GO** (drift still open), while UX safety-surface posture remains **GO**.
+  - Updated changelog and task ledger; docs-only verification task (no runtime code changes, no build run required).
+
 ## task-00137 — DEV — UX stabilization support pass for split layout
 
 - Status: **Done**
