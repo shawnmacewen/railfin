@@ -1,3 +1,7 @@
+- 2026-03-03 06:27 UTC task-00153: expanded Lexical toolbar to common rich-text set (inline, headings/paragraph, lists incl. checklist, quote/code, link/unlink, alignments, undo/redo, clear formatting); preserved neutral grey Lucide icon+label style, accessibility semantics, and existing create/generate/save/compliance/remediation flows; build passed.
+- 2026-03-03 06:19 UTC task-00152: swapped Lexical toolbar controls to Lucide icon+label buttons; kept neutral grey top-bar styling, preserved aria-pressed active states, and verified no command-behavior changes (UI/control-layer only).
+- 2026-03-03 task-00149: Lexical UX stabilization shipped (neutral toolbar style, grouped controls with active states, split-layout viewport/scroll tuning, and editor-ready gating for prompt lock/generate/save). Lexical setup follows composer+plugins guidance; intentional difference is text+symbol controls over SVG icon set.
+- 2026-03-03 task-00148: shipped Lexical editor phase 1 on Create; generate->Lexical + compliance-read + save/load(html) verified in local build path.
 # railfin-ui detailed work log
 
 ## 2026-03-03 01:32 UTC — ui log backfill

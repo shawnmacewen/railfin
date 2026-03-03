@@ -36,7 +36,15 @@ function formatCreatedAt(value: string) {
 }
 
 function excerpt(text: string) {
-  const compact = text.replace(/\s+/g, " ").trim();
+  const plain = text
+    .replace(/<\s*br\s*\/?\s*>/gi, " ")
+    .replace(/<\/(p|div|h1|h2|h3|li|ul|ol)>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+  const compact = plain.replace(/\s+/g, " ").trim();
   return compact.length > 220 ? `${compact.slice(0, 220)}…` : compact;
 }
 

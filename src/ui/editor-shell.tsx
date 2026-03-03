@@ -1,9 +1,11 @@
 "use client";
 
-import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { ComplianceFinding, CompliancePanel, SelectedFindingContext } from "./compliance-panel";
+import { LexicalEditorField } from "./lexical-editor";
+import { normalizeIncomingDraftBody, plainTextToContractHtml } from "./lexical-contract";
 
 type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
@@ -224,10 +226,15 @@ function getProtectedZoneWarning(sourceValues: Array<string | undefined>) {
   return `Protected/prohibited transform zone detected (${zones.join(", ")}). Review edits manually before apply/regenerate.`;
 }
 
+function plainTextToHtml(input: string): string {
+  return plainTextToContractHtml(input);
+}
+
 export function EditorShell() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId")?.trim() ?? "";
-  const [content, setContent] = useState("");
+  const [contentHtml, setContentHtml] = useState("<p></p>");
+  const [contentText, setContentText] = useState("");
   const [status, setStatus] = useState<EditorStatus>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
@@ -241,8 +248,6 @@ export function EditorShell() {
   const [isPromptLocked, setIsPromptLocked] = useState(false);
   const [isPromptAccordionCollapsed, setIsPromptAccordionCollapsed] = useState(false);
   const [isComplianceCollapsed, setIsComplianceCollapsed] = useState(false);
-  const [richTextColor, setRichTextColor] = useState("#1a4cff");
-  const editorContentRef = useRef<HTMLTextAreaElement | null>(null);
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
@@ -250,6 +255,7 @@ export function EditorShell() {
   const [remediationApplyHistory, setRemediationApplyHistory] = useState<RemediationApplyHistoryEntry[]>([]);
   const [remediationUndoState, setRemediationUndoState] = useState<RemediationUndoState | null>(null);
   const [generationHistory, setGenerationHistory] = useState<GenerationHistoryEntry[]>([]);
+  const [isLexicalReady, setIsLexicalReady] = useState(false);
 
   const generationHistoryContextKey = draftId || "session-new";
 
@@ -307,7 +313,10 @@ export function EditorShell() {
           throw new Error(payload.error || "Unable to open draft.");
         }
 
-        setContent(payload.data.body ?? "");
+        const loadedBody = payload.data.body ?? "";
+        const normalized = normalizeIncomingDraftBody(loadedBody);
+        setContentHtml(normalized.html);
+        setContentText(normalized.text);
         setLoadedDraftTitle(payload.data.title || "Untitled Draft");
         setStatus("idle");
         setFeedback(`Opened draft: ${payload.data.title || "Untitled Draft"}`);
@@ -331,8 +340,8 @@ export function EditorShell() {
     setGenerationHistory([]);
   }, [generationHistoryContextKey]);
 
-  const canSave = content.trim().length > 0 && status !== "saving";
-  const canGenerate = promptInput.trim().length > 0 && generationStatus !== "generating";
+  const canSave = isLexicalReady && contentText.trim().length > 0 && status !== "saving";
+  const canGenerate = isLexicalReady && promptInput.trim().length > 0 && generationStatus !== "generating";
 
   const selectedContentOption = useMemo(() => {
     return CREATE_CONTENT_OPTIONS.find((option) => option.apiType === contentType)?.id ?? "blog";
@@ -471,6 +480,12 @@ export function EditorShell() {
   const runGenerate = async (prompt: string, successMessage?: string) => {
     const trimmedPrompt = prompt.trim();
 
+    if (!isLexicalReady) {
+      setGenerationStatus("error");
+      setGenerationFeedback("Editor is still loading. Wait a moment and try again.");
+      return;
+    }
+
     if (!trimmedPrompt || generationStatus === "generating") {
       setGenerationStatus("error");
       setGenerationFeedback("Add AI instructions before generating.");
@@ -488,7 +503,9 @@ export function EditorShell() {
       const generated = await generateDraftForType(trimmedPrompt, contentType);
       const variantId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-      setContent(generated.generatedText);
+      const generatedHtml = plainTextToHtml(generated.generatedText);
+      setContentHtml(generatedHtml);
+      setContentText(generated.generatedText);
       setGenerationStatus("generated");
       const singleHistoryEntry: GenerationHistoryEntry = {
         id: variantId,
@@ -557,27 +574,6 @@ export function EditorShell() {
     setIsPromptAccordionCollapsed(true);
   };
 
-  const applyRichTextWrap = (before: string, after = before) => {
-    const editor = editorContentRef.current;
-    if (!editor) return;
-
-    const start = editor.selectionStart ?? 0;
-    const end = editor.selectionEnd ?? 0;
-    const selected = content.slice(start, end);
-    const wrapped = before + (selected || "text") + after;
-    const next = content.slice(0, start) + wrapped + content.slice(end);
-
-    setContent(next);
-    requestAnimationFrame(() => {
-      editor.focus();
-      const cursor = start + wrapped.length;
-      editor.setSelectionRange(cursor, cursor);
-    });
-  };
-
-  const onApplyTextColor = () => {
-    applyRichTextWrap(`<span style="color: ${richTextColor};">`, "</span>");
-  };
   const onSave = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -590,7 +586,7 @@ export function EditorShell() {
     setStatus("saving");
     setFeedback("Saving draft...");
 
-    const trimmedContent = content.trim();
+    const trimmedContent = contentText.trim();
     const titleFromContent = trimmedContent.split(/\r?\n/)[0]?.trim() ?? "";
     const fallbackTitle = titleFromContent ? titleFromContent.slice(0, 80) : "Untitled Draft";
     const resolvedTitle = loadedDraftTitle?.trim() || fallbackTitle;
@@ -604,7 +600,7 @@ export function EditorShell() {
         },
         body: JSON.stringify({
           title: resolvedTitle,
-          body: content,
+          body: contentHtml,
         }),
       });
 
@@ -641,7 +637,7 @@ export function EditorShell() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        currentContent: content,
+        currentContent: contentText,
         findingId: context.findingId,
         finding: {
           issue: context.issue,
@@ -681,10 +677,11 @@ export function EditorShell() {
     try {
       const applied = await applyRemediationViaApi(selectedFindingContext);
       setRemediationUndoState({
-        previousContent: content,
+        previousContent: contentText,
         preview: remediationPreview,
       });
-      setContent(applied.nextContent);
+      setContentHtml(plainTextToHtml(applied.nextContent));
+    setContentText(applied.nextContent);
       setRemediationPreview({
         issue,
         severity,
@@ -718,7 +715,8 @@ export function EditorShell() {
   };
 
   const onRestoreGenerationHistory = (variant: PackageVariantEntry, entry: GenerationHistoryEntry) => {
-    setContent(variant.text);
+    setContentHtml(plainTextToHtml(variant.text));
+    setContentText(variant.text);
     setContentType(variant.contentType);
     setPromptInput(lockedPrompt ?? promptInput);
     setStatus("idle");
@@ -760,7 +758,8 @@ export function EditorShell() {
       return;
     }
 
-    setContent(remediationUndoState.previousContent);
+    setContentHtml(plainTextToHtml(remediationUndoState.previousContent));
+    setContentText(remediationUndoState.previousContent);
     setRemediationPreview(remediationUndoState.preview);
     setRemediationUndoState(null);
     setRemediationApplyStatus("idle");
@@ -791,10 +790,11 @@ export function EditorShell() {
     }
 
     setRemediationUndoState({
-      previousContent: content,
+      previousContent: contentText,
       preview: remediationPreview,
     });
-    setContent(applied.nextContent);
+    setContentHtml(plainTextToHtml(applied.nextContent));
+    setContentText(applied.nextContent);
     setRemediationPreview({
       issue: finding.issue || "unknown issue",
       severity: (finding.severity || "unknown").toLowerCase(),
@@ -857,7 +857,7 @@ export function EditorShell() {
                 <div className="rf-prompt-header-row">
                   <label htmlFor="editor-prompt">AI Instructions</label>
                   <div className="rf-prompt-header-actions">
-                    <button type="button" onClick={onTogglePromptLock}>
+                    <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
                       {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
                     </button>
                     <button type="button" onClick={onGenerate} disabled={!canGenerate}>
@@ -890,6 +890,12 @@ export function EditorShell() {
             </div>
           </section>
 
+          {!isLexicalReady ? (
+            <p className="rf-status rf-status-muted" role="status">
+              Editor is initializing… generate and save controls will enable when ready.
+            </p>
+          ) : null}
+
           {generationFeedback ? (
         <p
           className={`rf-status ${
@@ -909,26 +915,13 @@ export function EditorShell() {
             <p className="rf-status rf-status-muted">Save once you are satisfied with review and remediation updates.</p>
             <form onSubmit={onSave} aria-busy={status === "saving"}>
         <label htmlFor="editor-content">Editor Content</label>
-        <div className="rf-richtext-toolbar" role="toolbar" aria-label="Editor formatting">
-          <button type="button" onClick={() => applyRichTextWrap("**")}>Bold</button>
-          <button type="button" onClick={() => applyRichTextWrap("*")}>Italic</button>
-          <label className="rf-richtext-color-picker" htmlFor="editor-color">Text Color</label>
-          <input
-            id="editor-color"
-            type="color"
-            value={richTextColor}
-            onChange={(event) => setRichTextColor(event.target.value)}
-          />
-          <button type="button" onClick={onApplyTextColor}>Apply Color</button>
-        </div>
-        <textarea
-          id="editor-content"
-          name="editor-content"
-          ref={editorContentRef}
-          className="rf-editor-content-area"
-          value={content}
-          onChange={(event) => {
-            setContent(event.target.value);
+        <LexicalEditorField
+          value={contentHtml}
+          placeholder="Write or generate content..."
+          onReadyChange={setIsLexicalReady}
+          onChange={({ html, text }) => {
+            setContentHtml(html);
+            setContentText(text);
             if (status !== "idle") {
               setStatus("idle");
               setFeedback(null);
@@ -942,8 +935,8 @@ export function EditorShell() {
               setReviewFeedback(null);
             }
           }}
-          rows={18}
         />
+        <p className="rf-status rf-status-muted" role="note">Remediation apply/regenerate actions are temporarily disabled during Lexical phase 1 while core generate/compliance/save flows stabilize.</p>
 
         <button type="submit" disabled={!canSave}>
           {status === "saving" ? "Saving..." : "Save Draft"}
@@ -1013,16 +1006,16 @@ export function EditorShell() {
 
                   void onApplyRemediationHint(selectedFindingContext.remediationHint, finding);
                 }}
-                disabled={!selectedFindingContext || generationStatus === "generating"}
+                disabled
               >
                 Apply Selected Context
               </button>
               <button
                 type="button"
                 onClick={onApplyAndRegenerate}
-                disabled={!selectedFindingContext || generationStatus === "generating"}
+                disabled
               >
-                {generationStatus === "generating" ? "Applying + Regenerating..." : "Apply + Regenerate Draft"}
+                Apply + Regenerate Draft (coming soon)
               </button>
               <button
                 type="button"
@@ -1170,11 +1163,11 @@ export function EditorShell() {
               <p className="rf-status rf-status-muted">Persistent review panel while you create.</p>
               <CompliancePanel
                 activePolicyContext={activePolicyContext}
-                content={content}
+                content={contentText}
                 contentType={contentType}
                 policySet="default"
-                onApplyRemediationHint={onApplyRemediationHint}
-                onRemindRemediationHint={onRemindRemediationHint}
+                onApplyRemediationHint={undefined}
+                onRemindRemediationHint={undefined}
                 onSelectedFindingChange={setSelectedFindingContext}
               />
             </div>

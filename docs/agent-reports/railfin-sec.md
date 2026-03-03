@@ -47,3 +47,4 @@
 - task-00138 | Done | `chore/sec/task-00138-ux-change-safety-check`
 - task-00141 | Done | `chore/sec/task-00141-post-alignment-safety-check`
 <!-- HISTORICAL_TASK_COVERAGE_END -->
+- 2026-03-03 06:03 UTC task-00151: completed Lexical phase-1 safety review (HTML save/load/render + compliance text extraction); no active HTML execution path found in reviewed surfaces; documented hidden-markup normalization residual risk and marked GO-with-follow-up in SECURITY_BASELINE.

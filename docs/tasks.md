@@ -1,3 +1,73 @@
+## task-00153 — UI — Lexical toolbar common options expansion
+
+- Status: **Done**
+- Branch: `feat/ui/task-00153-lexical-toolbar-common-options`
+- Scope delivered:
+  - Expanded Lexical toolbar to include standard rich-text controls: bold, italic, underline, strikethrough; H1/H2/H3 + paragraph; bullet/numbered/check lists; blockquote + code block; link/unlink; left/center/right alignment; undo/redo; clear formatting.
+  - Kept neutral grey toolbar visual style and Lucide icon + label pattern.
+  - Preserved accessibility/interaction semantics with toolbar grouping, `aria-label`, `aria-pressed`, disabled undo/redo state, and mouse-down selection preservation for keyboard-safe editing.
+  - Kept Create/generate/save/compliance/remediation flows unchanged (toolbar-only/editor-command layer change).
+  - Added Lexical nodes/plugins needed for features (code + link) and validated with `npm run build` (pass).
+
+## task-00152 — UI — Lexical toolbar Lucide icon pass
+
+- Status: **Done**
+- Branch: `feat/ui/task-00152-lexical-toolbar-lucide`
+- Scope delivered:
+  - Added `lucide-react` dependency and replaced Lexical toolbar text/symbol controls with Lucide icon + label buttons.
+  - Kept toolbar visual language neutral/grey (non-CTA) and aligned with demo-style top editor bar aesthetics.
+  - Preserved active-state and accessibility semantics (`aria-pressed`, visible active treatment, toolbar grouping/labels).
+  - Kept editor behavior/commands unchanged (visual/control layer update only).
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
+## task-00149 — UI — Lexical UX stabilization pass (post phase-1)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00149-lexical-ux-stabilization`
+- Scope delivered:
+  - Styled Lexical toolbar to neutral demo-style hierarchy (grey top bar, grouped controls, icon+label affordance, non-primary button treatment).
+  - Added live active-state affordances (`aria-pressed` + visual state) for bold/italic/heading/list tools.
+  - Kept Lexical React setup explicit and conventional (`LexicalComposer`, `RichTextPlugin`, `ContentEditable`, `HistoryPlugin`, `OnChangePlugin` + toolbar update listener).
+  - Tuned editor viewport behavior for split layout: sticky desktop toolbar, bounded editor viewport/internal scrolling, and mobile fallback to normal page flow.
+  - Added editor-ready gating so prompt lock / generate / save stay disabled until Lexical hydration completes.
+  - Preserved currently working save/load/compliance/library-preview flows.
+  - Re-ran `npm run build` (pass after clean `.next`).
+
+## task-00150 — DEV — Lexical data-contract hardening
+
+- Status: **Done**
+- Branch: `feat/dev/task-00150-lexical-data-contract-hardening`
+- Scope delivered:
+  - Hardened Lexical serialization/deserialization boundaries through a dedicated contract utility (`src/ui/lexical-contract.ts`) with HTML sanitization/normalization and bounded payload handling.
+  - Added safe normalization on draft load to handle malformed/legacy body content (including plain-text legacy drafts) before editor hydration.
+  - Made compliance extraction deterministic and bounded by normalizing HTML→text with explicit max-length enforcement.
+  - Updated API boundary + changelog documentation for contract-hardening behavior.
+  - Re-ran npm run build (pass).
+
+## task-00151 — SEC — Lexical safety review phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00151-lexical-safety-review`
+- Scope delivered:
+  - Reviewed Lexical HTML save/load/render path for injection/sanitization risk across Create + Library surfaces.
+  - Verified compliance input extraction remains plain-text based and does not execute HTML/markup in request flow.
+  - Documented residual hidden-markup normalization risk and follow-up hardening recommendation in security baseline.
+  - Updated security docs/changelog and sec lane report; no code change required.
+  - Build not run (docs-only review; no runtime changes).
+
+## task-00148 — UI/DEV — Lexical integration phase 1 (AI + compliance workflow)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00148-lexical-phase1-ai-compliance`
+- Scope delivered:
+  - Replaced Create textarea editor with Lexical editor as primary content surface.
+  - Added baseline formatting toolbar (bold/italic/heading/lists/paragraph).
+  - Wired AI generate output into Lexical editor hydration path.
+  - Kept compliance check flow working by reading current Lexical plain text.
+  - Standardized draft persistence to HTML serialization for rich text retention; load/open path hydrates stored HTML back into Lexical.
+  - Deferred remediation apply/regenerate actions safely (disabled with explicit temporary note).
+  - Updated UI/API/changelog docs and re-ran `npm run build` (pass).
+
 ## task-00147 — UI/DEV — Create single-content focus + prompt lock accordion + editor/compliance upgrade
 
 - Status: **Done**

@@ -1,3 +1,40 @@
+## 2026-03-03 — Lexical toolbar common options expansion (task-00153)
+- Expanded Create editor toolbar with practical common controls: bold/italic/underline/strikethrough, H1/H2/H3/paragraph, bullet/numbered/check lists, blockquote/code block, link/unlink, alignment (left/center/right), undo/redo, and clear formatting.
+- Preserved neutral grey toolbar styling and Lucide icon+label conventions while keeping active-state clarity and accessibility semantics.
+- Added Lexical link/code support wiring (`@lexical/link`, `@lexical/code`, LinkPlugin + nodes`) without changing generation/save/compliance/remediation flows.
+
+## 2026-03-03 — Lexical toolbar Lucide icon pass (task-00152)
+- Replaced Create editor toolbar’s text/symbol formatting controls with Lucide icon + label buttons for clearer affordances.
+- Kept the toolbar’s neutral grey, non-CTA visual style and preserved active-state clarity for formatting toggles.
+- Preserved editor behavior/commands while improving control legibility and consistency.
+
+## 2026-03-03 — Lexical UX stabilization pass (task-00149)
+- Aligned Create’s Lexical formatting toolbar to a neutral demo-style bar (grey surface, grouped controls, icon+label feel).
+- Removed primary-blue CTA treatment from formatting controls; active state is now clear but neutral.
+- Improved split-layout editing comfort with sticky desktop toolbar and bounded internal editor scrolling.
+- Added editor-ready guardrails so Prompt Lock / Generate Content / Save Draft wait until Lexical is fully hydrated.
+- Kept save/open/compliance/library preview flows stable while improving editing usability.
+
+## 2026-03-03 — Lexical data-contract hardening (task-00150)
+- Hardened Create editor HTML boundaries with a dedicated normalization/sanitization layer before persistence and hydration.
+- Added safe load-time normalization for malformed/legacy draft bodies so old plain-text drafts and malformed HTML hydrate reliably in Lexical.
+- Made compliance content extraction deterministic and bounded by deriving normalized plain text from sanitized HTML with explicit limits.
+- Kept API request/response envelopes stable while improving internal safety and consistency for editor contract handling.
+
+## 2026-03-03 — Lexical safety review phase 1 (task-00151)
+- Completed SEC review of Lexical HTML save/load/render path across Create and Library workflows.
+- Confirmed current flow does not use direct HTML injection sinks (no `dangerouslySetInnerHTML` in reviewed surfaces).
+- Confirmed compliance requests are derived from plain text extraction and submitted as JSON text content.
+- Documented residual hidden-markup normalization risk plus follow-up sanitizer hardening recommendation in security baseline.
+- No runtime code changes in this task (docs-first security verification).
+
+## 2026-03-03 — Lexical editor phase 1 for Create (task-00148)
+- Replaced Create’s textarea editor with Lexical as the primary authoring editor.
+- Added baseline rich formatting controls: bold, italic, heading, paragraph, bullet list, and numbered list.
+- Wired AI generation output to populate Lexical reliably and kept compliance checks reading current editor text.
+- Standardized draft persistence to HTML serialization for rich-text retention across save/open flows.
+- Deferred remediation apply/regenerate integration in this phase by disabling those actions with clear temporary guidance (no broken path).
+
 # Railfin Change Log
 
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.

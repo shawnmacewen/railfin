@@ -1,3 +1,46 @@
+## task-00153 — Lexical toolbar common options expansion
+
+- Expanded `src/ui/lexical-editor.tsx` toolbar coverage to practical common rich-text controls while preserving existing editor/data workflows:
+  - Inline: Bold, Italic, Underline, Strikethrough
+  - Blocks: H1/H2/H3, Paragraph, Blockquote, Code block
+  - Structure: Bullet list, Numbered list, Checklist
+  - Linking: Link + Unlink
+  - Layout/history: Align Left/Center/Right + Undo/Redo
+  - Cleanup: Clear formatting (resets inline styles/link/list/block/alignment to paragraph-left)
+- Maintained neutral/grey toolbar visual language and Lucide icon+label affordances.
+- Preserved accessibility semantics through role/group labels, per-button `aria-label`, toggle `aria-pressed`, and disabled-state handling for history commands.
+
+## task-00152 — Lexical toolbar Lucide icon pass
+
+- Updated `src/ui/lexical-editor.tsx` toolbar controls to use Lucide React icons with explicit text labels (Bold, Italic, Heading, Paragraph, Bullets, Numbered, Clear).
+- Added reusable toolbar button rendering so icon+label controls keep the same command wiring and keyboard/click behavior.
+- Preserved accessibility and active-state semantics via existing `aria-pressed` behavior for toggled formatting actions.
+- Kept visual style neutral through additive toolbar polish in `src/app/globals.css` (grey bar, subtle active state, no blue CTA treatment).
+
+## task-00149 — Lexical UX stabilization pass (post phase 1)
+
+- `src/ui/lexical-editor.tsx` follows explicit Lexical React setup conventions:
+  - `LexicalComposer`, `RichTextPlugin`, `ContentEditable`, `HistoryPlugin`, and `OnChangePlugin`.
+  - toolbar active-state behavior uses a registered Lexical update listener for state synchronization.
+- Toolbar style aligned to neutral demo approach:
+  - grey top bar, grouped controls, icon+label feel, and non-CTA formatting buttons.
+  - active formatting remains obvious without blue primary styling.
+- `src/app/globals.css` improves split-layout editing comfort:
+  - sticky desktop toolbar, bounded editor viewport with internal scroll.
+  - mobile/smaller viewports fall back to normal page flow.
+- `src/ui/editor-shell.tsx` adds Lexical-ready gating for prompt lock / generate / save controls.
+- Intentional deviation: text+symbol button labels used instead of external SVG icon package to keep dependencies stable in this pass.
+
+## task-00148 — Lexical phase 1 (Create workflow integration for AI + Compliance)
+
+- Replaced Create page textarea editor with a Lexical-based rich text editor (`src/ui/lexical-editor.tsx`) and made it the primary authoring surface.
+- Added practical baseline formatting controls in-editor: **bold**, **italic**, **heading**, **paragraph**, **bullet list**, **numbered list**.
+- Wired AI Generate flow to hydrate Lexical reliably by converting generated plain text into editor HTML and syncing state back from Lexical on every change.
+- Compliance now reads the current Lexical editor content via extracted plain text, preserving end-to-end compliance-check behavior.
+- Save Draft now persists Lexical content as serialized HTML (`body`), and draft open/load hydrates that HTML back into Lexical.
+- Library card previews now strip HTML tags from saved draft bodies so saved Lexical content remains readable in list/tile previews.
+- Remediation apply/regenerate actions are intentionally deferred in this phase: controls remain visible but disabled with a clear temporary note to avoid broken paths while Generate+Compliance+Save flow is stabilized.
+
 # UI Foundations
 
 ## task-00147 — Create single-content focus + prompt lock accordion + editor/compliance workspace upgrade

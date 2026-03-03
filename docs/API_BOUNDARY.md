@@ -1,3 +1,18 @@
+## task-00150 update — Lexical data-contract hardening (serialization/load/compliance boundaries)
+
+- Added a dedicated Lexical data-contract normalization layer in `src/ui/lexical-contract.ts` to enforce safe editor boundary handling for draft HTML.
+- **Serialization boundary hardening:** editor change output is now sanitized/normalized before state persistence (disallowed tags removed, unsafe attributes stripped, anchor href protocol allowlist applied, oversized payloads bounded).
+- **Deserialization/load boundary hardening:** draft open path now normalizes legacy/malformed body content into safe canonical HTML for Lexical hydration. Plain-text legacy bodies are converted to paragraph HTML deterministically.
+- **Compliance extraction hardening:** compliance input now derives from deterministic HTML-to-text normalization with explicit max-length cap (bounded operator payload) to avoid unstable or unbounded extraction.
+- API envelope shapes remain unchanged for `/api/internal/content/draft` and `/api/internal/compliance/check`; changes are internal normalization safeguards only.
+
+## task-00148 update — Create editor serialization contract (Lexical phase 1)
+
+- Create editor persistence remains on `POST /api/internal/content/draft` with unchanged envelope shape, but `body` now stores Lexical-authored **HTML** (serialized rich text) rather than plain textarea text for new/updated drafts.
+- Compliance contract remains unchanged: `POST /api/internal/compliance/check` continues to receive a plain `content` string; UI now derives this from Lexical text content extraction before request submission.
+- Generate contract remains unchanged: UI receives generated plain text and maps it into Lexical HTML for editor hydration.
+- Backward compatibility: existing plain-text draft bodies still load (treated as text content by the Lexical loader path).
+
 # API Boundary
 
 ## Internal Protected Operations
