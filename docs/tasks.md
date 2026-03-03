@@ -1,3 +1,14 @@
+## task-00153 — UI — Lexical toolbar common options expansion
+
+- Status: **Done**
+- Branch: `feat/ui/task-00153-lexical-toolbar-common-options`
+- Scope delivered:
+  - Expanded Lexical toolbar to include standard rich-text controls: bold, italic, underline, strikethrough; H1/H2/H3 + paragraph; bullet/numbered/check lists; blockquote + code block; link/unlink; left/center/right alignment; undo/redo; clear formatting.
+  - Kept neutral grey toolbar visual style and Lucide icon + label pattern.
+  - Preserved accessibility/interaction semantics with toolbar grouping, `aria-label`, `aria-pressed`, disabled undo/redo state, and mouse-down selection preservation for keyboard-safe editing.
+  - Kept Create/generate/save/compliance/remediation flows unchanged (toolbar-only/editor-command layer change).
+  - Added Lexical nodes/plugins needed for features (code + link) and validated with `npm run build` (pass).
+
 ## task-00152 — UI — Lexical toolbar Lucide icon pass
 
 - Status: **Done**

@@ -1,3 +1,8 @@
+## 2026-03-03 — Lexical toolbar common options expansion (task-00153)
+- Expanded Create editor toolbar with practical common controls: bold/italic/underline/strikethrough, H1/H2/H3/paragraph, bullet/numbered/check lists, blockquote/code block, link/unlink, alignment (left/center/right), undo/redo, and clear formatting.
+- Preserved neutral grey toolbar styling and Lucide icon+label conventions while keeping active-state clarity and accessibility semantics.
+- Added Lexical link/code support wiring (`@lexical/link`, `@lexical/code`, LinkPlugin + nodes`) without changing generation/save/compliance/remediation flows.
+
 ## 2026-03-03 — Lexical toolbar Lucide icon pass (task-00152)
 - Replaced Create editor toolbar’s text/symbol formatting controls with Lucide icon + label buttons for clearer affordances.
 - Kept the toolbar’s neutral grey, non-CTA visual style and preserved active-state clarity for formatting toggles.

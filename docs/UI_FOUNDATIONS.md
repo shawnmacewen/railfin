@@ -1,3 +1,15 @@
+## task-00153 — Lexical toolbar common options expansion
+
+- Expanded `src/ui/lexical-editor.tsx` toolbar coverage to practical common rich-text controls while preserving existing editor/data workflows:
+  - Inline: Bold, Italic, Underline, Strikethrough
+  - Blocks: H1/H2/H3, Paragraph, Blockquote, Code block
+  - Structure: Bullet list, Numbered list, Checklist
+  - Linking: Link + Unlink
+  - Layout/history: Align Left/Center/Right + Undo/Redo
+  - Cleanup: Clear formatting (resets inline styles/link/list/block/alignment to paragraph-left)
+- Maintained neutral/grey toolbar visual language and Lucide icon+label affordances.
+- Preserved accessibility semantics through role/group labels, per-button `aria-label`, toggle `aria-pressed`, and disabled-state handling for history commands.
+
 ## task-00152 — Lexical toolbar Lucide icon pass
 
 - Updated `src/ui/lexical-editor.tsx` toolbar controls to use Lucide React icons with explicit text labels (Bold, Italic, Heading, Paragraph, Bullets, Numbered, Clear).
