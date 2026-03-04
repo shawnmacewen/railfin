@@ -88,3 +88,11 @@
 - task-00140 | Done | `feat/dev/task-00140-package-ux-api-alignment`
 - task-00142 | Done | `feat/ui/task-00142-config-features-subpage`
 <!-- HISTORICAL_TASK_COVERAGE_END -->
+
+
+## 2026-03-04 16:44 UTC — task-00181 events backend phase 1
+- Implemented `src/api/internal/events/store.ts` + `contracts.ts` for events/registrations model contracts and phase-1 storage.
+- Added internal routes `src/app/api/internal/events/route.ts` and `src/app/api/internal/events/registrations/route.ts`.
+- Added fail-closed validation + safe error payload handling.
+- Updated `docs/API_BOUNDARY.md`, `docs/tasks.md`, `docs/CHANGELOG.md`.
+- Build verification: `npm run build` passed.
