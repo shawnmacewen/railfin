@@ -1,3 +1,14 @@
+## task-00174 — UI — Double left-nav brand logo size
+
+- Status: **Done**
+- Branch: `feat/ui/task-00174-double-logo-size`
+- Scope delivered:
+  - Doubled the current left-nav brand logo display size by 2x across desktop and responsive breakpoints.
+  - Preserved fixed horizontal logo anchoring and existing collapse/expand animation stability behavior (no jitter regressions introduced).
+  - Rebalanced brand block spacing and expanded sidebar track widths to prevent overlap/crowding and keep nav items usable.
+  - Preserved responsive shell behavior and collapsed-rail interactions.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00173 — UI — Remove duplicate in-page page titles
 
 - Status: **Done**

@@ -1,3 +1,9 @@
+## 2026-03-04 — Left-nav brand logo doubled with stable anchor (task-00174)
+- Doubled the app-shell left-nav brand logo display size by 2x across defined breakpoints (desktop/tablet/mobile shell ranges).
+- Kept the fixed logo anchor wrapper so logo x-position remains stable during sidebar collapse/expand (no horizontal jitter regressions).
+- Increased brand area spacing and widened expanded sidebar tracks to keep nav rows readable and avoid brand/menu overlap with the larger mark.
+- Preserved responsive behavior and existing hover/focus expand + delayed auto-collapse interactions.
+
 ## 2026-03-04 — Removed duplicate in-page page titles under shell header (task-00173)
 - Removed repeated visible page-title headings from in-content surfaces where the same page label is already shown in the app header.
 - Applied this consistency pass across Create, Library, Configure, and Events views.

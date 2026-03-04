@@ -1,3 +1,10 @@
+## task-00174 — Double left-nav brand logo size with stable anchor
+
+- Increased app-shell brand logo display size by exactly 2x at all existing breakpoints (`2.75rem -> 5.5rem`, `2.5rem -> 5rem`, `2.15rem -> 4.3rem`).
+- Preserved the fixed logo anchor pattern (`.rf-brand-logo-wrap`) from task-00172 so collapse/expand keeps a stable horizontal logo position with no added jitter.
+- Rebalanced brand block spacing for the larger mark (`.rf-brand` min-height and bottom spacing) to avoid crowding/overlap with nav items.
+- Increased expanded sidebar track widths at desktop/tablet breakpoints to keep nav labels/items usable with the larger logo while preserving collapsed rail behavior and responsive shell layout.
+
 ## task-00173 — Remove duplicate in-page page-title headings under shell header
 
 - Audited primary shell pages for duplicated page labels between top header (`<h1 class="rf-header-title">`) and in-content headings.
