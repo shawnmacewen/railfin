@@ -224,23 +224,23 @@ button:disabled {
 }
 
 .rf-nav-icon-library {
-  color: #7c3aed;
+  color: #6d28d9;
 }
 
 .rf-nav-icon-campaigns {
-  color: #b45309;
-}
-
-.rf-nav-icon-events {
   color: #0f766e;
 }
 
+.rf-nav-icon-events {
+  color: #0369a1;
+}
+
 .rf-nav-icon-help {
-  color: #be185d;
+  color: #4338ca;
 }
 
 .rf-nav-icon-configure {
-  color: #374151;
+  color: #334155;
 }
 
 .rf-main {

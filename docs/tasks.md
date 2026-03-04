@@ -1,3 +1,13 @@
+## task-00176 — UI — Events icon update + left-nav color harmony
+
+- Status: **Done**
+- Branch: `feat/ui/task-00176-nav-icon-color-harmony`
+- Scope delivered:
+  - Changed left-nav **Events** icon to Lucide `Tickets`.
+  - Replaced per-item nav icon colors with cohesive Railfin-complementary palette: Create `#1d4ed8`, Library `#6d28d9`, Campaigns `#0f766e`, Events `#0369a1`, Help Center `#4338ca`, Configure `#334155`.
+  - Preserved nav sizing/geometry and existing collapse/expand stability behavior.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00175 — UI — Left-nav icon mapping update
 
 - Status: **Done**

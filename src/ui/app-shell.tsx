@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BookOpenText, CalendarDays, Goal, LifeBuoy, Pickaxe, Settings } from "lucide-react";
+import { BookOpenText, Goal, LifeBuoy, Pickaxe, Settings, Tickets } from "lucide-react";
 
 import { Badge, Button, NavItem } from "./primitives";
 
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { label: "Library", href: "/app/library", icon: <BookOpenText size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
   // Campaigns uses target-arrow SVG geometry via Lucide `Goal` (repo source: node_modules/lucide-react/dist/esm/icons/goal.js)
   { label: "Campaigns", href: "/app/campaigns", icon: <Goal size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
-  { label: "Events", href: "/app/events", icon: <CalendarDays size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
+  { label: "Events", href: "/app/events", icon: <Tickets size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
   { label: "Help Center", href: "/app/help", icon: <LifeBuoy size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
   { label: "Configure", href: "/app/configure", icon: <Settings size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
 ];
