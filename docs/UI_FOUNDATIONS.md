@@ -1,3 +1,10 @@
+## task-00175 — Left-nav icon remap (requested set) with fallback reference
+
+- Updated app-shell primary nav icons in `src/ui/app-shell.tsx` to requested mapping while preserving existing size/stroke contracts (Lucide size `23`, strokeWidth `2`) so current nav visual balance, color classes, and no-jitter behavior remain intact.
+- Applied mapping: **Create → Pickaxe**, **Library → BookOpenText**, **Campaigns → Goal (target-arrow SVG geometry)**, **Help Center → LifeBuoy**, **Configure → Settings**.
+- Campaigns icon uses existing repo SVG source from Lucide Goal icon definition (`node_modules/lucide-react/dist/esm/icons/goal.js`), matching target+arrow treatment without introducing custom random assets.
+- Preserved prior/default icon mapping as explicit fallback reference in code comments above `NAV_ITEMS` for quick revert/reference: Create=PenSquare, Library=FolderOpen, Campaigns=Target, Help Center=HelpCircle, Configure=Settings2.
+
 ## task-00174 — Double left-nav brand logo size with stable anchor
 
 - Increased app-shell brand logo display size by exactly 2x at all existing breakpoints (`2.75rem -> 5.5rem`, `2.5rem -> 5rem`, `2.15rem -> 4.3rem`).

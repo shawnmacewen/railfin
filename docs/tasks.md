@@ -1,3 +1,13 @@
+## task-00175 — UI — Left-nav icon mapping update
+
+- Status: **Done**
+- Branch: `feat/ui/task-00175-nav-icon-map-update`
+- Scope delivered:
+  - Updated left-nav icon mapping per request: Create→`pickaxe`, Library→`book-open-text`, Campaigns→target-arrow (Lucide `Goal` SVG geometry from repo source), Help Center→`life-buoy`, Configure→`settings`.
+  - Preserved nav icon sizing/color behavior and existing collapse/expand stability fixes by keeping icon render/stroke + class wiring unchanged.
+  - Documented previous icon set as default fallback reference in `src/ui/app-shell.tsx` and UI foundations docs.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00174 — UI — Double left-nav brand logo size
 
 - Status: **Done**

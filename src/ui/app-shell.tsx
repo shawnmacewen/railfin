@@ -5,17 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CalendarDays, FolderOpen, HelpCircle, PenSquare, Settings2, Target } from "lucide-react";
+import { BookOpenText, CalendarDays, Goal, LifeBuoy, Pickaxe, Settings } from "lucide-react";
 
 import { Badge, Button, NavItem } from "./primitives";
 
+// Default fallback icon set (pre-task-00175) retained for easy revert/reference:
+// Create=PenSquare, Library=FolderOpen, Campaigns=Target, Help Center=HelpCircle, Configure=Settings2
 const NAV_ITEMS = [
-  { label: "Create", href: "/app/create", icon: <PenSquare size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-create" },
-  { label: "Library", href: "/app/library", icon: <FolderOpen size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
-  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
+  { label: "Create", href: "/app/create", icon: <Pickaxe size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-create" },
+  { label: "Library", href: "/app/library", icon: <BookOpenText size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
+  // Campaigns uses target-arrow SVG geometry via Lucide `Goal` (repo source: node_modules/lucide-react/dist/esm/icons/goal.js)
+  { label: "Campaigns", href: "/app/campaigns", icon: <Goal size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
   { label: "Events", href: "/app/events", icon: <CalendarDays size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
-  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
-  { label: "Configure", href: "/app/configure", icon: <Settings2 size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
+  { label: "Help Center", href: "/app/help", icon: <LifeBuoy size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
+  { label: "Configure", href: "/app/configure", icon: <Settings size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
 ];
 
 const AUTO_COLLAPSE_DELAY_MS = 2000;

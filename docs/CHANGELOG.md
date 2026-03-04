@@ -1,3 +1,8 @@
+## 2026-03-04 — Left-nav icon mapping refresh with fallback reference (task-00175)
+- Updated app-shell primary nav icons to requested set: Create→Pickaxe, Library→BookOpenText, Campaigns→Goal (target-arrow SVG geometry), Help Center→LifeBuoy, Configure→Settings.
+- Kept icon sizing/stroke and per-item icon class wiring unchanged so current nav visual rhythm/colors and collapse/expand jitter fixes are preserved.
+- Documented prior/default mapping as explicit fallback reference in code/docs for quick rollback context.
+
 ## 2026-03-04 — Left-nav brand logo doubled with stable anchor (task-00174)
 - Doubled the app-shell left-nav brand logo display size by 2x across defined breakpoints (desktop/tablet/mobile shell ranges).
 - Kept the fixed logo anchor wrapper so logo x-position remains stable during sidebar collapse/expand (no horizontal jitter regressions).
