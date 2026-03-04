@@ -1,3 +1,14 @@
+## task-00168 — UI — Nav scale bump + initial scroll/load offset fix
+
+- Status: **Done**
+- Branch: `feat/ui/task-00168-nav-scale-and-initial-scroll-fix`
+- Scope delivered:
+  - Increased left-nav visual hierarchy with a moderate icon/text size bump (Lucide icon render 15→17, nav icon slot 1rem→1.1rem, nav label size to 1.05rem) while preserving compact menu density.
+  - Preserved task-00167 row-height hard fix by keeping a strict fixed row height (`height/min-height/max-height: 1.72rem`) and unchanged collapse-label-only animation behavior.
+  - Fixed initial load/page-offset behavior by enforcing top-of-content reset on route render in AppShell and disabling browser auto scroll restoration for shell routes (`window.history.scrollRestoration = "manual"` + explicit `window.scrollTo(0,0)`).
+  - Preserved hover/focus sidebar expand and delayed auto-collapse interaction model/usability.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00167 — UI — Left-nav row-height hard fix across all states
 
 - Status: **Done**

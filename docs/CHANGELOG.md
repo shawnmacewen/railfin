@@ -1,3 +1,9 @@
+## 2026-03-04 — Nav scale bump + initial scroll/load offset fix (task-00168)
+- Increased left-nav icon and label scale moderately for readability (icon render 15px -> 17px, icon slot 1rem -> 1.1rem, nav label size bumped) while keeping compact row density.
+- Preserved task-00167 row-height invariants by keeping nav row hard-locked at `1.72rem` across expanded/collapsed/transition states.
+- Fixed initial scrolled-down/top-cutoff load behavior by forcing top reset on shell route render and opting out of browser scroll restoration (`history.scrollRestoration = "manual"` + `scrollTo(0,0)`).
+- Kept hover-expand + delayed auto-collapse sidebar behavior unchanged.
+
 ## 2026-03-04 — Left nav row-height hard fix across collapsed/expanded/transition states (task-00167)
 - Eliminated nav row stretch behavior by switching `.rf-nav-list` from grid to vertical flex layout so extra sidebar height is not distributed across item rows.
 - Locked `.rf-nav-item` to one fixed compact row height (`1.72rem`) with zero vertical padding growth and overflow constraints for consistent rhythm in expanded, collapsed, and transitioning states.

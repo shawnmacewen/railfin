@@ -10,12 +10,12 @@ import { CalendarDays, FolderOpen, HelpCircle, PenSquare, Settings2, Target } fr
 import { Badge, Button, NavItem } from "./primitives";
 
 const NAV_ITEMS = [
-  { label: "Create", href: "/app/create", icon: <PenSquare size={15} strokeWidth={1.9} /> },
-  { label: "Library", href: "/app/library", icon: <FolderOpen size={15} strokeWidth={1.9} /> },
-  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={15} strokeWidth={1.9} /> },
-  { label: "Events", href: "/app/events", icon: <CalendarDays size={15} strokeWidth={1.9} /> },
-  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={15} strokeWidth={1.9} /> },
-  { label: "Configure", href: "/app/configure", icon: <Settings2 size={15} strokeWidth={1.9} /> },
+  { label: "Create", href: "/app/create", icon: <PenSquare size={17} strokeWidth={1.95} /> },
+  { label: "Library", href: "/app/library", icon: <FolderOpen size={17} strokeWidth={1.95} /> },
+  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={17} strokeWidth={1.95} /> },
+  { label: "Events", href: "/app/events", icon: <CalendarDays size={17} strokeWidth={1.95} /> },
+  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={17} strokeWidth={1.95} /> },
+  { label: "Configure", href: "/app/configure", icon: <Settings2 size={17} strokeWidth={1.95} /> },
 ];
 
 const AUTO_COLLAPSE_DELAY_MS = 2000;
@@ -30,6 +30,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (window.history.scrollRestoration !== "manual") {
+      window.history.scrollRestoration = "manual";
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
 
   const clearCollapseTimer = useCallback(() => {
     if (collapseTimerRef.current) {
