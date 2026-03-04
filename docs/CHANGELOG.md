@@ -1,3 +1,10 @@
+## 2026-03-04 — SEC — Events APIs guard/validation posture verification (task-00186)
+- Verified auth-guard coverage across wired internal Events endpoints (`GET/POST /api/internal/events`, `POST /api/internal/events/registrations`) and confirmed unauthorized path behavior.
+- Verified `Cache-Control: no-store` coverage on success/error and unauthorized responses for reviewed Events APIs.
+- Verified registration API boundary controls for PII-facing fields: strict key allowlist, required-field + length/email validation, normalization, and safe structured error responses.
+- Recorded compat-mode auth caveat (`INTERNAL_API_AUTH_COMPAT_MODE`) and marked verification gate as GO-with-caution in `docs/SECURITY_BASELINE.md`.
+- Docs-only update; no runtime code changes.
+
 ## 2026-03-04 — Events wizard phase 2: pre-event communications setup (task-00182)
 - Expanded `/app/events/new` into a clear 2-step wizard with explicit step progress and navigation between event basics and communication planning.
 - Added communication planning step with configurable **1-3 pre-event email touchpoints**.

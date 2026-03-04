@@ -1,3 +1,14 @@
+## task-00186 — SEC — Events APIs guard/validation posture verification
+
+- Status: **Done**
+- Branch: `chore/sec/task-00186-events-api-guard-validation`
+- Scope delivered:
+  - Verified auth guard coverage on currently wired Events internal endpoints (`GET/POST /api/internal/events`, `POST /api/internal/events/registrations`).
+  - Verified `Cache-Control: no-store` coverage on success/error/unauthorized responses for reviewed endpoints.
+  - Verified registration payload validation posture for PII-sensitive fields (allowlist, normalization, bounds, deterministic error mapping).
+  - Documented compat-mode auth caveat and go/no-go decision in `docs/SECURITY_BASELINE.md`.
+  - Updated changelog and sec lane report for traceability.
+
 ## task-00182 — UI — Events wizard phase 2 (pre-event communications setup)
 
 - Status: **Done**

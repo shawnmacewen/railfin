@@ -1,3 +1,40 @@
+## task-00186 — SEC — Events APIs guard/validation posture verification (auth + no-store + registration PII/error safety)
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `src/app/api/internal/events/route.ts`
+- `src/app/api/internal/events/registrations/route.ts`
+- `src/api/internal/events/contracts.ts`
+- `src/api/internal/events/store.ts`
+
+### Findings
+
+1. **Auth guard is present on all currently wired Events internal endpoints (PASS with compat-mode caveat):**
+   - `GET /api/internal/events`, `POST /api/internal/events`, and `POST /api/internal/events/registrations` all call `requireInternalApiAuth(request)` before business logic.
+   - Unauthorized responses are deterministic (`401`, `{ ok: false, error: "Unauthorized" }`).
+   - Caveat: when `INTERNAL_API_AUTH_COMPAT_MODE` is enabled (default unless set to `off`), same-origin/same-site requests may pass without a recognized session cookie; keep this mode temporary and disable for stricter production posture.
+
+2. **No-store cache control coverage is complete for reviewed Events responses (PASS):**
+   - Success and error responses in both Events route handlers explicitly include `INTERNAL_SENSITIVE_NO_STORE_HEADERS`.
+   - Unauthorized responses emitted from the shared auth helper also include `Cache-Control: no-store`.
+
+3. **Registration PII field validation + error safety are in place at API boundary (PASS):**
+   - Registration contract is strict allowlist-only (`eventId`, `name`, `email`, `phone`, `attendanceIntent`) with unknown-key rejection.
+   - Required fields + bounded lengths are enforced; normalization trims strings and lowercases email.
+   - `eventId` existence is checked before record creation (`Event not found` -> `404`).
+   - Error payloads return structured validation metadata (`fieldErrors`) without reflecting raw request payload values or stack traces.
+
+### Gate decision (task-00186)
+
+- **Events API guard/validation posture status:** **GO (verified with compat-mode caution tracked)**
+- Rationale: required auth guard hooks, no-store response policy, and registration validation/error-safety controls are active on current endpoints; remaining hardening is to retire auth compat-mode where feasible.
+
+### Verification outcome (task-00186)
+
+- Outcome: **PASS (docs-first verification complete)**
+- Code changes: none (verification-only; no tiny critical runtime fix required)
+- Build: not run (docs-only task)
+
 ## task-00183 — SEC — Events registration safety pass phase 1 (field/API review + PII retention defaults)
 
 Review scope:
