@@ -1,3 +1,9 @@
+## 2026-03-04 — Left nav auto-minimize + width refinement (task-00164)
+- Added left-nav auto-minimize with ~3s inactivity timeout when enabled, plus auto-expand on nav interaction.
+- Added bottom nav controls for manual expand/collapse and an `Auto-minimize` toggle.
+- Reduced default nav width, added collapsed rail behavior, and kept page content area layout stable.
+- Moved Railfin name onto the same row as logo and kept responsive shell behavior coherent.
+
 ## 2026-03-04 — Main nav brand logo reduced by 25% (task-00163)
 - Reduced the left-nav Railfin brand logo by 25% from task-00162 values (168px -> 126px on desktop) with proportional responsive scaling.
 - Kept stacked brand alignment and sidebar navigation usability intact.

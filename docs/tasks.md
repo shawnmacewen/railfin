@@ -1,3 +1,16 @@
+## task-00164 — UI — Left nav auto-minimize + width refinement
+
+- Status: **Done**
+- Branch: `feat/ui/task-00164-nav-auto-minimize`
+- Scope delivered:
+  - Added left-nav auto-minimize behavior with ~3s inactivity timeout and auto-expand on nav interaction.
+  - Added bottom-nav controls: manual expand/collapse button and `Auto-minimize` toggle (enable/disable).
+  - Kept manual expand/collapse interaction available regardless of auto-minimize state.
+  - Reduced default sidebar width and added collapsed rail width while preserving content area layout stability.
+  - Moved Railfin wordmark onto the same row as logo in nav header.
+  - Preserved responsive navigation behavior and updated UI docs/changelog/lane report.
+  - Ran `npm run build` (pass).
+
 ## task-00163 — UI — Main nav brand logo reduce by 25%
 
 - Status: **Done**

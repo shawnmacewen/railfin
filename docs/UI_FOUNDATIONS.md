@@ -372,6 +372,7 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 - **task-00161 update:** tripled the shell brand mark from 112px to 336px, kept the wordmark present but de-emphasized, and retuned sidebar track + responsive logo sizing to keep navigation usable without overlap.
 - **task-00162 update:** reduced the shell brand mark by ~50% from the task-00161 oversized state (336px to 168px on desktop), tightened sidebar track sizing for better brand/nav balance, and preserved responsive logo scaling at narrower breakpoints.
 - **task-00163 update:** reduced the shell brand mark by 25% from task-00162 sizing (168px to 126px on desktop) with proportional responsive fallbacks, while preserving stacked brand alignment and sidebar nav usability.
+- **task-00164 update:** added left-nav auto-minimize (~3s inactivity) with bottom controls for manual expand/collapse + auto-minimize toggle, reduced default sidebar width, introduced collapsed-rail layout, and moved Railfin wordmark onto the same row as the logo while preserving responsive shell/content behavior.
 
 ## Hosted Smoke UX Verification Rerun (task-00056)
 

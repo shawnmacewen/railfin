@@ -57,3 +57,5 @@
 - 2026-03-04 06:18 UTC task-00161: tripled app-shell top-left Railfin logo from 112px to 336px, retuned brand spacing/text emphasis and sidebar responsive widths to avoid nav overlap/clipping, and build passed.
 - 2026-03-04 06:22 UTC task-00162: reduced app-shell top-left Railfin logo by ~50% from task-00161 oversized values (336px→168px desktop with proportional responsive fallbacks), tightened sidebar track sizing to rebalance branding vs nav readability, preserved stacked logo+wordmark responsive behavior, and build passed.
 - 2026-03-04 06:26 UTC task-00163: reduced app-shell top-left Railfin logo by 25% from task-00162 values (168px→126px desktop with proportional responsive fallbacks), kept stacked brand alignment/sidebar usability intact, preserved responsive behavior, and build passed.
+
+- 2026-03-04 06:32 UTC task-00164: shipped app-shell left-nav auto-minimize (~3s inactivity when enabled) with bottom controls (manual expand/collapse + auto-minimize toggle), reduced default sidebar width with collapsed rail state, moved Railfin name to logo row, preserved responsive nav/content behavior, and build passed.
