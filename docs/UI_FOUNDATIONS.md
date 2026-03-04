@@ -1,3 +1,14 @@
+## task-00168 — Left-nav scale refinement + initial scroll offset stabilization
+
+- Updated `src/ui/app-shell.tsx` to moderately increase nav icon rendering size (Lucide `15 -> 17`) and retain existing hover/focus expand with delayed auto-collapse behavior.
+- Updated `src/app/globals.css` nav primitives to raise visual size while preserving compact rhythm:
+  - `.rf-nav-item` label size increased to `1.05rem`.
+  - `.rf-nav-item-icon` slot increased from `1rem` to `1.1rem` (including SVG sizing).
+  - row-height hard lock from task-00167 remains intact (`height/min-height/max-height: 1.72rem`).
+- Added shell-level scroll normalization in `AppShell` so each route render lands at top-of-content consistently:
+  - disables browser auto restoration (`window.history.scrollRestoration = "manual"`)
+  - enforces explicit top reset (`window.scrollTo({ top: 0, left: 0, behavior: "auto" })`) on pathname change.
+
 ## task-00158 — Generate/Lock action alignment across Create input modes
 
 - `src/ui/editor-shell.tsx` now renders a shared action pattern in both Create input modes:
