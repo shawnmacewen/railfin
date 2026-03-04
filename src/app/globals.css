@@ -56,7 +56,7 @@ button:disabled {
 .rf-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(16.5rem, 17.5rem) 1fr;
+  grid-template-columns: minmax(17.5rem, 19.5rem) 1fr;
 }
 
 .rf-sidebar {
@@ -67,27 +67,28 @@ button:disabled {
 
 .rf-brand {
   display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-weight: 700;
-  color: #454d66;
-  margin-bottom: 1rem;
-  padding: 0 0.4rem;
+  font-weight: 600;
+  color: #5a627e;
+  margin-bottom: 1.1rem;
+  padding: 0.15rem 0.4rem;
 }
 
 .rf-brand-logo {
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 7rem;
+  height: 7rem;
   border-radius: 4px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .rf-brand-text {
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .rf-nav-list {
@@ -836,9 +837,13 @@ button:disabled {
     grid-template-columns: 15rem 1fr;
   }
 
+  .rf-brand {
+    font-size: 0.72rem;
+  }
+
   .rf-brand-logo {
-    width: 3.25rem;
-    height: 3.25rem;
+    width: 5.5rem;
+    height: 5.5rem;
   }
 }
 
