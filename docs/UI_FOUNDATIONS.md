@@ -370,6 +370,7 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 - **task-00159 update:** increased shell brand logo visual size to 60px (>=2x prior 28px), added `.rf-brand-text` line-height tuning, and widened desktop sidebar track with responsive fallback to maintain clean nav spacing/alignment.
 - **task-00160 update:** doubled the shell brand mark again to 112px, shifted brand layout to stacked logo + wordmark with reduced text prominence, and further widened desktop sidebar track to preserve usable nav spacing at common desktop widths.
 - **task-00161 update:** tripled the shell brand mark from 112px to 336px, kept the wordmark present but de-emphasized, and retuned sidebar track + responsive logo sizing to keep navigation usable without overlap.
+- **task-00162 update:** reduced the shell brand mark by ~50% from the task-00161 oversized state (336px to 168px on desktop), tightened sidebar track sizing for better brand/nav balance, and preserved responsive logo scaling at narrower breakpoints.
 
 ## Hosted Smoke UX Verification Rerun (task-00056)
 
