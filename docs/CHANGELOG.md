@@ -1,3 +1,10 @@
+## 2026-03-04 — Nav visual pass 2 + Create initial scroll hard fix (task-00169)
+- Increased left-nav readability with another noticeable scale bump (Lucide icons 17→19, icon slot 1.1rem→1.2rem, nav labels 1.05rem→1.13rem) while preserving consistent row behavior.
+- Added unique, consistent, high-contrast colors for each primary nav icon (Create, Library, Campaigns, Events, Help, Configure).
+- Added extra top/bottom internal padding in the nav menu container to improve vertical spacing rhythm.
+- Fixed persistent Create initial offset by hardening app-shell route scroll reset behavior across pathname transitions, including window/document/container scroll resets and a follow-up `requestAnimationFrame` pass.
+- Removed Lexical sync cursor placement (`root.selectEnd`) that could still trigger viewport jumps during Create hydration.
+
 ## 2026-03-04 — Nav scale bump + initial scroll/load offset fix (task-00168)
 - Increased left-nav icon and label scale moderately for readability (icon render 15px -> 17px, icon slot 1rem -> 1.1rem, nav label size bumped) while keeping compact row density.
 - Preserved task-00167 row-height invariants by keeping nav row hard-locked at `1.72rem` across expanded/collapsed/transition states.

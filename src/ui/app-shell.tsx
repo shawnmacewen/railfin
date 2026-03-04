@@ -10,12 +10,12 @@ import { CalendarDays, FolderOpen, HelpCircle, PenSquare, Settings2, Target } fr
 import { Badge, Button, NavItem } from "./primitives";
 
 const NAV_ITEMS = [
-  { label: "Create", href: "/app/create", icon: <PenSquare size={17} strokeWidth={1.95} /> },
-  { label: "Library", href: "/app/library", icon: <FolderOpen size={17} strokeWidth={1.95} /> },
-  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={17} strokeWidth={1.95} /> },
-  { label: "Events", href: "/app/events", icon: <CalendarDays size={17} strokeWidth={1.95} /> },
-  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={17} strokeWidth={1.95} /> },
-  { label: "Configure", href: "/app/configure", icon: <Settings2 size={17} strokeWidth={1.95} /> },
+  { label: "Create", href: "/app/create", icon: <PenSquare size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-create" },
+  { label: "Library", href: "/app/library", icon: <FolderOpen size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
+  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
+  { label: "Events", href: "/app/events", icon: <CalendarDays size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
+  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
+  { label: "Configure", href: "/app/configure", icon: <Settings2 size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
 ];
 
 const AUTO_COLLAPSE_DELAY_MS = 2000;
@@ -40,7 +40,22 @@ export function AppShell({ children }: { children: ReactNode }) {
       window.history.scrollRestoration = "manual";
     }
 
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    const resetToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const shellContent = document.querySelector<HTMLElement>(".rf-content");
+      if (shellContent) {
+        shellContent.scrollTop = 0;
+      }
+    };
+
+    resetToTop();
+    const frameId = window.requestAnimationFrame(resetToTop);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
   }, [pathname]);
 
   const clearCollapseTimer = useCallback(() => {
@@ -93,6 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               label={item.label}
               icon={item.icon}
               active={isActive(pathname, item.href)}
+              iconClassName={item.iconClassName}
             />
           ))}
         </nav>

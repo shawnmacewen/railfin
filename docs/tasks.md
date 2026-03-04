@@ -1,3 +1,16 @@
+## task-00169 — UI — Nav visual pass 2 + Create initial scroll hard fix
+
+- Status: **Done**
+- Branch: `feat/ui/task-00169-nav-visual-pass-and-scroll-fix2`
+- Scope delivered:
+  - Increased left-nav readability again with a noticeable bump (Lucide icon render `17 -> 19`, icon slot `1.1rem -> 1.2rem`, nav label `1.05rem -> 1.13rem`) while keeping row sizing consistent across states.
+  - Applied distinct per-item icon colors (Create/Library/Campaigns/Events/Help/Configure) using a consistent high-contrast palette on white backgrounds.
+  - Added extra vertical breathing room in the nav menu container (`.rf-nav-list`) with top/bottom internal padding and slightly increased row gap.
+  - Fixed persistent Create initial offset by hardening shell route scroll reset behavior to cover pathname transitions and reset both window/document + shell container scroll positions, including a post-transition frame reset.
+  - Removed Lexical sync-time cursor placement (`root.selectEnd`) that could still trigger browser scroll jumps into the editor region during initial hydration.
+  - Preserved nav row consistency/usability with fixed row-height contract retained and unchanged collapse-label interaction model.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00168 — UI — Nav scale bump + initial scroll/load offset fix
 
 - Status: **Done**

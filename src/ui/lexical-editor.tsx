@@ -381,7 +381,6 @@ function SyncValuePlugin({ value, onReadyChange }: { value: string; onReadyChang
       } else {
         root.append($createParagraphNode());
       }
-      root.selectEnd();
     });
 
     lastAppliedValueRef.current = nextValue;

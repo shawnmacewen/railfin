@@ -1,3 +1,12 @@
+## task-00169 — Left-nav visual pass 2 + Create initial scroll hard fix
+
+- Updated `src/ui/app-shell.tsx` nav item definitions to raise icon render size (`17 -> 19`) and assign a unique class per nav icon for deterministic per-item color treatment.
+- Updated `src/ui/primitives.tsx` `NavItem` primitive to accept optional `iconClassName` so icon color can be applied per route while preserving existing row structure and interactions.
+- Updated `src/app/globals.css` nav primitives for a second visual bump and spacing polish: label size to `1.13rem`, icon slot to `1.2rem`, row height locked at `1.84rem`, and extra top/bottom nav-list padding for better vertical breathing room.
+- Added per-route icon colors (`.rf-nav-icon-*`) with accessible contrast on white surfaces and retained active-row readability/hover behavior.
+- Hardened shell scroll reset logic in `AppShell` to eliminate lingering Create initial offset: reset now runs on pathname transitions, resets window/document/shell container scroll positions, and repeats once on the next animation frame to avoid route transition race conditions.
+- Updated `src/ui/lexical-editor.tsx` to remove sync-time `root.selectEnd()` cursor placement, preventing hydration-time editor selection from pulling viewport down on Create load.
+
 ## task-00168 — Left-nav scale refinement + initial scroll offset stabilization
 
 - Updated `src/ui/app-shell.tsx` to moderately increase nav icon rendering size (Lucide `15 -> 17`) and retain existing hover/focus expand with delayed auto-collapse behavior.
