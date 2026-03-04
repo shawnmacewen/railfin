@@ -1,11 +1,62 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Card } from "../../../ui/primitives";
 
-const upcomingEvents: Array<{ id: string; title: string; date: string; location: string }> = [];
+type EventItem = {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  summary: string;
+  status: "draft" | "scheduled" | "cancelled" | "completed";
+};
+
+type EventsListResponse =
+  | { ok: true; data: { items: EventItem[]; total: number } }
+  | { ok: false; error?: string };
+
+function formatEventDate(input: string): string {
+  const value = new Date(input);
+  if (Number.isNaN(value.getTime())) return input;
+  return value.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
 
 export default function EventsPage() {
-  const hasEvents = upcomingEvents.length > 0;
+  const [items, setItems] = useState<EventItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadEvents = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/internal/events", { method: "GET", credentials: "include" });
+      const payload = (await response.json().catch(() => null)) as EventsListResponse | null;
+
+      if (!response.ok || !payload?.ok) {
+        setItems([]);
+        setError(payload && "error" in payload && payload.error ? payload.error : "Could not load events right now.");
+        return;
+      }
+
+      setItems(Array.isArray(payload.data?.items) ? payload.data.items : []);
+    } catch {
+      setItems([]);
+      setError("Could not load events right now.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadEvents();
+  }, [loadEvents]);
+
+  const hasEvents = useMemo(() => items.length > 0, [items.length]);
 
   return (
     <div className="rf-events-page">
@@ -25,12 +76,26 @@ export default function EventsPage() {
 
       <Card>
         <h3 className="rf-library-section-title">Upcoming Events</h3>
-        {hasEvents ? (
+
+        {isLoading ? (
+          <p className="rf-status rf-status-muted" role="status" aria-live="polite">
+            Loading events...
+          </p>
+        ) : error ? (
+          <div className="rf-events-empty-state">
+            <p className="rf-status rf-status-error" role="alert">
+              Unable to load events: {error}
+            </p>
+            <button type="button" onClick={() => void loadEvents()}>
+              Retry
+            </button>
+          </div>
+        ) : hasEvents ? (
           <ul className="rf-events-list">
-            {upcomingEvents.map((event) => (
+            {items.map((event) => (
               <li key={event.id} className="rf-events-item">
                 <h4>{event.title}</h4>
-                <p className="rf-status rf-status-muted">{event.date}</p>
+                <p className="rf-status rf-status-muted">{formatEventDate(event.date)}</p>
                 <p className="rf-status rf-status-muted">{event.location}</p>
               </li>
             ))}

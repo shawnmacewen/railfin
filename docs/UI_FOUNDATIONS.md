@@ -1,3 +1,9 @@
+## task-00185 — Events list/create wizard live internal API wiring
+
+- `src/app/app/events/page.tsx` now fetches live events from `GET /api/internal/events` with explicit loading/error/empty/success render states and retry affordance.
+- `src/app/app/events/new/page.tsx` preserves the 2-step draft communication-planning UX and wires step-2 submit to `POST /api/internal/events`.
+- Added create submit feedback states (submitting, validation/error, success) with a post-success link back to `/app/events`.
+
 ## task-00182 — Events wizard phase 2 (pre-event communications setup)
 
 - Extended `src/app/app/events/new/page.tsx` from a single-step placeholder into a 2-step local wizard flow with explicit progress context (`Step 1 of 2` / `Step 2 of 2`).
