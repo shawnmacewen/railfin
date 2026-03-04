@@ -1,5 +1,11 @@
 # PRD — Events Module (v0)
 
+> **Milestone Ownership/Status (v0.2):**
+> - **Roadmap milestone:** `v0.2`
+> - **Module owner lane:** `DEV/COO`
+> - **Planning status:** `Approved roadmap focus; phased delivery sequencing defined`
+> - **Current app baseline:** `v0.1 (MVP locked)`
+
 ## Goal
 Enable teams to create and run events end-to-end from Railfin, including promotion content, registration capture, day-of attendance check-in, and post-event follow-up communication.
 

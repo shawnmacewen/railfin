@@ -8,6 +8,10 @@
 - Detailed summaries live in per-agent markdown files under this folder.
 - COO sends concise status updates and blocker escalations only.
 
+## 2026-03-04 15:44 UTC — milestone state update
+- App milestone formalized as **v0.1 (MVP locked)**.
+- Next roadmap milestone set to **v0.2** with focus on **Events Module** phased delivery slices.
+
 ## 2026-03-03 01:32 UTC — latest consolidated bullets
 - Package mode shipped and aligned across API+UI; compare/restore UX and export schema are in main.
 - Create UX stabilized with 2/3+1/3 layout and phase-2 ergonomic refinements.

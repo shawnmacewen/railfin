@@ -1,3 +1,10 @@
+## 2026-03-04 15:44 UTC — task-00178 milestone formalization (v0.1 -> v0.2)
+- Formalized release state as **v0.1 (MVP locked)** in task ledger/changelog/reporting docs.
+- Set next roadmap milestone to **v0.2** with **Events Module** as explicit focus.
+- Documented phased v0.2 delivery slices (events foundation, registrations, QR check-in, attendance-branch follow-up, send plumbing hardening).
+- Added explicit v0.2 ownership/status header in `docs/PRD_Events_Module_v0.md` for planning control.
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/PRD_Events_Module_v0.md`, `docs/agent-reports/SUMMARY.md`, `docs/agent-reports/railfin-dev.md`.
+
 ## 2026-03-04 05:53 UTC — task-00157 create topics/purpose wiring
 - Updated Create generation UX (`src/ui/editor-shell.tsx`, `src/app/globals.css`):
   - content-type buttons moved above creation-method selector

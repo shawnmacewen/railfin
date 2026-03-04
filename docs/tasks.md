@@ -1,3 +1,24 @@
+## task-00178 — DEV/COO — Milestone state formalization (v0.1 locked, v0.2 Events roadmap)
+
+- Status: **Done**
+- Branch: `chore/dev/task-00178-v0.1-v0.2-milestone`
+- Scope delivered:
+  - Formalized current application milestone as **v0.1 (MVP locked)** across planning/reporting docs.
+  - Declared **v0.2 roadmap focus: Events Module** with phased delivery slices for execution sequencing.
+  - Added explicit Events PRD ownership/status header for v0.2 planning control.
+  - Updated consolidated and lane reports with milestone-state note for COO/DEV alignment.
+
+## Milestone state (effective 2026-03-04)
+
+- **Current milestone:** `v0.1 (MVP locked)`
+- **Next milestone:** `v0.2 (Events Module focus)`
+- **v0.2 phased delivery slices:**
+  1. Events entity + operator UI shell (CRUD + lifecycle states)
+  2. Registration capture flow + storage contracts
+  3. QR issuance + day-of check-in workflow
+  4. Post-event communication branching by attendance outcome
+  5. Delivery-channel integration hardening (email send plumbing and operational controls)
+
 ## task-00177 — UI — Reduce left-nav brand logo size by half (again)
 
 - Status: **Done**
