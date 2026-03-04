@@ -1,3 +1,13 @@
+## task-00159 — UI — Main nav brand logo size increase
+
+- Status: **Done**
+- Branch: `feat/ui/task-00159-nav-logo-size-increase`
+- Scope delivered:
+  - Increased the app-shell top-left Railfin logo from 28px to 60px (>=2x visual size target).
+  - Rebalanced brand row spacing/alignment for larger mark readability via updated logo sizing and brand text line-height treatment.
+  - Adjusted desktop sidebar column width to preserve clean nav spacing with the larger brand mark, with responsive fallback at narrower widths.
+  - Updated UI foundations/changelog/lane-report docs and re-ran `npm run build` (pass).
+
 ## task-00158 — UI/DEV — Align Generate/Lock placement across Topics + AI Prompt modes
 
 - Status: **Done**

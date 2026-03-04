@@ -56,19 +56,19 @@ button:disabled {
 .rf-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 15rem 1fr;
+  grid-template-columns: minmax(16.5rem, 17.5rem) 1fr;
 }
 
 .rf-sidebar {
   border-right: 1px solid #e4e8f5;
   background: #ffffff;
-  padding: 1.25rem 0.85rem;
+  padding: 1rem 0.9rem;
 }
 
 .rf-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -79,7 +79,15 @@ button:disabled {
 }
 
 .rf-brand-logo {
-  border-radius: 2px;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.rf-brand-text {
+  line-height: 1.2;
 }
 
 .rf-nav-list {
@@ -820,6 +828,17 @@ button:disabled {
     overflow: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
+  }
+}
+
+@media (max-width: 860px) {
+  .rf-shell {
+    grid-template-columns: 15rem 1fr;
+  }
+
+  .rf-brand-logo {
+    width: 3.25rem;
+    height: 3.25rem;
   }
 }
 
