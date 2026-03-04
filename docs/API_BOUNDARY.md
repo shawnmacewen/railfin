@@ -425,3 +425,11 @@ Library listing is wired to table-backed draft persistence (`public.drafts`) and
   - `{ ok: true, data: { items: Draft[], total: number, limit: number, offset: number, q: string } }`
 - BLOCKED/runtime error (`500`):
   - `{ ok: false, error: string, blocked: { kind: "BLOCKED", error: string, missingEnv?: string[], requiredSql: string } }`
+
+
+## Events v0.2 phase 1 contracts (internal)
+- Added protected internal routes for event create/list and registration submit: `GET/POST /api/internal/events`, `POST /api/internal/events/registrations`.
+- Event contract fields: `title`, `date`, `summary`, `location`, `status`.
+- Registration contract fields: `name`, `email`, optional `phone`, `attendanceIntent`, with required `eventId` link.
+- Fail-closed validation: strict body key allowlists, enum checks, required/bounded fields, safe error payloads.
+- No outbound email/delivery side effects in this phase.

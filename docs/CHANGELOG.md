@@ -305,3 +305,9 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added the first Event creation wizard step at `/app/events/new` with local form capture for title, date, summary, and location.
 - Added local submit placeholder feedback for step 1 and intentionally deferred downstream messaging/email plumbing.
 - Preserved existing app-shell navigation behavior and overall UI style contract.
+
+
+## 2026-03-04 — Events backend phase 1 contracts + internal APIs (task-00181)
+- Added internal Events contracts and APIs for create/list events and submit registrations.
+- Enforced fail-closed validation (strict fields, enum allowlists, bounds) and safe non-leaky error responses.
+- Kept outbound email sending disabled for this phase.

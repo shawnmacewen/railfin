@@ -1692,3 +1692,13 @@
   - Preserved existing app shell/nav behavior and styling patterns.
   - Updated `docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`, and lane report.
   - Ran `npm run build` (pass).
+
+
+## task-00181 — DEV — Events v0.2 backend phase 1 (data model + core APIs)
+- Status: **Done**
+- Branch: `feat/dev/task-00181-events-data-model-and-api-phase1`
+- Scope delivered:
+  - Added Events + registrations internal model/contracts and in-memory phase-1 store.
+  - Added protected internal APIs for event create/list and registration submit.
+  - Added fail-closed validation and safe error payloads.
+  - Updated API boundary/changelog/dev lane docs and ran `npm run build` (pass).
