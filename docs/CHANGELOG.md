@@ -1,3 +1,16 @@
+## 2026-03-04 — Events live data wiring for list + create wizard (task-00185)
+- Connected **Events** list page to live internal API data (`GET /api/internal/events`) with explicit loading, empty, error, and retry states.
+- Connected **Create Event** wizard final submit (step 2) to live internal create API (`POST /api/internal/events`).
+- Preserved step-2 communication planning draft behavior (1-3 editable touchpoints with local metadata/template editing) while persisting event basics on submit.
+- Added clear create-run feedback states (submitting, success, validation/error) and post-success path back to Events list.
+
+## 2026-03-04 — DEV — Events DB schema/bootstrap + migration readiness (task-00184)
+- Added canonical Supabase bootstrap SQL: `docs/events_bootstrap.sql`.
+- Provisioned required Events phase-1 tables/indexes: `events`, `event_registrations`, `event_registration_intents`.
+- Aligned DB constraints/defaults to existing internal API contracts (status + attendance-intent enums, field length limits, created-at defaults, event FK linkage).
+- Documented API boundary mapping and defensive note that intent-capture table is provisioned for future ingestion hardening.
+- Confirmed no in-repo migration runner is currently configured; SQL must be applied manually by operator in Supabase environment.
+
 ## 2026-03-04 — SEC — Events APIs guard/validation posture verification (task-00186)
 - Verified auth-guard coverage across wired internal Events endpoints (`GET/POST /api/internal/events`, `POST /api/internal/events/registrations`) and confirmed unauthorized path behavior.
 - Verified `Cache-Control: no-store` coverage on success/error and unauthorized responses for reviewed Events APIs.

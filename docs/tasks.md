@@ -1,3 +1,30 @@
+## task-00185 — UI — Events list/create wizard live internal API wiring
+
+- Status: **Done**
+- Branch: `feat/ui/task-00185-events-list-live-data-wiring`
+- Scope delivered:
+  - Wired `/app/events` list view to live internal events API (`GET /api/internal/events`) with clear loading, empty, error, and retry UX states.
+  - Wired Events wizard submit in `/app/events/new` step 2 to live create API (`POST /api/internal/events`).
+  - Preserved existing step-2 communication-planning draft behavior (1-3 editable touchpoints) while adding create persistence on submit.
+  - Added explicit operator feedback for create success/error/submitting states and linked post-success navigation back to Events list.
+  - Kept UI and interaction patterns aligned with existing `rf-*` status and form styles.
+  - Updated UI docs/changelog/lane report and ran `npm run build` (pass).
+
+## task-00184 — DEV — Events DB schema/bootstrap + migration readiness
+
+- Status: **Done**
+- Branch: `feat/dev/task-00184-events-db-schema-bootstrap`
+- Scope delivered:
+  - Inspected task-00181 Events internal API/model contracts and derived canonical Supabase schema requirements.
+  - Added idempotent bootstrap SQL at `docs/events_bootstrap.sql` for required tables/indexes:
+    - `events`
+    - `event_registrations`
+    - `event_registration_intents`
+  - Aligned DB field names/types/defaults/check constraints with phase-1 API contracts (status + attendance intent enums, bounded text lengths, timestamp defaults).
+  - Added boundary docs clarifying table mapping + defensive intent-table posture and manual-apply requirement.
+  - Confirmed no migration runner exists in repository scripts; operator-ready manual SQL apply path documented.
+  - Ran `npm run build` (pass).
+
 ## task-00186 — SEC — Events APIs guard/validation posture verification
 
 - Status: **Done**

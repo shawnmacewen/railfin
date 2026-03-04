@@ -433,3 +433,12 @@ Library listing is wired to table-backed draft persistence (`public.drafts`) and
 - Registration contract fields: `name`, `email`, optional `phone`, `attendanceIntent`, with required `eventId` link.
 - Fail-closed validation: strict body key allowlists, enum checks, required/bounded fields, safe error payloads.
 - No outbound email/delivery side effects in this phase.
+
+## Events DB bootstrap contract (task-00184)
+- Canonical SQL bootstrap file: `docs/events_bootstrap.sql` (Supabase/Postgres-safe, idempotent `IF NOT EXISTS`).
+- Canonical table/column mapping (API -> DB):
+  - Event create/list: `events.id`, `title`, `date`, `summary`, `location`, `status`, `created_at`.
+  - Registration submit: `event_registrations.id`, `event_id`, `name`, `email`, `phone`, `attendance_intent`, `created_at`.
+- `event_registration_intents` is provisioned as defensive write-ahead/raw-intake storage for future ingestion hardening; phase-1 handlers do not yet persist to it.
+- Enum boundaries are enforced by DB `CHECK` constraints to mirror API allowlists (`status`, `attendance_intent`).
+- No DB migration runner is currently wired in repository scripts; operators must run bootstrap SQL manually in Supabase SQL Editor/psql for environment readiness.
