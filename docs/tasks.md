@@ -1,3 +1,14 @@
+## task-00170 — UI — Left-nav animation stability + size bump
+
+- Status: **Done**
+- Branch: `feat/ui/task-00170-nav-animation-stability-size-bump`
+- Scope delivered:
+  - Fixed tiny left-nav collapse/expand jitter by removing collapsed-state row metric drift and locking row box metrics in both states.
+  - Kept animation scope to label visibility only (`max-width` + `opacity`) and avoided flow-affecting metric animation in collapse transitions.
+  - Increased nav row container height by ~20% (`1.84rem -> 2.2rem`).
+  - Increased nav label and icon scale by ~20% (`1.13rem -> 1.36rem`, icon slot/SVG `1.2rem -> 1.44rem`, icon render `19 -> 23`).
+  - Preserved expanded/collapsed behavior and icon/label alignment cleanly.
+  - Updated UI docs/changelog/lane report and re-ran npm run build (pass).
 ## task-00169 — UI — Nav visual pass 2 + Create initial scroll hard fix
 
 - Status: **Done**

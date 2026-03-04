@@ -10,12 +10,12 @@ import { CalendarDays, FolderOpen, HelpCircle, PenSquare, Settings2, Target } fr
 import { Badge, Button, NavItem } from "./primitives";
 
 const NAV_ITEMS = [
-  { label: "Create", href: "/app/create", icon: <PenSquare size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-create" },
-  { label: "Library", href: "/app/library", icon: <FolderOpen size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
-  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
-  { label: "Events", href: "/app/events", icon: <CalendarDays size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
-  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
-  { label: "Configure", href: "/app/configure", icon: <Settings2 size={19} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
+  { label: "Create", href: "/app/create", icon: <PenSquare size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-create" },
+  { label: "Library", href: "/app/library", icon: <FolderOpen size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
+  { label: "Campaigns", href: "/app/campaigns", icon: <Target size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
+  { label: "Events", href: "/app/events", icon: <CalendarDays size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
+  { label: "Help Center", href: "/app/help", icon: <HelpCircle size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
+  { label: "Configure", href: "/app/configure", icon: <Settings2 size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
 ];
 
 const AUTO_COLLAPSE_DELAY_MS = 2000;
