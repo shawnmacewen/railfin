@@ -48,3 +48,4 @@
 - task-00141 | Done | `chore/sec/task-00141-post-alignment-safety-check`
 <!-- HISTORICAL_TASK_COVERAGE_END -->
 - 2026-03-03 06:03 UTC task-00151: completed Lexical phase-1 safety review (HTML save/load/render + compliance text extraction); no active HTML execution path found in reviewed surfaces; documented hidden-markup normalization residual risk and marked GO-with-follow-up in SECURITY_BASELINE.
+- 2026-03-04 15:44 UTC task-00180: established Events v0.2 phase-1 safety baseline in SECURITY_BASELINE (registration data handling, QR trust model, attendance/no-show segmentation), added explicit deferred-email send note + outbound enablement acceptance gates; docs-only change set.
