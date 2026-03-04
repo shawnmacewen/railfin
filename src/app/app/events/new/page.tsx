@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Card } from "../../../../ui/primitives";
@@ -17,6 +18,10 @@ type CommunicationTouchpoint = {
   subject: string;
   body: string;
 };
+
+type EventsCreateResponse =
+  | { ok: true; data: { id: string; title: string } }
+  | { ok: false; error?: string; fieldErrors?: Array<{ field?: string; message?: string }> };
 
 const INITIAL_FORM: EventFormState = {
   title: "",
@@ -52,13 +57,15 @@ export default function NewEventPage() {
   const [touchpointCount, setTouchpointCount] = useState<1 | 2 | 3>(1);
   const [touchpoints, setTouchpoints] = useState<CommunicationTouchpoint[]>(INITIAL_TOUCHPOINTS);
   const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isStep1Complete = useMemo(() => Boolean(form.title.trim() && form.date), [form.date, form.title]);
-
-  const visibleTouchpoints = useMemo(
-    () => touchpoints.slice(0, touchpointCount),
-    [touchpointCount, touchpoints],
+  const isStep1Complete = useMemo(
+    () => Boolean(form.title.trim() && form.date && form.summary.trim() && form.location.trim()),
+    [form.date, form.location, form.summary, form.title],
   );
+
+  const visibleTouchpoints = useMemo(() => touchpoints.slice(0, touchpointCount), [touchpointCount, touchpoints]);
 
   return (
     <Card>
@@ -78,8 +85,10 @@ export default function NewEventPage() {
           className="rf-events-form"
           onSubmit={(event) => {
             event.preventDefault();
+            setError(null);
             if (!isStep1Complete) {
-              setStatus("Please complete Event title and Event date before continuing.");
+              setStatus(null);
+              setError("Please complete Event title, date, summary, and location before continuing.");
               return;
             }
             setStep(2);
@@ -113,6 +122,7 @@ export default function NewEventPage() {
             value={form.summary}
             onChange={(event) => setForm((current) => ({ ...current, summary: event.target.value }))}
             placeholder="What this event is about"
+            required
           />
 
           <label htmlFor="event-location">Location</label>
@@ -122,6 +132,7 @@ export default function NewEventPage() {
             value={form.location}
             onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))}
             placeholder="Downtown HQ · Austin, TX"
+            required
           />
 
           <button type="submit" disabled={!isStep1Complete}>
@@ -131,9 +142,45 @@ export default function NewEventPage() {
       ) : (
         <form
           className="rf-events-form"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
-            setStatus(`Step 2 saved locally with ${touchpointCount} planned touchpoint${touchpointCount > 1 ? "s" : ""}.`);
+            setError(null);
+            setStatus(null);
+            setIsSubmitting(true);
+
+            try {
+              const response = await fetch("/api/internal/events", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  title: form.title.trim(),
+                  date: form.date,
+                  summary: form.summary.trim(),
+                  location: form.location.trim(),
+                  status: "draft",
+                }),
+              });
+
+              const payload = (await response.json().catch(() => null)) as EventsCreateResponse | null;
+              if (!response.ok || !payload?.ok) {
+                const validationMessage =
+                  payload && !payload.ok
+                    ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
+                    : "";
+                const fallbackError = payload && !payload.ok ? payload.error : null;
+                setError(validationMessage || fallbackError || "Could not create event. Please try again.");
+                return;
+              }
+
+              setStatus(
+                `Event created and communication draft saved with ${touchpointCount} planned touchpoint${touchpointCount > 1 ? "s" : ""}.`,
+              );
+            } catch {
+              setError("Could not create event. Please try again.");
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
         >
           <label htmlFor="touchpoint-count">Number of pre-event touchpoints</label>
@@ -216,19 +263,35 @@ export default function NewEventPage() {
               type="button"
               onClick={() => {
                 setStep(1);
+                setError(null);
                 setStatus("Returned to Step 1. Event basics are still available.");
               }}
+              disabled={isSubmitting}
             >
               Back to Step 1
             </button>{" "}
-            <button type="submit">Save communication plan</button>
+            <button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating event..." : "Create event and save communication plan"}
+            </button>
           </div>
         </form>
       )}
 
+      {error ? (
+        <p className="rf-status rf-status-error" role="alert">
+          {error}
+        </p>
+      ) : null}
+
       {status ? (
         <p className="rf-status rf-status-success" role="status">
           {status}
+        </p>
+      ) : null}
+
+      {status && !error && step === 2 ? (
+        <p className="rf-status rf-status-muted">
+          View all events in <Link href="/app/events">Events</Link>.
         </p>
       ) : null}
     </Card>

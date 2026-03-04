@@ -1,3 +1,5 @@
+- 2026-03-04 16:50 UTC task-00185: wired `/app/events` to live `GET /api/internal/events` with loading/empty/error+retry states, wired `/app/events/new` step-2 submit to `POST /api/internal/events` while preserving local communication-planning draft behavior, added create submitting/success/error feedback + post-success list link, updated docs, and `npm run build` passed.
+
 - 2026-03-04 16:44 UTC task-00182: extended `/app/events/new` into a 2-step event wizard with explicit progress/navigation, added step-2 pre-event communications planner for 1-3 touchpoints (days-before + send-time metadata, editable subject/body placeholders), kept scope draft-only with no send plumbing, updated UI foundations/tasks/changelog docs, and build passed.
 
 - 2026-03-04 07:43 UTC task-00177: reduced left-nav Railfin brand logo display size by 50% from current values across breakpoints (5.5rem→2.75rem, 5rem→2.5rem, 4.3rem→2.15rem), preserved fixed logo-anchor wrapper and clip/opacity text transitions for collapse/expand jitter stability, restored sidebar/brand geometry to keep nav spacing usable, updated UI foundations/tasks/changelog docs, and build passed.
