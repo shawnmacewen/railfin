@@ -1,3 +1,13 @@
+## task-00163 — UI — Main nav brand logo reduce by 25%
+
+- Status: **Done**
+- Branch: `feat/ui/task-00163-logo-reduce-25pct`
+- Scope delivered:
+  - Reduced the app-shell top-left Railfin logo by 25% from task-00162 sizing (desktop 168px -> 126px, with proportional responsive fallbacks).
+  - Kept stacked brand alignment and sidebar navigation usability intact without clipping/overlap.
+  - Preserved responsive behavior across desktop and narrower breakpoints.
+  - Updated UI foundations/changelog/lane-report docs and re-ran `npm run build` (pass).
+
 ## task-00162 — UI — Main nav brand logo shrink by half
 
 - Status: **Done**
