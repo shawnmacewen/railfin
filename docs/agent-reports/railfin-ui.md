@@ -49,3 +49,5 @@
 <!-- HISTORICAL_TASK_COVERAGE_END -->
 - 2026-03-03 06:43 UTC task-00154: refined Lexical toolbar to icon-only controls and contiguous no-gap strip, enforced one-row no-wrap with horizontal overflow fallback, preserved aria-label/accessibility semantics and command behavior; build passed.
 - 2026-03-04 05:12 UTC task-00155: shipped Help Center starter surface (new primary nav item + `/app/help` landing with hero/search-placeholder/topic cards), added detail pages (`/app/help/getting-started`, `/app/help/compliance-basics`) and `/help` shortcut redirect; kept additive `rf-help-*` styling and build passed.
+
+- 2026-03-04 05:38 UTC task-00156: refined Create input UX with a two-mode selector (Select a few topics vs AI prompt) using single-container content swapping; removed header fallback copy, Content Type label, and save-stage reminder sentence; flattened content-type placement above prompt input; preserved generate/save/compliance/remediation/history flows; build passed.

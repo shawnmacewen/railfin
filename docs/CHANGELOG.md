@@ -1,3 +1,10 @@
+## 2026-03-04 — Create input-mode selector + copy declutter (task-00156)
+- Reworked Create generation controls to use a two-option content-creation method selector: **Select a few topics** or **AI prompt**.
+- Implemented shared-container swap behavior between topics selection UI and prompt input UI.
+- Removed copy clutter from Create: header fallback text (`Policy last updated: unavailable`), visible `Content Type` label, and the Save-stage reminder sentence.
+- Removed the standalone tile around content-type controls and kept the four content-type buttons directly above prompt input in prompt mode.
+- Preserved existing generate/save/compliance/remediation/history behavior while keeping styling consistent.
+
 ## 2026-03-03 — Lexical toolbar icon-only solid row (task-00154)
 - Converted Create editor toolbar controls to icon-only buttons and preserved accessibility labels/pressed semantics.
 - Removed spacing between toolbar controls/groups so the toolbar renders as one continuous neutral strip.

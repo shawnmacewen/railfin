@@ -1,3 +1,17 @@
+## task-00156 — UI — Create input-mode UX refine + copy cleanup
+
+- Status: **Done**
+- Branch: `feat/ui/task-00156-create-input-mode-ux-refine`
+- Scope delivered:
+  - Removed the Create header fallback phrase `Policy last updated: unavailable` from the visible Create surface.
+  - Removed the `Content Type` label text and eliminated the separate tile/wrapper around content-type choices.
+  - Added a content-creation method selector with two options: **Select a few topics** and **AI prompt**.
+  - Implemented single-container mode swapping so the same control container toggles between topics selection UI and prompt input UI.
+  - Kept the four content-type buttons directly above the prompt input area in AI prompt mode for faster scan/use.
+  - Removed the Save-stage helper copy: `Save once you are satisfied with review and remediation updates.`
+  - Preserved existing generate/save/compliance/remediation/history flows and updated docs/lane report.
+  - Re-ran `npm run build` (pass).
+
 ## task-00154 — UI — Lexical toolbar icon-only solid row
 
 - Status: **Done**
