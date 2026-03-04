@@ -1,3 +1,9 @@
+## 2026-03-04 — Events wizard phase 2: pre-event communications setup (task-00182)
+- Expanded `/app/events/new` into a clear 2-step wizard with explicit step progress and navigation between event basics and communication planning.
+- Added communication planning step with configurable **1-3 pre-event email touchpoints**.
+- Each touchpoint now supports editable draft schedule metadata (days-before + local send time) and editable subject/body placeholder templates.
+- Kept this phase intentionally draft-only/local-state with no outbound email send plumbing.
+
 ## 2026-03-04 — SEC — Events registration safety pass phase 1 (task-00183)
 - Reviewed current Events create and registration surfaces: event create flow is local-only UI state, while registration API validation/storage surfaces are not yet implemented.
 - Added explicit phase-1 security findings and gate decision to `docs/SECURITY_BASELINE.md` for event registration rollout readiness.

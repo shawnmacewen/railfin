@@ -1,3 +1,15 @@
+## task-00182 — UI — Events wizard phase 2 (pre-event communications setup)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00182-events-wizard-step2-comms`
+- Scope delivered:
+  - Extended `/app/events/new` into a 2-step local wizard flow with clear progress + step transitions.
+  - Added step-2 communication planner supporting 1-3 pre-event email touchpoints.
+  - Added per-touchpoint schedule metadata fields (days-before + local send time) and editable subject/body placeholders.
+  - Kept implementation intentionally local/draft-only (no send plumbing).
+  - Updated `docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`, and `docs/agent-reports/railfin-ui.md`.
+  - Ran `npm run build` (pass).
+
 ## task-00183 — SEC — Events registration safety pass phase 1
 
 - Status: **Done**

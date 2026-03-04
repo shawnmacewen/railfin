@@ -1,3 +1,13 @@
+## task-00182 — Events wizard phase 2 (pre-event communications setup)
+
+- Extended `src/app/app/events/new/page.tsx` from a single-step placeholder into a 2-step local wizard flow with explicit progress context (`Step 1 of 2` / `Step 2 of 2`).
+- Step 1 (event basics) remains local-form capture for title/date/summary/location with clear handoff CTA (`Continue to Step 2`).
+- Added Step 2 communication planning UI for **1-3 pre-event email touchpoints** (draft metadata only):
+  - configurable touchpoint count (`1`, `2`, or `3`)
+  - per-touchpoint schedule metadata fields (`Send before event (days)`, `Scheduled send time`)
+  - editable subject/body placeholder inputs seeded with starter template text (`{{event_title}}`, `{{event_date}}`, `{{event_location}}`, etc.)
+- Added explicit step navigation affordances between phases (`Continue to Step 2`, `Back to Step 1`) and local save confirmation for communication plan (no outbound-send plumbing).
+
 ## task-00177 — Reduce left-nav brand logo size by half (again)
 
 - Reduced app-shell brand logo display size by exactly 50% at all current breakpoints (`5.5rem -> 2.75rem`, `5rem -> 2.5rem`, `4.3rem -> 2.15rem`).
