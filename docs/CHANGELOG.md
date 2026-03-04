@@ -7,6 +7,12 @@
 - Added acceptance criteria gates required before enabling outbound attendance/no-show email delivery in a future phase.
 - Updated security/task/changelog/lane-report docs only; no runtime code changes.
 
+## 2026-03-04 — Milestone formalization: v0.1 locked, v0.2 Events roadmap (task-00178)
+- Set product milestone baseline to **v0.1 (MVP locked)** for current release-state documentation.
+- Established **v0.2** as the next roadmap milestone with explicit focus on the **Events Module**.
+- Captured phased v0.2 delivery slices: events foundation, registration, QR check-in, attendance-based follow-up logic, and send-integration hardening.
+- Added explicit Events PRD ownership/status header to tighten planning accountability for v0.2 execution.
+
 ## 2026-03-04 — Left-nav brand logo reduced by half again (task-00177)
 - Reduced the app-shell top-left Railfin logo display size by 50% from the current enlarged state across desktop/tablet/mobile shell breakpoints.
 - Preserved fixed logo-anchor alignment and existing collapse/expand transition stability contracts to avoid horizontal/vertical jitter regressions.
