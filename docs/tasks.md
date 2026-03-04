@@ -1,3 +1,13 @@
+## task-00183 — SEC — Events registration safety pass phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00183-events-registration-safety-pass`
+- Scope delivered:
+  - Reviewed current Events create/registration surfaces and API validation presence: event create is local UI state only; registration API/validation remains pending implementation.
+  - Added explicit phase-1 findings + gate decision in `docs/SECURITY_BASELINE.md` for upcoming registration enablement.
+  - Added concrete checklist for registration PII handling and retention defaults (allowlist validation, PII-safe logging, retention/deletion defaults, export restrictions, and pre-enable verification tests).
+  - Updated changelog and sec lane report for task traceability.
+
 ## task-00180 — SEC — Events v0.2 safety baseline phase 1
 
 - Status: **Done**

@@ -1,3 +1,9 @@
+## 2026-03-04 — SEC — Events registration safety pass phase 1 (task-00183)
+- Reviewed current Events create and registration surfaces: event create flow is local-only UI state, while registration API validation/storage surfaces are not yet implemented.
+- Added explicit phase-1 security findings and gate decision to `docs/SECURITY_BASELINE.md` for event registration rollout readiness.
+- Added implementation checklist for registration PII handling + retention defaults (API field allowlist, validation bounds, PII-safe logging, 180-day default retention after event end, purge/anonymization workflow baseline, export restrictions, and pre-enable tests).
+- Docs-only update; no runtime code changes.
+
 ## 2026-03-04 — SEC — Events v0.2 safety baseline phase 1 (task-00180)
 - Added Events v0.2 docs-first security baseline for:
   - registration data fields handling controls

@@ -49,3 +49,4 @@
 <!-- HISTORICAL_TASK_COVERAGE_END -->
 - 2026-03-03 06:03 UTC task-00151: completed Lexical phase-1 safety review (HTML save/load/render + compliance text extraction); no active HTML execution path found in reviewed surfaces; documented hidden-markup normalization residual risk and marked GO-with-follow-up in SECURITY_BASELINE.
 - 2026-03-04 15:44 UTC task-00180: established Events v0.2 phase-1 safety baseline in SECURITY_BASELINE (registration data handling, QR trust model, attendance/no-show segmentation), added explicit deferred-email send note + outbound enablement acceptance gates; docs-only change set.
+- 2026-03-04 16:44 UTC task-00183: completed Events registration safety pass phase 1; reviewed current event-create field surface (local-only UI), confirmed registration API/validation not yet wired, and added explicit PII handling + 180-day retention default checklist/gates in SECURITY_BASELINE (docs-only).

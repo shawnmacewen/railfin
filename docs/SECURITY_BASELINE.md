@@ -1,3 +1,53 @@
+## task-00183 — SEC — Events registration safety pass phase 1 (field/API review + PII retention defaults)
+
+Review scope:
+- `src/app/app/events/new/page.tsx`
+- `src/app/app/events/page.tsx`
+- `src/app/events/new/page.tsx`
+- `src/app/events/page.tsx`
+- `src/app/api/**` (event/registration route presence + validation surface check)
+- `docs/PRD_Events_Module_v0.md`
+
+### Findings
+
+1. **Event create surface is currently local-only UI state (PASS with hardening follow-up):**
+   - Step-1 event form currently captures only `title`, `date`, `summary`, and `location` in client state.
+   - Form submit path is local-only and not wired to persistence/API yet (`saved locally` status only).
+   - This reduces immediate backend exposure but leaves required server-side validation contracts undefined for upcoming implementation.
+
+2. **Registration API + validation surface not yet implemented (OPEN, required before rollout):**
+   - No event registration endpoint/handler exists under current internal API routes.
+   - No server-side schema validation for attendee registration fields is present yet (name/email/company/role in PRD remain planned scope).
+   - Security implication: field-level privacy constraints must be codified at API boundary before registration storage is enabled.
+
+3. **PII handling/retention defaults were baseline-level only; operational checklist now required (CLOSED by docs update):**
+   - Prior baseline documented minimization/classification/retention intent.
+   - This pass adds explicit implementation checklist items (field allowlist, logging redaction, retention horizon/default purge behavior, deletion workflow expectations) for event registration records.
+
+### Event registration PII handling + retention defaults checklist (phase-1 implementation gate)
+
+- [ ] **Field allowlist at API boundary:** accept only approved registration keys (default-deny unknown fields).
+- [ ] **Required vs optional contract:** require minimal attendee identity/contact fields only; keep company/role optional and bounded.
+- [ ] **Validation bounds:** enforce deterministic max lengths, normalized email format checks, and trimmed string normalization server-side.
+- [ ] **No free-form sensitive intake:** registration payloads must not introduce open-ended notes/comments fields without separate risk review.
+- [ ] **PII-safe logging:** redact/mask direct identifiers (`email`, full name) in logs/traces; use request/event ids for diagnostics.
+- [ ] **Retention default:** registration records retained for a default of **180 days after event end** unless stricter policy/legal basis applies.
+- [ ] **No-show artifact handling:** attendance/no-show segmentation artifacts inherit registration retention horizon and are purged together.
+- [ ] **Deletion workflow:** provide operator-admin path for event-linked registration purge/anonymization when retention expires or on verified deletion request.
+- [ ] **Export restriction baseline:** no unauthenticated registration export endpoint; authenticated exports require explicit operator action and audit trace.
+- [ ] **Pre-enable verification:** add API tests for allowlist rejection, invalid payload rejection, redaction behavior, and retention metadata defaults before enabling registration persistence.
+
+### Gate decision (task-00183)
+
+- **Events registration phase-1 safety status:** **GO (docs baseline hardened; implementation gates explicit)**
+- Rationale: current runtime has no active registration API exposure; required privacy/validation/retention controls are now codified as pre-enable gates.
+
+### Verification outcome (task-00183)
+
+- Outcome: **PASS (docs-first safety pass complete)**
+- Code changes: none (no tiny critical runtime fix required)
+- Build: not run (docs-only task)
+
 ## task-00180 — SEC — Events v0.2 safety baseline phase 1 (registration, QR check-in, attendance segmentation)
 
 Review scope:
