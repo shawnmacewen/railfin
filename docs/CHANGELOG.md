@@ -1,3 +1,8 @@
+## 2026-03-04 — Main nav brand logo tripled (task-00161)
+- Increased the left-nav Railfin brand logo from 112px to 336px (~3x larger).
+- Tuned brand spacing/typography so the wordmark remains present but visually de-emphasized beneath the oversized mark.
+- Expanded desktop sidebar width with responsive fallbacks to preserve nav readability and interaction at narrower widths.
+
 ## 2026-03-04 — Main nav brand logo doubled again (task-00160)
 - Increased the left-nav Railfin brand logo from 60px to 112px (roughly 2x larger again).
 - Reworked the brand block to a stacked logo + wordmark treatment and reduced wordmark emphasis so the oversized mark remains clean and readable.

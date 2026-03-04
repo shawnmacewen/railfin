@@ -56,7 +56,7 @@ button:disabled {
 .rf-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(17.5rem, 19.5rem) 1fr;
+  grid-template-columns: minmax(22rem, 24rem) 1fr;
 }
 
 .rf-sidebar {
@@ -69,26 +69,28 @@ button:disabled {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.45rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 500;
   color: #5a627e;
-  margin-bottom: 1.1rem;
-  padding: 0.15rem 0.4rem;
+  margin-bottom: 1.35rem;
+  padding: 0.25rem 0.2rem;
 }
 
 .rf-brand-logo {
-  width: 7rem;
-  height: 7rem;
+  width: 21rem;
+  height: 21rem;
+  max-width: 100%;
   border-radius: 4px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .rf-brand-text {
-  line-height: 1.1;
+  line-height: 1;
+  opacity: 0.7;
 }
 
 .rf-nav-list {
@@ -156,7 +158,7 @@ button:disabled {
   border-radius: 2px;
   border: 1px dashed #b5bfdc;
   color: #4e5879;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   padding: 0.25rem 0.55rem;
 }
 
@@ -227,7 +229,7 @@ button:disabled {
 .rf-severity-chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
   margin: 0.55rem 0 0.7rem;
 }
 
@@ -241,7 +243,7 @@ button:disabled {
   padding: 0.2rem 0.5rem;
   color: #2f3a5f;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .rf-selected-finding-panel {
@@ -304,7 +306,7 @@ button:disabled {
 .rf-finding-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
   margin: 0.45rem 0;
 }
 
@@ -401,7 +403,7 @@ button:disabled {
 }
 
 .rf-review-workbench-actions button {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
 }
 
 .rf-review-history-list {
@@ -526,7 +528,7 @@ button:disabled {
 
 .rf-library-description-label {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #4e5879;
@@ -548,7 +550,7 @@ button:disabled {
 .rf-library-open-link {
   justify-self: start;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .rf-generate-controls {
@@ -679,7 +681,7 @@ button:disabled {
   border: 1px solid #c9d2f2;
   background: #eef2ff;
   color: #1b378a;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
 }
 
 .rf-page-header {
@@ -771,7 +773,7 @@ button:disabled {
   background: #eef2ff;
   color: #1b378a;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.35rem 0.55rem;
 }
 
@@ -832,18 +834,29 @@ button:disabled {
   }
 }
 
+@media (max-width: 1200px) {
+  .rf-shell {
+    grid-template-columns: 18rem 1fr;
+  }
+
+  .rf-brand-logo {
+    width: 12rem;
+    height: 12rem;
+  }
+}
+
 @media (max-width: 860px) {
   .rf-shell {
     grid-template-columns: 15rem 1fr;
   }
 
   .rf-brand {
-    font-size: 0.72rem;
+    font-size: 0.62rem;
   }
 
   .rf-brand-logo {
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 7rem;
+    height: 7rem;
   }
 }
 
@@ -906,19 +919,19 @@ button:disabled {
   background: #eef2ff;
   color: #1b378a;
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .rf-generate-mode-buttons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  gap: 0.35rem;
 }
 
 .rf-create-input-mode-header {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.35rem;
   margin-bottom: 0.55rem;
 }
 
@@ -929,7 +942,7 @@ button:disabled {
 .rf-content-type-buttons {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
 }
 
 .rf-content-type-buttons .rf-choice-button {
@@ -954,7 +967,7 @@ button:disabled {
 
 .rf-topic-purpose-buttons {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.35rem;
 }
 
 .rf-topic-purpose-buttons .rf-choice-button {
@@ -968,7 +981,7 @@ button:disabled {
   background: #f7f9ff;
   color: #2f3a5f;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.55rem 0.6rem;
 }
 
@@ -999,13 +1012,13 @@ button:disabled {
 
 .rf-prompt-header-row label {
   margin: 0;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .rf-generate-action-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
   margin-top: 0.55rem;
 }
 
@@ -1024,7 +1037,7 @@ button:disabled {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
   margin: 0.35rem 0 0.65rem;
 }
 
@@ -1034,7 +1047,7 @@ button:disabled {
 }
 
 .rf-richtext-color-picker {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   color: #4e5879;
 }
 
@@ -1140,7 +1153,7 @@ button:disabled {
   background: #ffffff;
   color: #1f2937;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1;
   padding: 0.42rem;
   min-width: 2rem;
@@ -1216,7 +1229,7 @@ button:disabled {
 
 .rf-help-kicker {
   margin: 0 0 0.3rem;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #4e5879;
@@ -1224,7 +1237,7 @@ button:disabled {
 
 .rf-help-search-label {
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #2f3a5f;
 }
 

@@ -31,8 +31,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Image
             src="/brand/railfin-v1.png"
             alt="Railfin"
-            width={112}
-            height={112}
+            width={336}
+            height={336}
             className="rf-brand-logo"
             priority
           />
