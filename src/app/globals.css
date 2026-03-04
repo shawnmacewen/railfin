@@ -91,10 +91,11 @@ button:disabled {
 }
 
 .rf-brand {
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
   gap: 0.45rem;
   min-height: 3rem;
   font-size: 0.68rem;
@@ -108,10 +109,19 @@ button:disabled {
   overflow: hidden;
 }
 
+.rf-brand-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  flex-shrink: 0;
+}
+
 .rf-brand-logo {
   width: 2.75rem;
   height: auto;
-  max-width: 100%;
+  max-width: 2.75rem;
   max-height: 2.75rem;
   border-radius: 4px;
   object-fit: contain;
@@ -958,8 +968,11 @@ button:disabled {
     grid-template-columns: 13rem 1fr;
   }
 
+  .rf-brand-logo-wrap,
   .rf-brand-logo {
     width: 2.5rem;
+    min-width: 2.5rem;
+    max-width: 2.5rem;
     max-height: 2.5rem;
   }
 }
@@ -974,8 +987,11 @@ button:disabled {
     gap: 0.35rem;
   }
 
+  .rf-brand-logo-wrap,
   .rf-brand-logo {
     width: 2.15rem;
+    min-width: 2.15rem;
+    max-width: 2.15rem;
     max-height: 2.15rem;
   }
 }

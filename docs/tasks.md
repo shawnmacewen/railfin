@@ -1,3 +1,14 @@
+## task-00172 — UI — Lock nav logo horizontal anchor across collapse/expand
+
+- Status: **Done**
+- Branch: `feat/ui/task-00172-logo-horizontal-jitter-fix`
+- Scope delivered:
+  - Fixed remaining top brand horizontal jitter by locking the logo into a fixed-width anchor slot that does not change between collapsed and expanded sidebar states.
+  - Kept brand row alignment mode constant (`justify-content: flex-start`) across states and removed any state-dependent brand row geometry shifts.
+  - Preserved label/word visibility behavior using non-positional transitions (`clip-path` + `opacity`) so wordmark hide/reveal does not move the logo anchor.
+  - Kept nav usability and prior row consistency improvements intact.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00171 — UI/DEV — Final nav jitter fix + app-shell SHA badge
 
 - Status: **Done**

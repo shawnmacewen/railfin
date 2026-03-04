@@ -91,14 +91,16 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
         onBlurCapture={scheduleCollapse}
       >
         <Link href="/app/create" className="rf-brand" aria-label="Railfin home">
-          <Image
-            src="/brand/railfin-v1.png"
-            alt="Railfin"
-            width={1492}
-            height={1021}
-            className="rf-brand-logo"
-            priority
-          />
+          <span className="rf-brand-logo-wrap" aria-hidden="true">
+            <Image
+              src="/brand/railfin-v1.png"
+              alt="Railfin"
+              width={1492}
+              height={1021}
+              className="rf-brand-logo"
+              priority
+            />
+          </span>
           <span className="rf-brand-text">Railfin</span>
         </Link>
         <nav className="rf-nav-list">

@@ -1,3 +1,11 @@
+## task-00172 — Lock nav logo horizontal anchor across collapse/expand
+
+- Root cause: the brand row still allowed subtle x-axis drift because the logo lived directly in a content-width row where text reveal/hide and shrinking sidebar width could introduce small horizontal reflow.
+- Updated `src/ui/app-shell.tsx` to wrap the logo in a dedicated fixed-width anchor container (`.rf-brand-logo-wrap`) so the logo x-position is constant in both collapsed and expanded states.
+- Updated `src/app/globals.css` brand primitives to keep one alignment mode and box model across states (`display:flex`, `justify-content:flex-start`, `width:100%`) and pin the logo slot width at each responsive breakpoint.
+- Preserved wordmark visibility behavior via `opacity` + `clip-path` only, with no positional alignment mode switching.
+- Existing hover/focus expand + delayed auto-collapse nav behavior and row consistency contracts remain unchanged.
+
 ## task-00171 — Final nav jitter fix + app-shell SHA badge
 
 - Root cause: the final micro-jitter came from collapse-state label width animation (`max-width`) and state-specific brand alignment changes (`justify-content` override), both of which triggered subtle reflow during sidebar width animation.

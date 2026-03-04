@@ -1,3 +1,9 @@
+## 2026-03-04 — Nav logo horizontal anchor lock (task-00172)
+- Fixed residual top-left brand horizontal jitter during sidebar collapse/expand by introducing a fixed logo anchor slot (`.rf-brand-logo-wrap`) that does not shift between states.
+- Kept brand row alignment mode constant (`justify-content: flex-start`) and made brand row layout width-stable (`width: 100%`) across collapsed/expanded states.
+- Preserved wordmark hide/reveal behavior using non-positional transitions (`clip-path` + `opacity`) so label visibility changes do not move the logo.
+- Maintained existing hover-expand + delayed auto-collapse behavior and prior nav row consistency improvements.
+
 ## 2026-03-04 — Final nav jitter fix + app-shell SHA badge (task-00171)
 - Removed residual left-nav expand/collapse micro-jitter by replacing label width-based animation with clip/opacity-only visibility transitions.
 - Fixed top brand drift by stabilizing brand container layout across collapsed/expanded states (no state-specific alignment shift).
