@@ -1,3 +1,12 @@
+## 2026-03-04 19:54 UTC — task-00187 CRM basic lead tracking space phase 1
+- Added internal CRM contracts and persistence helper:
+  - `src/api/internal/crm/leads.ts`
+  - `src/lib/supabase/leads.ts`
+- Added protected internal API route: `src/app/api/internal/crm/leads/route.ts` (`GET/POST`).
+- Added fail-closed validation, allowlisted status enum (`new|contacted|qualified|closed`), and safe BLOCKED/runtime error mapping.
+- Added docs-based SQL bootstrap guidance for `public.leads` in API boundary docs.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-04 15:44 UTC — task-00178 milestone formalization (v0.1 -> v0.2)
 - Formalized release state as **v0.1 (MVP locked)** in task ledger/changelog/reporting docs.
 - Set next roadmap milestone to **v0.2** with **Events Module** as explicit focus.

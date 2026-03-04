@@ -1,3 +1,14 @@
+## task-00187 — UI — CRM basic lead tracking space phase 1
+
+- Status: **Done**
+- Branch: `feat/dev/task-00187-crm-basic-space-phase1`
+- Scope delivered:
+  - Added **CRM** to primary nav and routed to `/app/crm`.
+  - Added CRM landing UI with create-lead form and lead list states (loading/error/empty/success).
+  - Added `/crm` shortcut redirect to `/app/crm`.
+  - Kept UI scope intentionally basic with no automation/outbound actions.
+  - Build verification: `npm run build` passed.
+
 - 2026-03-04 16:50 UTC task-00185: wired `/app/events` to live `GET /api/internal/events` with loading/empty/error+retry states, wired `/app/events/new` step-2 submit to `POST /api/internal/events` while preserving local communication-planning draft behavior, added create submitting/success/error feedback + post-success list link, updated docs, and `npm run build` passed.
 
 - 2026-03-04 16:44 UTC task-00182: extended `/app/events/new` into a 2-step event wizard with explicit progress/navigation, added step-2 pre-event communications planner for 1-3 touchpoints (days-before + send-time metadata, editable subject/body placeholders), kept scope draft-only with no send plumbing, updated UI foundations/tasks/changelog docs, and build passed.

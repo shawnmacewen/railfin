@@ -1493,3 +1493,26 @@ button:disabled {
   display: grid;
   gap: 0.2rem;
 }
+
+.rf-crm-page {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.rf-crm-lead-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.rf-crm-lead-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #e4e8f5;
+  border-radius: 2px;
+  padding: 0.65rem;
+  background: #fff;
+}

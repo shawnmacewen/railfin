@@ -1,3 +1,31 @@
+## task-00187 — CRM leads phase 1 contracts (internal)
+
+- Added protected internal CRM leads routes: `GET/POST /api/internal/crm/leads`.
+- Lead create contract fields: `name`, `email`, optional `phone`, optional `source`, required `status`.
+- Allowed status values (fail-closed): `new`, `contacted`, `qualified`, `closed`.
+- Validation posture: strict JSON object + allowlisted keys, required/bounded fields, email format checks, safe validation payloads (`Validation failed` + `fieldErrors`).
+- Persistence path: Supabase table `public.leads` via `src/lib/supabase/leads.ts` with explicit BLOCKED diagnostics when env/table access is unavailable.
+- No outbound automations/messaging in this phase.
+
+### CRM leads SQL bootstrap (manual apply)
+
+No migration runner is configured in repository scripts for this table; apply manually in Supabase SQL editor/psql:
+
+```sql
+create table if not exists public.leads (
+  id text primary key,
+  name text not null,
+  email text not null,
+  phone text,
+  source text,
+  status text not null check (status in ('new', 'contacted', 'qualified', 'closed')),
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists leads_created_at_idx on public.leads(created_at desc);
+create index if not exists leads_email_idx on public.leads(lower(email));
+```
+
 ## task-00158 — Create mode alignment (Topics + AI prompt) on shared generate pipeline
 
 - No generate endpoint schema change required. `POST /api/internal/content/generate` request/response contracts remain unchanged.

@@ -1,3 +1,10 @@
+## 2026-03-04 — CRM basic lead tracking space phase 1 (task-00187)
+- Added new app-shell primary nav item **CRM** with landing route `/app/crm`.
+- Added basic Contact CRM page with lead list + create form (name, email, optional phone/source, status).
+- Added protected internal CRM leads API (`GET/POST /api/internal/crm/leads`) with strict validation and safe error behavior.
+- Added Supabase lead persistence helper + manual SQL bootstrap guidance for `public.leads` (no migration runner wired for this table).
+- Kept phase intentionally basic: no automations and no outbound messaging.
+
 ## 2026-03-04 — Events live data wiring for list + create wizard (task-00185)
 - Connected **Events** list page to live internal API data (`GET /api/internal/events`) with explicit loading, empty, error, and retry states.
 - Connected **Create Event** wizard final submit (step 2) to live internal create API (`POST /api/internal/events`).

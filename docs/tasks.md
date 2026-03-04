@@ -1,3 +1,14 @@
+## task-00187 — DEV/UI — CRM basic lead tracking space phase 1
+
+- Status: **Done**
+- Branch: `feat/dev/task-00187-crm-basic-space-phase1`
+- Scope delivered:
+  - Added primary nav item **CRM** and `/app/crm` landing page route.
+  - Added basic CRM UI with lead list + create form for `name`, `email`, optional `phone`, optional `source`, `status`.
+  - Added protected internal API routes for CRM leads (`GET/POST /api/internal/crm/leads`) with fail-closed validation + safe errors.
+  - Added Supabase model helper `src/lib/supabase/leads.ts` and docs-based manual SQL bootstrap guidance for `public.leads`.
+  - Updated API/UI/changelog/agent-report docs and ran `npm run build` (pass).
+
 ## task-00185 — UI — Events list/create wizard live internal API wiring
 
 - Status: **Done**

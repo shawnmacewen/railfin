@@ -1,3 +1,13 @@
+## task-00187 — CRM space + lead tracking UI phase 1
+
+- Added new primary nav destination **CRM** in app shell, pointing to `/app/crm`.
+- Added CRM page route `src/app/app/crm/page.tsx` with:
+  - lead list view (loading/error/empty/success states)
+  - create-lead form (name, email, optional phone/source, status)
+  - post-create refresh of lead list
+- Added top-level shortcut route `src/app/crm/page.tsx` redirecting to `/app/crm`.
+- Scope intentionally basic: no automations, no outbound messaging, no enrichment workflows.
+
 ## task-00185 — Events list/create wizard live internal API wiring
 
 - `src/app/app/events/page.tsx` now fetches live events from `GET /api/internal/events` with explicit loading/error/empty/success render states and retry affordance.
