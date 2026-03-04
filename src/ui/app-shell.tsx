@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { label: "Library", href: "/app/library" },
   { label: "Campaigns", href: "/app/campaigns" },
   { label: "Events", href: "/app/events" },
+  { label: "Help Center", href: "/app/help" },
   { label: "Configure", href: "/app/configure" },
 ];
 

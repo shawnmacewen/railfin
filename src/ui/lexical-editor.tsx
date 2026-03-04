@@ -122,7 +122,6 @@ function ToolbarButton({ active = false, pressed = false, disabled = false, onCl
       onClick={onClick}
     >
       <span className="rf-lexical-toolbar-icon" aria-hidden="true">{icon}</span>
-      <span className="rf-lexical-toolbar-label">{label}</span>
     </button>
   );
 }

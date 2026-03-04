@@ -1,3 +1,13 @@
+## task-00154 — UI — Lexical toolbar icon-only solid row
+
+- Status: **Done**
+- Branch: `feat/ui/task-00154-toolbar-icon-only-solid-row`
+- Scope delivered:
+  - Converted Lexical toolbar controls to icon-only buttons (removed visible text labels) while preserving per-control `aria-label` and existing commands/behavior.
+  - Removed inter-button/group spacing so the toolbar reads as one continuous neutral control strip.
+  - Enforced single-row toolbar layout with horizontal overflow on narrow widths (no wrapping).
+  - Preserved active-state clarity and neutral styling treatment.
+  - Updated docs/lane report and validated with `npm run build` (pass).
 ## task-00153 — UI — Lexical toolbar common options expansion
 
 - Status: **Done**
@@ -1354,3 +1364,15 @@
   - Added Events placeholder page and shortcut redirect route.
   - Authored `docs/PRD_Events_Module_v0.md` with human-readable module scope for event creation, content generation, registration, QR check-in, and attendance-based post-event communication.
   - Updated changelog with Events kickoff entry.
+
+## task-00155 — UI — Help Center landing + starter help topics
+
+- Status: **Done**
+- Branch: `feat/ui/task-00155-help-center-landing`
+- Scope delivered:
+  - Added **Help Center** to primary app navigation (`/app/help`).
+  - Added Help Center landing page with hero/welcome copy, non-functional search UI, and starter topic-card grid.
+  - Added starter topic coverage for Create onboarding, save/library flow, AI controls, compliance/remediation basics, and Configure/Change Log/Features guidance.
+  - Added two concise help detail pages linked from topic cards: `/app/help/getting-started` and `/app/help/compliance-basics`.
+  - Added top-level shortcut route `/help` → `/app/help`.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).

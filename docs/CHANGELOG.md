@@ -1,3 +1,8 @@
+## 2026-03-03 — Lexical toolbar icon-only solid row (task-00154)
+- Converted Create editor toolbar controls to icon-only buttons and preserved accessibility labels/pressed semantics.
+- Removed spacing between toolbar controls/groups so the toolbar renders as one continuous neutral strip.
+- Enforced single-row toolbar behavior with horizontal overflow on smaller widths (no wrapping).
+- Kept active-state clarity and existing editor command behavior unchanged.
 ## 2026-03-03 — Lexical toolbar common options expansion (task-00153)
 - Expanded Create editor toolbar with practical common controls: bold/italic/underline/strikethrough, H1/H2/H3/paragraph, bullet/numbered/check lists, blockquote/code block, link/unlink, alignment (left/center/right), undo/redo, and clear formatting.
 - Preserved neutral grey toolbar styling and Lucide icon+label conventions while keeping active-state clarity and accessibility semantics.
@@ -129,3 +134,11 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added new `Events` item in app side navigation with `/app/events` placeholder page.
 - Added `docs/PRD_Events_Module_v0.md` capturing event lifecycle scope: creation, promotion content, registration, QR check-in, and attendance-based follow-up logic.
 - Email delivery plumbing remains intentionally deferred for a later integration phase.
+
+## 2026-03-04 — Help Center landing + starter docs topics (task-00155)
+- Added **Help Center** to primary app navigation for faster in-product support discovery.
+- Added new Help Center landing page with a welcome hero, "How can we help?" prompt, search input UI placeholder, and topic-card grid.
+- Added starter help topics for core workflows: Create onboarding, Save/Library flow, AI generation controls, compliance/remediation basics, and Configure/Change Log/Features guidance.
+- Added two linked detail pages for immediate operator onboarding:
+  - Getting started with Create
+  - Compliance review and remediation basics

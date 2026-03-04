@@ -1011,17 +1011,6 @@ button:disabled {
   padding: 0.35rem 0.2rem;
 }
 
-.rf-lexical-toolbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 0.35rem 0 0.65rem;
-}
-
-.rf-lexical-toolbar button {
-  margin: 0;
-}
 
 .rf-lexical-editor-shell {
   position: relative;
@@ -1048,42 +1037,62 @@ button:disabled {
   font-size: 0.9rem;
 }
 
-/* task-00149: Lexical toolbar + viewport stabilization */
 .rf-lexical-toolbar {
   position: sticky;
   top: 0.25rem;
   z-index: 2;
-  padding: 0.45rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin: 0.35rem 0 0.65rem;
+  padding: 0.35rem;
   border: 1px solid #d7dbe4;
   border-radius: 2px;
   background: #f3f4f6;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
 
 .rf-lexical-toolbar-group {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  flex-wrap: nowrap;
+  gap: 0;
 }
 
 .rf-lexical-toolbar-divider {
-  width: 1px;
-  height: 1.55rem;
-  background: #d1d5db;
+  display: none;
 }
+
 
 .rf-lexical-toolbar button {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  gap: 0;
+  flex: 0 0 auto;
   margin: 0;
-  border-color: #d1d5db;
+  border: 1px solid #d1d5db;
+  border-right-width: 0;
+  border-radius: 0;
   background: #ffffff;
   color: #1f2937;
   font-size: 0.8rem;
   font-weight: 600;
   line-height: 1;
-  padding: 0.38rem 0.58rem;
+  padding: 0.42rem;
+  min-width: 2rem;
+}
+
+.rf-lexical-toolbar button:last-child {
+  border-right-width: 1px;
+}
+
+.rf-lexical-toolbar button:focus-visible {
+  position: relative;
+  z-index: 1;
 }
 
 .rf-lexical-toolbar-icon {
@@ -1091,10 +1100,6 @@ button:disabled {
   align-items: center;
   justify-content: center;
   color: #4b5563;
-}
-
-.rf-lexical-toolbar-label {
-  letter-spacing: 0.01em;
 }
 
 .rf-lexical-toolbar button.is-active {
@@ -1137,4 +1142,70 @@ button:disabled {
   .rf-lexical-toolbar {
     position: static;
   }
+}
+
+.rf-help-page {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.rf-help-hero {
+  border: 1px solid #dbe4ff;
+  background: #f8faff;
+}
+
+.rf-help-kicker {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4e5879;
+}
+
+.rf-help-search-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2f3a5f;
+}
+
+.rf-help-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 780px) {
+  .rf-help-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rf-help-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.rf-help-card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.rf-help-card p {
+  margin: 0;
+  color: #2f3a5f;
+}
+
+.rf-help-topic-tag {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #4e5879;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rf-help-detail-list {
+  margin: 0.35rem 0 0.8rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
 }
