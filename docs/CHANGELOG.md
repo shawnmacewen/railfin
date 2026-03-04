@@ -1,3 +1,10 @@
+## 2026-03-04 — Final nav jitter fix + app-shell SHA badge (task-00171)
+- Removed residual left-nav expand/collapse micro-jitter by replacing label width-based animation with clip/opacity-only visibility transitions.
+- Fixed top brand drift by stabilizing brand container layout across collapsed/expanded states (no state-specific alignment shift).
+- Added a subtle, app-shell-level top-right SHA badge for immediate build/version verification after refresh.
+- Added robust SHA resolution precedence from runtime/build env vars with a safe fallback string.
+- Preserved existing responsive shell behavior and hover/focus expand + delayed auto-collapse interactions.
+
 ## 2026-03-04 — Left-nav animation stability + size bump (task-00170)
 - Fixed subtle left-nav collapse/expand jitter by removing collapsed-state row metric drift and keeping nav row box metrics identical across states.
 - Kept collapse animation scoped to label visibility only (label width/opacity), avoiding layout-flow animation side effects.

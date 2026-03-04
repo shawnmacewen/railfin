@@ -1,3 +1,16 @@
+## task-00171 — UI/DEV — Final nav jitter fix + app-shell SHA badge
+
+- Status: **Done**
+- Branch: `feat/ui/task-00171-nav-jitter-fix-and-sha-badge`
+- Scope delivered:
+  - Removed remaining collapse/expand micro-jitter by eliminating layout-affecting label width transitions and switching nav label hide/reveal to clip-path + opacity only.
+  - Fixed brand/logo drift by keeping brand container alignment metrics identical in both states (no collapsed-state justify-content change).
+  - Kept icon/label/logo containers on stable x/y anchors while sidebar track width animates; no row/brand reflow behavior during nav transitions.
+  - Added an app-shell-level top-right build SHA badge for fast visual version checks on refresh.
+  - Wired SHA sourcing from env with robust precedence (Vercel + generic git SHA vars) and safe fallback.
+  - Preserved existing hover-expand/delayed-collapse behavior and responsive shell layout.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00170 — UI — Left-nav animation stability + size bump
 
 - Status: **Done**

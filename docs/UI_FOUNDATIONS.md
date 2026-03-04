@@ -1,3 +1,12 @@
+## task-00171 — Final nav jitter fix + app-shell SHA badge
+
+- Root cause: the final micro-jitter came from collapse-state label width animation (`max-width`) and state-specific brand alignment changes (`justify-content` override), both of which triggered subtle reflow during sidebar width animation.
+- `src/app/globals.css` now keeps nav row and brand container geometry stable across collapsed/expanded states and limits transition surfaces to non-positional properties (label/brand text `opacity` + `clip-path`).
+- `src/app/globals.css` removes collapsed-state brand alignment override and keeps brand/logo anchors fixed while sidebar track width animates.
+- `src/ui/app-shell.tsx` now renders an app-shell-level top-right build SHA badge (`.rf-build-sha-badge`) outside scrolling page content.
+- `src/app/app/layout.tsx` resolves build SHA from env precedence (`NEXT_PUBLIC_APP_BUILD_SHA`, Vercel SHA vars, generic git SHA vars) with fallback `sha-unknown`, and normalizes hex SHAs to short 7-char display.
+- Existing nav behavior (hover/focus expand + delayed auto-collapse), interactions, and responsive shell layout are preserved.
+
 ## task-00170 — Left-nav animation stability + size bump
 
 - Root cause: collapse/expand state still changed row-adjacent box metrics (`.rf-nav-item` collapsed padding override + `.rf-nav-item-label` margin override), which introduced subtle layout reflow and visible micro-jitter while the sidebar track animated.

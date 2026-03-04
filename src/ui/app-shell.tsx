@@ -24,7 +24,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, buildSha }: { children: ReactNode; buildSha: string }) {
   const pathname = usePathname();
   const activeItem = NAV_ITEMS.find((item) => isActive(pathname, item.href));
 
@@ -81,6 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className={`rf-shell ${isSidebarExpanded ? "" : "is-sidebar-collapsed"}`}>
+      <div className="rf-build-sha-badge" aria-label="Build version">{buildSha}</div>
       <aside
         className="rf-sidebar"
         aria-label="Primary navigation"
