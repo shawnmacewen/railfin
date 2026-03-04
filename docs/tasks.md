@@ -1,3 +1,13 @@
+## task-00177 — UI — Reduce left-nav brand logo size by half (again)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00177-logo-reduce-half-again`
+- Scope delivered:
+  - Reduced the current top-left Railfin logo display size by exactly 50% across active breakpoints (`5.5rem -> 2.75rem`, `5rem -> 2.5rem`, `4.3rem -> 2.15rem`).
+  - Preserved fixed logo-anchor wrapper behavior to keep collapse/expand brand alignment stable (no horizontal/vertical jitter introduced).
+  - Rebalanced brand block/sidebar track sizing back to pre-task-00174 values to maintain nav readability/usability and spacing.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00176 — UI — Events icon update + left-nav color harmony
 
 - Status: **Done**

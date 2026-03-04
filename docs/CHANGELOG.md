@@ -1,3 +1,8 @@
+## 2026-03-04 — Left-nav brand logo reduced by half again (task-00177)
+- Reduced the app-shell top-left Railfin logo display size by 50% from the current enlarged state across desktop/tablet/mobile shell breakpoints.
+- Preserved fixed logo-anchor alignment and existing collapse/expand transition stability contracts to avoid horizontal/vertical jitter regressions.
+- Restored sidebar/brand geometry to keep nav spacing and usability balanced after the logo reduction.
+
 ## 2026-03-04 — Left-nav Events icon + cohesive brand-harmonic icon palette (task-00176)
 - Swapped the app-shell **Events** nav icon from `CalendarDays` to Lucide `Tickets` while preserving existing icon sizing/stroke and sidebar interaction behavior.
 - Replaced prior mixed per-item icon colors with a cohesive high-contrast Railfin-complementary palette across primary nav icons.

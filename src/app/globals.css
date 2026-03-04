@@ -56,7 +56,7 @@ button:disabled {
 .rf-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(16rem, 17rem) 1fr;
+  grid-template-columns: minmax(14rem, 15rem) 1fr;
   transition: grid-template-columns 180ms ease;
 }
 
@@ -97,13 +97,13 @@ button:disabled {
   justify-content: flex-start;
   width: 100%;
   gap: 0.45rem;
-  min-height: 5.8rem;
+  min-height: 3rem;
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 500;
   color: #5a627e;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   padding: 0.2rem;
   white-space: nowrap;
   overflow: hidden;
@@ -113,16 +113,16 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  width: 5.5rem;
-  min-width: 5.5rem;
+  width: 2.75rem;
+  min-width: 2.75rem;
   flex-shrink: 0;
 }
 
 .rf-brand-logo {
   width: 5.5rem;
   height: auto;
-  max-width: 5.5rem;
-  max-height: 5.5rem;
+  max-width: 2.75rem;
+  max-height: 2.75rem;
   border-radius: 4px;
   object-fit: contain;
   flex-shrink: 0;
@@ -985,21 +985,21 @@ button:disabled {
 
 @media (max-width: 1200px) {
   .rf-shell {
-    grid-template-columns: 14.5rem 1fr;
+    grid-template-columns: 13rem 1fr;
   }
 
   .rf-brand-logo-wrap,
   .rf-brand-logo {
-    width: 5rem;
-    min-width: 5rem;
-    max-width: 5rem;
-    max-height: 5rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    max-width: 2.5rem;
+    max-height: 2.5rem;
   }
 }
 
 @media (max-width: 860px) {
   .rf-shell {
-    grid-template-columns: 13rem 1fr;
+    grid-template-columns: 12rem 1fr;
   }
 
   .rf-brand {
@@ -1009,10 +1009,10 @@ button:disabled {
 
   .rf-brand-logo-wrap,
   .rf-brand-logo {
-    width: 4.3rem;
-    min-width: 4.3rem;
-    max-width: 4.3rem;
-    max-height: 4.3rem;
+    width: 2.15rem;
+    min-width: 2.15rem;
+    max-width: 2.15rem;
+    max-height: 2.15rem;
   }
 }
 

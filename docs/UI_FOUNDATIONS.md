@@ -1,3 +1,9 @@
+## task-00177 — Reduce left-nav brand logo size by half (again)
+
+- Reduced app-shell brand logo display size by exactly 50% at all current breakpoints (`5.5rem -> 2.75rem`, `5rem -> 2.5rem`, `4.3rem -> 2.15rem`).
+- Kept the fixed logo anchor slot (`.rf-brand-logo-wrap`) unchanged so collapse/expand interactions retain stable logo positioning without jitter regressions.
+- Restored brand block and expanded sidebar track sizing to pre-task-00174 geometry (`minmax(14rem,15rem)`, `13rem`, `12rem`) to preserve nav spacing/usability.
+
 ## task-00176 — Left-nav Events icon update + brand-harmonic icon palette
 
 - Updated `src/ui/app-shell.tsx` to switch **Events** nav icon from `CalendarDays` to Lucide **`Tickets`** while preserving existing nav icon render contract (size `23`, strokeWidth `2`) and current collapse/expand stability behavior.
