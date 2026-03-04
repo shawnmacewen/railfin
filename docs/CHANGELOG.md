@@ -1,3 +1,9 @@
+## 2026-03-04 — Left nav row-height + icon stability during collapse/expand (task-00166)
+- Tightened left-nav item vertical rhythm (padding/line-height/gap/min-height) so rows are compact and only as tall as needed.
+- Stabilized nav icon rendering with a fixed 1rem icon slot (.rf-nav-item-icon) and disabled icon-layer transform/opacity transitions to prevent flicker/disappearance.
+- Kept icon x/y placement stable across collapse/expand by removing collapsed-state centering and animating only label reveal/collapse (max-width + opacity).
+- Preserved existing hover-expand and delayed auto-collapse behavior while maintaining readable labels when expanded.
+
 ## 2026-03-04 — Nav logo asset swap + hover-driven compact nav refresh (task-00165)
 - Replaced the left-nav Railfin logo asset with the newly provided image and trimmed transparent edge padding so the mark sits tighter.
 - Switched nav behavior to collapsed-by-default hover interaction: sidebar expands on hover/focus and auto-collapses after ~2s when not hovered.

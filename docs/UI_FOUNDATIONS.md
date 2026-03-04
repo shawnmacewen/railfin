@@ -373,6 +373,7 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 - **task-00162 update:** reduced the shell brand mark by ~50% from the task-00161 oversized state (336px to 168px on desktop), tightened sidebar track sizing for better brand/nav balance, and preserved responsive logo scaling at narrower breakpoints.
 - **task-00163 update:** reduced the shell brand mark by 25% from task-00162 sizing (168px to 126px on desktop) with proportional responsive fallbacks, while preserving stacked brand alignment and sidebar nav usability.
 - **task-00164 update:** added left-nav auto-minimize (~3s inactivity) with bottom controls for manual expand/collapse + auto-minimize toggle, reduced default sidebar width, introduced collapsed-rail layout, and moved Railfin wordmark onto the same row as the logo while preserving responsive shell/content behavior.
+- **task-00166 update:** tightened nav row density (padding/line-height/gap/min-height), stabilized icon slot geometry (1rem fixed icon container) with no icon-layer transform/opacity transition, and moved collapse animation responsibility to nav labels (max-width + opacity) so icons stay fixed with no collapse/expand flicker while hover-expand + delayed auto-collapse behavior remains intact.
 
 ## Hosted Smoke UX Verification Rerun (task-00056)
 

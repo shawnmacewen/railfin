@@ -1,3 +1,15 @@
+## task-00166 — UI — Left-nav row height + icon stability on collapse/expand
+
+- Status: **Done**
+- Branch: `feat/ui/task-00166-nav-row-height-icon-stability`
+- Scope delivered:
+  - Tightened left-nav row sizing so each menu item is compact (reduced nav item padding/line-height/gap/min-height).
+  - Stabilized icon layer with fixed-size icon container (1rem x 1rem) and explicit no-transition icon rendering to prevent flicker/disappearance during state changes.
+  - Kept icon position/size stable between expanded/collapsed states by removing collapsed-state icon centering and animating label reveal/collapse separately.
+  - Preserved hover-driven expand and delayed auto-collapse behavior in AppShell.
+  - Preserved label readability/usability when expanded with controlled label width/opacity animation.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00165 — UI — Nav logo asset swap + padding trim
 
 - Status: **Done**
