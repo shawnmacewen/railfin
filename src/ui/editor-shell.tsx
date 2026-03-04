@@ -877,7 +877,7 @@ export function EditorShell() {
   return (
     <section aria-live="polite">
       <header className="rf-page-header rf-page-header-create">
-        <h2 className="rf-page-title">Create</h2>
+        <h2 className="rf-sr-only">Create</h2>
         <span className="rf-status-pill" role="status" aria-label={saveStatusText}>{saveStatusText}</span>
       </header>
 

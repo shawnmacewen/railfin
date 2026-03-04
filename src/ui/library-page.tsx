@@ -112,8 +112,8 @@ export function LibraryPageContent() {
   return (
     <Card>
       <div className="rf-library-header">
-        <h2 className="rf-library-title">Library</h2>
-        <p className="rf-library-subtitle">Search and browse saved drafts.</p>
+        <h2 className="rf-sr-only">Library</h2>
+        <p className="rf-library-subtitle rf-library-subtitle-standalone">Search and browse saved drafts.</p>
       </div>
 
       <label htmlFor="library-search">Search drafts</label>

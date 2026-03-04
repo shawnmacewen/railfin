@@ -51,7 +51,7 @@ export default function HelpCenterPage() {
   return (
     <div className="rf-help-page">
       <Card className="rf-help-hero">
-        <p className="rf-help-kicker">Help Center</p>
+        <h2 className="rf-sr-only">Help Center</h2>
         <h2 className="rf-page-title">Welcome to Railfin Help</h2>
         <p className="rf-page-subtitle">How can we help?</p>
         <label className="rf-help-search-label" htmlFor="help-search">

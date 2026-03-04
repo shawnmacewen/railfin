@@ -1,3 +1,9 @@
+## 2026-03-04 — Removed duplicate in-page page titles under shell header (task-00173)
+- Removed repeated visible page-title headings from in-content surfaces where the same page label is already shown in the app header.
+- Applied this consistency pass across Create, Library, Configure, and Events views.
+- Kept accessibility semantics by preserving page section headings as screen-reader-only labels.
+- Updated Help hero labeling to avoid repeating the page label as visible body text.
+
 ## 2026-03-04 — Nav logo horizontal anchor lock (task-00172)
 - Fixed residual top-left brand horizontal jitter during sidebar collapse/expand by introducing a fixed logo anchor slot (`.rf-brand-logo-wrap`) that does not shift between states.
 - Kept brand row alignment mode constant (`justify-content: flex-start`) and made brand row layout width-stable (`width: 100%`) across collapsed/expanded states.
