@@ -523,3 +523,22 @@ Rerun completed after hosted path repair, verifying current route/component cont
 - Existing Create behaviors were preserved:
   - `draftId` query hydration/load path
   - configure policy metadata indicator used by Create/compliance context
+
+## task-00155 — Help Center landing + starter help topics
+
+- Added new primary nav item **Help Center** in `src/ui/app-shell.tsx` pointing to `/app/help`.
+- Added Help Center landing route `src/app/app/help/page.tsx` with:
+  - welcome hero/header section
+  - non-functional search input UI placeholder (`type=search`, disabled)
+  - starter topic-card grid aligned with existing `rf-*` card/layout patterns
+- Added starter topics mapped to current product surfaces:
+  - Getting started (Create flow)
+  - Saving and Library
+  - AI generation controls
+  - Compliance review + remediation basics
+  - Configure + Change Log + Features pages
+- Added two detail pages linked from topic cards:
+  - `/app/help/getting-started`
+  - `/app/help/compliance-basics`
+- Added top-level shortcut route `src/app/help/page.tsx` redirecting to `/app/help`.
+- Added additive help styles in `src/app/globals.css` under `rf-help-*` classes (no shell redesign).

@@ -1143,3 +1143,69 @@ button:disabled {
     position: static;
   }
 }
+
+.rf-help-page {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.rf-help-hero {
+  border: 1px solid #dbe4ff;
+  background: #f8faff;
+}
+
+.rf-help-kicker {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4e5879;
+}
+
+.rf-help-search-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2f3a5f;
+}
+
+.rf-help-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 780px) {
+  .rf-help-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rf-help-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.rf-help-card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.rf-help-card p {
+  margin: 0;
+  color: #2f3a5f;
+}
+
+.rf-help-topic-tag {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #4e5879;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rf-help-detail-list {
+  margin: 0.35rem 0 0.8rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
