@@ -1,3 +1,21 @@
+## task-00157 — Generate contract extension (topics/purposes context injection)
+
+Default generate prompt/context location (current source of truth):
+- `src/api/internal/content/generate.ts`
+  - `buildGenerationPrompt(...)` — canonical prompt scaffold used by generation runtime.
+  - `generateDraftForContentType(...)` — passes request context into `buildGenerationPrompt` before provider execution.
+
+Contract additions for `POST /api/internal/content/generate`:
+- Optional `topics: Array<"tax-season-2026" | "ai-and-jobs" | "financial-wellness">`
+- Optional `purposes: Array<"lead-outreach" | "social-growth" | "follower-growth">`
+- Validation behavior:
+  - values must be arrays of supported enums when provided
+  - duplicate values are de-duplicated
+  - omitted fields resolve to empty arrays
+- Prompt scaffold injection behavior:
+  - `buildGenerationPrompt` now appends `Selected topics: ...` and `Selected purposes: ...`
+  - when empty/omitted, scaffold uses `none selected` (backward-compatible default)
+
 ## task-00150 update — Lexical data-contract hardening (serialization/load/compliance boundaries)
 
 - Added a dedicated Lexical data-contract normalization layer in `src/ui/lexical-contract.ts` to enforce safe editor boundary handling for draft HTML.

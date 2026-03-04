@@ -1,3 +1,17 @@
+## task-00157 — DEV/UI — Create topics/purpose UX additions + generation wiring
+
+- Status: **Done**
+- Branch: `feat/dev/task-00157-topics-purpose-generation-wiring`
+- Scope delivered:
+  - Moved the four content-type buttons above the **Create content by:** selector container.
+  - Added toggleable Topics options in Topics mode: **Tax Season 2026**, **AI and Jobs**, **Financial Wellness**.
+  - Added toggleable Purpose options: **Lead Outreach**, **Social Growth**, **Follower Growth**.
+  - Kept toggle state explicit via active/inactive button styling + `aria-pressed` semantics.
+  - Wired Create generation requests to include selected `contentType`, `topics[]`, and `purposes[]`.
+  - Extended backend generation prompt scaffold to inject selected topics/purposes into model context.
+  - Preserved non-breaking defaults when none selected (`none selected` in scaffold / empty selection arrays).
+  - Updated UI/API/changelog/lane-report docs and ran `npm run build` (pass).
+
 ## task-00156 — UI — Create input-mode UX refine + copy cleanup
 
 - Status: **Done**

@@ -12,6 +12,8 @@ type GenerationStatus = "idle" | "generating" | "generated" | "error";
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 type CreateContentOption = "blog" | "social-post" | "article" | "newsletter";
 type CreateInputMode = "topics" | "prompt";
+type TopicOptionId = "tax-season-2026" | "ai-and-jobs" | "financial-wellness";
+type PurposeOptionId = "lead-outreach" | "social-growth" | "follower-growth";
 
 type RemediationContextResult = {
   nextContent: string;
@@ -88,6 +90,18 @@ const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   "x-thread": "Article",
   newsletter: "Newsletter",
 };
+
+const TOPIC_OPTIONS: Array<{ id: TopicOptionId; label: string }> = [
+  { id: "tax-season-2026", label: "Tax Season 2026" },
+  { id: "ai-and-jobs", label: "AI and Jobs" },
+  { id: "financial-wellness", label: "Financial Wellness" },
+];
+
+const PURPOSE_OPTIONS: Array<{ id: PurposeOptionId; label: string }> = [
+  { id: "lead-outreach", label: "Lead Outreach" },
+  { id: "social-growth", label: "Social Growth" },
+  { id: "follower-growth", label: "Follower Growth" },
+];
 
 const REMEDIATION_BLOCK_START = "[Compliance Remediation Draft Context]";
 const REMEDIATION_BLOCK_END = "[/Compliance Remediation Draft Context]";
@@ -245,6 +259,8 @@ export function EditorShell() {
   const [remediationApplyStatus, setRemediationApplyStatus] = useState<RemediationApplyStatus>("idle");
   const [contentType, setContentType] = useState<ContentType>("blog");
   const [createInputMode, setCreateInputMode] = useState<CreateInputMode>("prompt");
+  const [selectedTopics, setSelectedTopics] = useState<TopicOptionId[]>([]);
+  const [selectedPurposes, setSelectedPurposes] = useState<PurposeOptionId[]>([]);
   const [promptInput, setPromptInput] = useState("");
   const [lockedPrompt, setLockedPrompt] = useState<string | null>(null);
   const [isPromptLocked, setIsPromptLocked] = useState(false);
@@ -349,6 +365,23 @@ export function EditorShell() {
     return CREATE_CONTENT_OPTIONS.find((option) => option.apiType === contentType)?.id ?? "blog";
   }, [contentType]);
 
+  const generationSelections = useMemo(() => ({
+    topics: selectedTopics,
+    purposes: selectedPurposes,
+  }), [selectedPurposes, selectedTopics]);
+
+  const onToggleTopic = (topicId: TopicOptionId) => {
+    setSelectedTopics((current) =>
+      current.includes(topicId) ? current.filter((item) => item !== topicId) : [...current, topicId],
+    );
+  };
+
+  const onTogglePurpose = (purposeId: PurposeOptionId) => {
+    setSelectedPurposes((current) =>
+      current.includes(purposeId) ? current.filter((item) => item !== purposeId) : [...current, purposeId],
+    );
+  };
+
   const saveStatusText = useMemo(() => {
     if (status === "saving") {
       return "Draft save status: Saving…";
@@ -379,7 +412,7 @@ export function EditorShell() {
     return `Configure policy updated ${date.toLocaleString()}.`;
   }, [policyUpdatedAt]);
 
-  const generateDraftForType = async (prompt: string, requestedType: ContentType) => {
+  const generateDraftForType = async (prompt: string, requestedType: ContentType, selections: { topics: TopicOptionId[]; purposes: PurposeOptionId[] }) => {
     const response = await fetch("/api/internal/content/generate", {
       method: "POST",
       credentials: "include",
@@ -390,6 +423,8 @@ export function EditorShell() {
         prompt,
         mode: "single",
         contentType: requestedType,
+        topics: selections.topics,
+        purposes: selections.purposes,
       }),
     });
 
@@ -413,7 +448,7 @@ export function EditorShell() {
     return assetType === "email" ? "newsletter" : assetType;
   };
 
-  const generatePackageVariants = async (prompt: string): Promise<{ variants: PackageVariantEntry[]; notes?: string }> => {
+  const generatePackageVariants = async (prompt: string, selections: { topics: TopicOptionId[]; purposes: PurposeOptionId[] }): Promise<{ variants: PackageVariantEntry[]; notes?: string }> => {
     const response = await fetch("/api/internal/content/generate", {
       method: "POST",
       credentials: "include",
@@ -426,6 +461,8 @@ export function EditorShell() {
         package: {
           assets: PACKAGE_REQUEST_ASSETS.map((assetType) => ({ assetType })),
         },
+        topics: selections.topics,
+        purposes: selections.purposes,
       }),
     });
 
@@ -488,7 +525,7 @@ export function EditorShell() {
     setGenerationDegraded(null);
 
     try {
-      const generated = await generateDraftForType(trimmedPrompt, contentType);
+      const generated = await generateDraftForType(trimmedPrompt, contentType, generationSelections);
       const variantId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
       const generatedHtml = plainTextToHtml(generated.generatedText);
@@ -821,6 +858,21 @@ export function EditorShell() {
           <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
             <div className="rf-generate-controls">
               <section className={`rf-control-group ${createInputMode === "prompt" && isPromptAccordionCollapsed ? "is-collapsed" : ""}`} aria-label="Content creation method">
+                <div className="rf-content-type-buttons" role="group" aria-label="Content type">
+                  {CREATE_CONTENT_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
+                      onClick={() => setContentType(option.apiType)}
+                      disabled={generationStatus === "generating"}
+                      aria-pressed={selectedContentOption === option.id}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="rf-create-input-mode-header">
                   <p className="rf-status rf-status-muted">Create content by:</p>
                   <div className="rf-generate-mode-buttons" role="group" aria-label="Content creation method">
@@ -846,39 +898,45 @@ export function EditorShell() {
                 </div>
 
                 {createInputMode === "topics" ? (
-                  <div>
-                    <div className="rf-content-type-buttons" role="group" aria-label="Content type topics">
-                      {CREATE_CONTENT_OPTIONS.map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
-                          onClick={() => setContentType(option.apiType)}
-                          disabled={generationStatus === "generating"}
-                          aria-pressed={selectedContentOption === option.id}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
+                  <div className="rf-topic-purpose-grid">
+                    <div>
+                      <p className="rf-status rf-status-muted">Topics</p>
+                      <div className="rf-topic-purpose-buttons" role="group" aria-label="Topic options">
+                        {TOPIC_OPTIONS.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`rf-choice-button ${selectedTopics.includes(option.id) ? "is-active" : ""}`}
+                            onClick={() => onToggleTopic(option.id)}
+                            disabled={generationStatus === "generating"}
+                            aria-pressed={selectedTopics.includes(option.id)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <p className="rf-status rf-status-muted" role="status">Pick a topic set, then switch to AI prompt to generate.</p>
+                    <div>
+                      <p className="rf-status rf-status-muted">Purpose</p>
+                      <div className="rf-topic-purpose-buttons" role="group" aria-label="Purpose options">
+                        {PURPOSE_OPTIONS.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`rf-choice-button ${selectedPurposes.includes(option.id) ? "is-active" : ""}`}
+                            onClick={() => onTogglePurpose(option.id)}
+                            disabled={generationStatus === "generating"}
+                            aria-pressed={selectedPurposes.includes(option.id)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="rf-status rf-status-muted" role="status">Pick topic/purpose filters, then switch to AI prompt to generate.</p>
                   </div>
                 ) : (
                   <>
-                    <div className="rf-content-type-buttons" role="group" aria-label="Content type">
-                      {CREATE_CONTENT_OPTIONS.map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
-                          onClick={() => setContentType(option.apiType)}
-                          disabled={generationStatus === "generating"}
-                          aria-pressed={selectedContentOption === option.id}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
                     <div className="rf-prompt-header-row">
                       <label htmlFor="editor-prompt">AI Instructions</label>
                       <div className="rf-prompt-header-actions">

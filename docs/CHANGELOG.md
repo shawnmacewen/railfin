@@ -1,3 +1,11 @@
+## 2026-03-04
+
+- Create page now places the four content-type buttons above the **Create content by** selector and adds toggleable **Topics**/**Purpose** controls in Topics mode.
+- Added selectable Topics: **Tax Season 2026**, **AI and Jobs**, **Financial Wellness**.
+- Added selectable Purposes: **Lead Outreach**, **Social Growth**, **Follower Growth**.
+- Generation API requests now include selected `contentType`, `topics`, and `purposes`, and backend prompt scaffolding now incorporates those selections into model input.
+- Backward-compatible default behavior preserved when no topic/purpose is selected.
+
 ## 2026-03-04 — Create input-mode selector + copy declutter (task-00156)
 - Reworked Create generation controls to use a two-option content-creation method selector: **Select a few topics** or **AI prompt**.
 - Implemented shared-container swap behavior between topics selection UI and prompt input UI.

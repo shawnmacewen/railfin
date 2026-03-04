@@ -1,3 +1,14 @@
+## 2026-03-04 05:53 UTC — task-00157 create topics/purpose wiring
+- Updated Create generation UX (`src/ui/editor-shell.tsx`, `src/app/globals.css`):
+  - content-type buttons moved above creation-method selector
+  - Topics toggles added (Tax Season 2026, AI and Jobs, Financial Wellness)
+  - Purpose toggles added (Lead Outreach, Social Growth, Follower Growth)
+- Wired selected topics/purposes through generation request payload for both single and package generate requests.
+- Extended backend generation scaffold (`src/api/internal/content/generate.ts`) to validate and inject `topics` + `purposes` into `buildGenerationPrompt(...)`.
+- Updated API route typing for new fields (`src/app/api/internal/content/generate/route.ts`).
+- Updated docs: `docs/UI_FOUNDATIONS.md`, `docs/API_BOUNDARY.md`, `docs/tasks.md`, `docs/CHANGELOG.md`.
+- Build verification: `npm run build` passed.
+
 # railfin-dev detailed work log
 
 ## 2026-03-03 06:20 UTC — task-00150 lexical data-contract hardening

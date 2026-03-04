@@ -1,3 +1,13 @@
+## task-00157 — Create topics/purpose toggles + generation payload wiring
+
+- `src/ui/editor-shell.tsx` updates Create Generate controls so the four content-type buttons now render above the **Create content by** selector (applies to both Topics and AI Prompt modes).
+- Added explicit Topics + Purpose toggle controls in Topics mode with clear on/off state (`aria-pressed` + active button styling):
+  - Topics: `Tax Season 2026`, `AI and Jobs`, `Financial Wellness`
+  - Purpose: `Lead Outreach`, `Social Growth`, `Follower Growth`
+- Topics mode now presents a left-first Topics column with adjacent Purpose column and retains the existing prompt-mode generation flow.
+- Generation request wiring now includes selected `contentType`, `topics[]`, and `purposes[]` on `/api/internal/content/generate` requests (single and package paths).
+- Preserved non-breaking defaults: when no topics/purposes are selected, requests send empty arrays and backend prompt scaffold records `none selected`.
+
 ## task-00156 — Create input-mode UX refine + copy cleanup
 
 - `src/ui/editor-shell.tsx` now uses a **content creation method selector** in the Generate stage:
