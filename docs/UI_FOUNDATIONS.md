@@ -1,3 +1,10 @@
+## task-00170 — Left-nav animation stability + size bump
+
+- Root cause: collapse/expand state still changed row-adjacent box metrics (`.rf-nav-item` collapsed padding override + `.rf-nav-item-label` margin override), which introduced subtle layout reflow and visible micro-jitter while the sidebar track animated.
+- Updated nav row contract in `src/app/globals.css` so expanded/collapsed states share identical row metrics (same fixed row height, padding, line-height, and icon slot geometry) and collapse animation remains label-only (`max-width` + `opacity`).
+- Increased nav row container height by ~20% (`1.84rem -> 2.2rem`).
+- Increased nav font size and icon size by ~20% (`1.13rem -> 1.36rem`, icon slot/SVG `1.2rem -> 1.44rem`) with lockstep icon render bump in `src/ui/app-shell.tsx` (Lucide `19 -> 23`).
+- Preserved existing collapsed/expanded behavior and clean icon/label alignment while removing flow-affecting collapse-state metric drift.
 ## task-00169 — Left-nav visual pass 2 + Create initial scroll hard fix
 
 - Updated `src/ui/app-shell.tsx` nav item definitions to raise icon render size (`17 -> 19`) and assign a unique class per nav icon for deterministic per-item color treatment.

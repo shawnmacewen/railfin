@@ -1,3 +1,9 @@
+## 2026-03-04 — Left-nav animation stability + size bump (task-00170)
+- Fixed subtle left-nav collapse/expand jitter by removing collapsed-state row metric drift and keeping nav row box metrics identical across states.
+- Kept collapse animation scoped to label visibility only (label width/opacity), avoiding layout-flow animation side effects.
+- Increased nav item row height by ~20% (`1.84rem -> 2.2rem`).
+- Increased nav readability by another ~20% for label and icon scale (label `1.13rem -> 1.36rem`, icon slot/SVG `1.2rem -> 1.44rem`, icon render `19 -> 23`).
+- Preserved hover-expand and delayed auto-collapse behavior with stable icon/label alignment in both nav states.
 ## 2026-03-04 — Nav visual pass 2 + Create initial scroll hard fix (task-00169)
 - Increased left-nav readability with another noticeable scale bump (Lucide icons 17→19, icon slot 1.1rem→1.2rem, nav labels 1.05rem→1.13rem) while preserving consistent row behavior.
 - Added unique, consistent, high-contrast colors for each primary nav icon (Create, Library, Campaigns, Events, Help, Configure).
