@@ -892,6 +892,16 @@ button:disabled {
   gap: 0.45rem;
 }
 
+.rf-create-input-mode-header {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.rf-create-input-mode-header .rf-status {
+  margin: 0;
+}
+
 .rf-content-type-buttons {
   display: flex;
   flex-wrap: nowrap;

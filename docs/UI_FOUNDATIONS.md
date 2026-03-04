@@ -1,3 +1,16 @@
+## task-00156 — Create input-mode UX refine + copy cleanup
+
+- `src/ui/editor-shell.tsx` now uses a **content creation method selector** in the Generate stage:
+  - **Select a few topics**
+  - **AI prompt**
+- The same control container now swaps content by selected method (topics UI vs prompt UI) instead of rendering a fixed single prompt section.
+- Removed redundant copy/labels from Create:
+  - removed top policy fallback phrase (`Policy last updated: unavailable`) from header area
+  - removed visible `Content Type` label text
+  - removed Save-stage helper sentence about review/remediation satisfaction
+- Flattened content-type placement by removing the standalone content-type wrapper/tile and keeping the four content-type buttons directly above prompt input in AI prompt mode.
+- Preserved existing behavior across generation, save, compliance, remediation actions, and generation history.
+
 ## task-00154 — Lexical toolbar icon-only solid row
 
 - Updated `src/ui/lexical-editor.tsx` toolbar controls to icon-only rendering (no visible text labels) while retaining command wiring and `aria-label` accessibility semantics.

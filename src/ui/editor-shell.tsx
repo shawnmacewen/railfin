@@ -11,6 +11,7 @@ type EditorStatus = "idle" | "saving" | "saved" | "error";
 type GenerationStatus = "idle" | "generating" | "generated" | "error";
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 type CreateContentOption = "blog" | "social-post" | "article" | "newsletter";
+type CreateInputMode = "topics" | "prompt";
 
 type RemediationContextResult = {
   nextContent: string;
@@ -243,6 +244,7 @@ export function EditorShell() {
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null);
   const [remediationApplyStatus, setRemediationApplyStatus] = useState<RemediationApplyStatus>("idle");
   const [contentType, setContentType] = useState<ContentType>("blog");
+  const [createInputMode, setCreateInputMode] = useState<CreateInputMode>("prompt");
   const [promptInput, setPromptInput] = useState("");
   const [lockedPrompt, setLockedPrompt] = useState<string | null>(null);
   const [isPromptLocked, setIsPromptLocked] = useState(false);
@@ -362,20 +364,6 @@ export function EditorShell() {
 
     return "Draft save status: Not saved yet.";
   }, [status]);
-
-  const policyUpdatedLabel = useMemo(() => {
-    if (!policyUpdatedAt) {
-      return "Policy last updated: unavailable";
-    }
-
-    const date = new Date(policyUpdatedAt);
-
-    if (Number.isNaN(date.getTime())) {
-      return "Policy last updated: unavailable";
-    }
-
-    return `Policy last updated: ${date.toLocaleString()}`;
-  }, [policyUpdatedAt]);
 
   const activePolicyContext = useMemo(() => {
     if (!policyUpdatedAt) {
@@ -827,63 +815,102 @@ export function EditorShell() {
       </header>
 
       {loadedDraftTitle ? <p className="rf-editor-opened">Editing: {loadedDraftTitle}</p> : null}
-      <p className="rf-status rf-status-muted" role="status">
-        {policyUpdatedLabel}
-      </p>
 
       <div className="rf-create-layout">
         <div className="rf-create-main">
           <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
             <div className="rf-generate-controls">
-                            <section className="rf-control-group" aria-label="Primary output controls">
-                <label className="rf-content-type-label">Content Type</label>
-                <div className="rf-content-type-buttons" role="group" aria-label="Content type">
-                  {CREATE_CONTENT_OPTIONS.map((option) => (
+              <section className={`rf-control-group ${createInputMode === "prompt" && isPromptAccordionCollapsed ? "is-collapsed" : ""}`} aria-label="Content creation method">
+                <div className="rf-create-input-mode-header">
+                  <p className="rf-status rf-status-muted">Create content by:</p>
+                  <div className="rf-generate-mode-buttons" role="group" aria-label="Content creation method">
                     <button
-                      key={option.id}
                       type="button"
-                      className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
-                      onClick={() => setContentType(option.apiType)}
+                      className={`rf-choice-button ${createInputMode === "topics" ? "is-active" : ""}`}
+                      onClick={() => setCreateInputMode("topics")}
                       disabled={generationStatus === "generating"}
-                      aria-pressed={selectedContentOption === option.id}
+                      aria-pressed={createInputMode === "topics"}
                     >
-                      {option.label}
+                      Select a few topics
                     </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className={`rf-control-group ${isPromptAccordionCollapsed ? "is-collapsed" : ""}`} aria-label="AI prompt input">
-                <div className="rf-prompt-header-row">
-                  <label htmlFor="editor-prompt">AI Instructions</label>
-                  <div className="rf-prompt-header-actions">
-                    <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
-                      {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
-                    </button>
-                    <button type="button" onClick={onGenerate} disabled={!canGenerate}>
-                      {generationStatus === "generating" ? "Generating..." : "Generate Content"}
+                    <button
+                      type="button"
+                      className={`rf-choice-button ${createInputMode === "prompt" ? "is-active" : ""}`}
+                      onClick={() => setCreateInputMode("prompt")}
+                      disabled={generationStatus === "generating"}
+                      aria-pressed={createInputMode === "prompt"}
+                    >
+                      AI prompt
                     </button>
                   </div>
                 </div>
-                {isPromptAccordionCollapsed ? (
-                  <div className="rf-prompt-collapsed-summary">
-                    <p className="rf-status rf-status-muted" role="status">Prompt locked. Expand to view or edit instructions.</p>
-                    <button type="button" onClick={() => setIsPromptAccordionCollapsed(false)}>Expand Prompt</button>
+
+                {createInputMode === "topics" ? (
+                  <div>
+                    <div className="rf-content-type-buttons" role="group" aria-label="Content type topics">
+                      {CREATE_CONTENT_OPTIONS.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
+                          onClick={() => setContentType(option.apiType)}
+                          disabled={generationStatus === "generating"}
+                          aria-pressed={selectedContentOption === option.id}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="rf-status rf-status-muted" role="status">Pick a topic set, then switch to AI prompt to generate.</p>
                   </div>
                 ) : (
                   <>
-                    <textarea
-                      id="editor-prompt"
-                      name="editor-prompt"
-                      value={promptInput}
-                      onChange={(event) => setPromptInput(event.target.value)}
-                      rows={4}
-                      placeholder="Describe what to generate and any constraints."
-                      disabled={isPromptLocked && generationStatus !== "generating"}
-                    />
-                    {lockedPrompt ? (
-                      <p className="rf-status rf-status-muted" role="status">Locked prompt saved for reference.</p>
-                    ) : null}
+                    <div className="rf-content-type-buttons" role="group" aria-label="Content type">
+                      {CREATE_CONTENT_OPTIONS.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`rf-choice-button ${selectedContentOption === option.id ? "is-active" : ""}`}
+                          onClick={() => setContentType(option.apiType)}
+                          disabled={generationStatus === "generating"}
+                          aria-pressed={selectedContentOption === option.id}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="rf-prompt-header-row">
+                      <label htmlFor="editor-prompt">AI Instructions</label>
+                      <div className="rf-prompt-header-actions">
+                        <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
+                          {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
+                        </button>
+                        <button type="button" onClick={onGenerate} disabled={!canGenerate}>
+                          {generationStatus === "generating" ? "Generating..." : "Generate Content"}
+                        </button>
+                      </div>
+                    </div>
+                    {isPromptAccordionCollapsed ? (
+                      <div className="rf-prompt-collapsed-summary">
+                        <p className="rf-status rf-status-muted" role="status">Prompt locked. Expand to view or edit instructions.</p>
+                        <button type="button" onClick={() => setIsPromptAccordionCollapsed(false)}>Expand Prompt</button>
+                      </div>
+                    ) : (
+                      <>
+                        <textarea
+                          id="editor-prompt"
+                          name="editor-prompt"
+                          value={promptInput}
+                          onChange={(event) => setPromptInput(event.target.value)}
+                          rows={4}
+                          placeholder="Describe what to generate and any constraints."
+                          disabled={isPromptLocked && generationStatus !== "generating"}
+                        />
+                        {lockedPrompt ? (
+                          <p className="rf-status rf-status-muted" role="status">Locked prompt saved for reference.</p>
+                        ) : null}
+                      </>
+                    )}
                   </>
                 )}
               </section>
@@ -912,7 +939,6 @@ export function EditorShell() {
       ) : null}
 
       <section id="create-save" className="rf-create-stage" aria-label="Save draft stage">
-            <p className="rf-status rf-status-muted">Save once you are satisfied with review and remediation updates.</p>
             <form onSubmit={onSave} aria-busy={status === "saving"}>
         <label htmlFor="editor-content">Editor Content</label>
         <LexicalEditorField
