@@ -367,6 +367,7 @@ Implemented MVP login action wiring in `src/ui/login.tsx` with the following beh
 - App favicon/icon is provided via `src/app/icon.png` (Next app-router icon file convention).
 - Shell top-left branding in `src/ui/app-shell.tsx` now renders the Railfin logo + wordmark linking to `/app/create`.
 - Supporting minimal shell brand styles are in `src/app/globals.css` (`.rf-brand`, `.rf-brand-logo`).
+- **task-00159 update:** increased shell brand logo visual size to 60px (>=2x prior 28px), added `.rf-brand-text` line-height tuning, and widened desktop sidebar track with responsive fallback to maintain clean nav spacing/alignment.
 
 ## Hosted Smoke UX Verification Rerun (task-00056)
 

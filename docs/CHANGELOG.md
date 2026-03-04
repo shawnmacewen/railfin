@@ -1,3 +1,8 @@
+## 2026-03-04 — Main nav brand logo size increase (task-00159)
+- Increased the left-nav Railfin brand logo in the app shell from 28px to 60px (at least 2x larger visually).
+- Tuned brand row alignment so the Railfin wordmark remains readable and balanced beside the larger mark.
+- Expanded desktop sidebar width and added responsive sizing fallback to keep nav spacing clean across screen sizes.
+
 ## 2026-03-04 — Create Generate/Lock action alignment across Topics + AI prompt (task-00158)
 - Added **Generate Content** action to Topics mode and aligned Topics-mode action order to **Lock Prompt** then **Generate Content** under the selector area.
 - Moved AI prompt mode action row under the AI Instructions textarea, matching Topics-mode placement/order.

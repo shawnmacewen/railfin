@@ -31,12 +31,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Image
             src="/brand/railfin-v1.png"
             alt="Railfin"
-            width={28}
-            height={28}
+            width={60}
+            height={60}
             className="rf-brand-logo"
             priority
           />
-          <span>Railfin</span>
+          <span className="rf-brand-text">Railfin</span>
         </Link>
         <nav className="rf-nav-list">
           {NAV_ITEMS.map((item) => (
