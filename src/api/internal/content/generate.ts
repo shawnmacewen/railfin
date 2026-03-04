@@ -3,6 +3,8 @@ import { completeWithDeterministicFallback } from "../../../ai/runtime/providerC
 type ContentType = "blog" | "linkedin" | "newsletter" | "x-thread";
 type PackageAssetType = "email" | "linkedin" | "x-thread";
 type GenerateMode = "single" | "package";
+type GenerateTopicId = "tax-season-2026" | "ai-and-jobs" | "financial-wellness";
+type GeneratePurposeId = "lead-outreach" | "social-growth" | "follower-growth";
 
 type GenerateTemplateId = "default" | "conversion";
 type GenerateToneId = "professional" | "friendly" | "bold";
@@ -17,6 +19,8 @@ type GenerateRequestBody = {
   prompt?: string;
   mode?: GenerateMode;
   contentType?: ContentType;
+  topics?: GenerateTopicId[];
+  purposes?: GeneratePurposeId[];
   package?: {
     assets?: Array<{
       assetType?: PackageAssetType;
@@ -108,6 +112,18 @@ type GenerationControlProfile = {
 
 const CONTENT_TYPES: ContentType[] = ["blog", "linkedin", "newsletter", "x-thread"];
 const PACKAGE_ASSET_TYPES: PackageAssetType[] = ["email", "linkedin", "x-thread"];
+const TOPIC_IDS: GenerateTopicId[] = ["tax-season-2026", "ai-and-jobs", "financial-wellness"];
+const PURPOSE_IDS: GeneratePurposeId[] = ["lead-outreach", "social-growth", "follower-growth"];
+const TOPIC_LABELS: Record<GenerateTopicId, string> = {
+  "tax-season-2026": "Tax Season 2026",
+  "ai-and-jobs": "AI and Jobs",
+  "financial-wellness": "Financial Wellness",
+};
+const PURPOSE_LABELS: Record<GeneratePurposeId, string> = {
+  "lead-outreach": "Lead Outreach",
+  "social-growth": "Social Growth",
+  "follower-growth": "Follower Growth",
+};
 const MAX_PROMPT_LENGTH = 12000;
 const MAX_PACKAGE_ASSETS = 3;
 
@@ -411,6 +427,8 @@ function buildGenerationPrompt(input: {
   preset: GenerationPreset;
   controlProfile: GenerationControlProfile;
   controls: GenerationControls;
+  topics: GenerateTopicId[];
+  purposes: GeneratePurposeId[];
 }): string {
   return [
     "You are a content generation engine for marketing copy.",
@@ -444,6 +462,8 @@ function buildGenerationPrompt(input: {
     ...input.controls.audienceGuidance.map((item) => `- ${item}`),
     "Objective guidance:",
     ...input.controls.objectiveGuidance.map((item) => `- ${item}`),
+    `Selected topics: ${input.topics.length > 0 ? input.topics.map((item) => TOPIC_LABELS[item]).join(", ") : "none selected"}`,
+    `Selected purposes: ${input.purposes.length > 0 ? input.purposes.map((item) => PURPOSE_LABELS[item]).join(", ") : "none selected"}`,
     "Prompt:",
     input.prompt,
   ].join("\n");
@@ -498,6 +518,45 @@ function buildDegradedGenerationNote(errorKind?: string): string {
   }
 
   return "AI generation unavailable or invalid output; fallback response used.";
+}
+
+function isGenerateTopicId(value: unknown): value is GenerateTopicId {
+  return typeof value === "string" && TOPIC_IDS.includes(value as GenerateTopicId);
+}
+
+function isGeneratePurposeId(value: unknown): value is GeneratePurposeId {
+  return typeof value === "string" && PURPOSE_IDS.includes(value as GeneratePurposeId);
+}
+
+function validateSelectionArray(params: {
+  value: unknown;
+  field: "topics" | "purposes";
+  isValid: (item: unknown) => boolean;
+}) {
+  const { value, field, isValid } = params;
+  const fieldErrors: Array<{ field: string; message: string }> = [];
+
+  if (value === undefined) {
+    return { values: [] as string[], fieldErrors };
+  }
+
+  if (!Array.isArray(value)) {
+    fieldErrors.push({ field, message: field + " must be an array." });
+    return { values: [] as string[], fieldErrors };
+  }
+
+  const values = value.filter((item) => typeof item === "string") as string[];
+
+  if (values.length !== value.length) {
+    fieldErrors.push({ field, message: field + " must contain only strings." });
+  }
+
+  const invalidIndex = values.findIndex((item) => !isValid(item));
+  if (invalidIndex !== -1) {
+    fieldErrors.push({ field: field + "[" + invalidIndex + "]", message: "Unsupported " + field.slice(0, -1) + " value." });
+  }
+
+  return { values: Array.from(new Set(values)), fieldErrors };
 }
 
 function validateControlOverrides(body: GenerateRequestBody) {
@@ -641,6 +700,8 @@ async function generateDraftForContentType(input: {
   prompt: string;
   contentType: ContentType;
   config: NormalizedGenerationConfig;
+  topics: GenerateTopicId[];
+  purposes: GeneratePurposeId[];
 }) {
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
@@ -651,6 +712,8 @@ async function generateDraftForContentType(input: {
       preset: input.config.preset,
       controlProfile: input.config.controlProfile,
       controls: input.config.controls,
+      topics: input.topics,
+      purposes: input.purposes,
     }),
   });
 
@@ -881,11 +944,14 @@ export async function internalContentGenerate(request: {
   }
 
   const combinationErrors = validateControlOverrides(body);
-  if (combinationErrors.length > 0) {
+  const topicValidation = validateSelectionArray({ value: body.topics, field: "topics", isValid: isGenerateTopicId });
+  const purposeValidation = validateSelectionArray({ value: body.purposes, field: "purposes", isValid: isGeneratePurposeId });
+  const selectionErrors = [...topicValidation.fieldErrors, ...purposeValidation.fieldErrors];
+  if (combinationErrors.length > 0 || selectionErrors.length > 0) {
     return {
       ok: false,
       error: "Validation failed",
-      fieldErrors: combinationErrors,
+      fieldErrors: [...combinationErrors, ...selectionErrors],
     };
   }
 
@@ -933,6 +999,8 @@ export async function internalContentGenerate(request: {
       prompt,
       contentType: body.contentType as ContentType,
       config,
+      topics: topicValidation.values as GenerateTopicId[],
+      purposes: purposeValidation.values as GeneratePurposeId[],
     });
 
     return {
@@ -954,6 +1022,8 @@ export async function internalContentGenerate(request: {
         prompt: buildAssetPrompt(assetPrompt, assetType),
         contentType: mappedContentType,
         config,
+        topics: topicValidation.values as GenerateTopicId[],
+        purposes: purposeValidation.values as GeneratePurposeId[],
       });
 
       return {

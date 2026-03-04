@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
     prompt?: string;
     mode?: "single" | "package";
     contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
+    topics?: Array<"tax-season-2026" | "ai-and-jobs" | "financial-wellness">;
+    purposes?: Array<"lead-outreach" | "social-growth" | "follower-growth">;
     package?: {
       assets?: Array<{
         assetType?: "email" | "linkedin" | "x-thread";
