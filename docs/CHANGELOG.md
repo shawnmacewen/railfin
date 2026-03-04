@@ -1,3 +1,10 @@
+## 2026-03-04 — Nav logo asset swap + hover-driven compact nav refresh (task-00165)
+- Replaced the left-nav Railfin logo asset with the newly provided image and trimmed transparent edge padding so the mark sits tighter.
+- Switched nav behavior to collapsed-by-default hover interaction: sidebar expands on hover/focus and auto-collapses after ~2s when not hovered.
+- Removed bottom nav minimize/maximize controls and related toggle UI.
+- Added Lucide icons to nav items and reduced nav row vertical padding/height for a more compact menu.
+- Kept logo rendering crisp and preserved responsive shell usability/alignment.
+
 ## 2026-03-04 — Left nav auto-minimize + width refinement (task-00164)
 - Added left-nav auto-minimize with ~3s inactivity timeout when enabled, plus auto-expand on nav interaction.
 - Added bottom nav controls for manual expand/collapse and an `Auto-minimize` toggle.

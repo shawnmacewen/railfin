@@ -1,3 +1,16 @@
+## task-00165 — UI — Nav logo asset swap + padding trim
+
+- Status: **Done**
+- Branch: `feat/ui/task-00165-logo-asset-swap-crop`
+- Scope delivered:
+  - Replaced the left-nav brand logo asset with the newly provided Railfin logo (`public/brand/railfin-v1.png`).
+  - Trimmed transparent outer padding from the source asset so the visible mark renders tighter with minimal dead space.
+  - Converted nav behavior to hover-driven auto-expand/collapse: collapsed by default, expands while hovered/focused, and auto-collapses after ~2s when not hovered.
+  - Removed bottom nav minimize/maximize controls and related toggle UI.
+  - Added Lucide icons to each nav item and compacted nav row vertical spacing so each row is only as tall as needed.
+  - Preserved nav usability/responsiveness, existing shell sizing/alignment logic, and crisp logo rendering at current sizes.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00164 — UI — Left nav auto-minimize + width refinement
 
 - Status: **Done**

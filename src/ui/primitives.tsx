@@ -33,15 +33,20 @@ export function Badge({ children, className }: PrimitiveProps) {
 export function NavItem({
   href,
   label,
+  icon,
   active,
 }: {
   href: string;
   label: string;
+  icon: ReactNode;
   active?: boolean;
 }) {
   return (
     <Link href={href} className={cx("rf-nav-item", active ? "is-active" : undefined)}>
-      {label}
+      <span className="rf-nav-item-icon" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="rf-nav-item-label">{label}</span>
     </Link>
   );
 }
