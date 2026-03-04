@@ -1,3 +1,10 @@
+## task-00176 — Left-nav Events icon update + brand-harmonic icon palette
+
+- Updated `src/ui/app-shell.tsx` to switch **Events** nav icon from `CalendarDays` to Lucide **`Tickets`** while preserving existing nav icon render contract (size `23`, strokeWidth `2`) and current collapse/expand stability behavior.
+- Refined per-route nav icon colors in `src/app/globals.css` to a cohesive Railfin-complementary cool palette with strong contrast on white and active-row surfaces:
+  - Create `#1d4ed8`, Library `#6d28d9`, Campaigns `#0f766e`, Events `#0369a1`, Help Center `#4338ca`, Configure `#334155`.
+- Kept nav row geometry, icon slot sizing, label transitions, and collapsed-rail behavior unchanged to avoid reintroducing prior jitter/reflow regressions.
+
 ## task-00175 — Left-nav icon remap (requested set) with fallback reference
 
 - Updated app-shell primary nav icons in `src/ui/app-shell.tsx` to requested mapping while preserving existing size/stroke contracts (Lucide size `23`, strokeWidth `2`) so current nav visual balance, color classes, and no-jitter behavior remain intact.

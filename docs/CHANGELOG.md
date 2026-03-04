@@ -1,3 +1,8 @@
+## 2026-03-04 — Left-nav Events icon + cohesive brand-harmonic icon palette (task-00176)
+- Swapped the app-shell **Events** nav icon from `CalendarDays` to Lucide `Tickets` while preserving existing icon sizing/stroke and sidebar interaction behavior.
+- Replaced prior mixed per-item icon colors with a cohesive high-contrast Railfin-complementary palette across primary nav icons.
+- Preserved left-nav collapse/expand stability contracts (row metrics, icon slot geometry, label-only visibility transitions) in both expanded and collapsed states.
+
 ## 2026-03-04 — Left-nav icon mapping refresh with fallback reference (task-00175)
 - Updated app-shell primary nav icons to requested set: Create→Pickaxe, Library→BookOpenText, Campaigns→Goal (target-arrow SVG geometry), Help Center→LifeBuoy, Configure→Settings.
 - Kept icon sizing/stroke and per-item icon class wiring unchanged so current nav visual rhythm/colors and collapse/expand jitter fixes are preserved.
