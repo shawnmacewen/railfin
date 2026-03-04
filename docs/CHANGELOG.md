@@ -1,3 +1,12 @@
+## 2026-03-04 — SEC — Events v0.2 safety baseline phase 1 (task-00180)
+- Added Events v0.2 docs-first security baseline for:
+  - registration data fields handling controls
+  - QR check-in trust model and replay/validation constraints
+  - attendance/no-show communication segmentation safety
+- Added explicit deferred-email-plumbing safety note: outbound sends remain disabled in this phase.
+- Added acceptance criteria gates required before enabling outbound attendance/no-show email delivery in a future phase.
+- Updated security/task/changelog/lane-report docs only; no runtime code changes.
+
 ## 2026-03-04 — Milestone formalization: v0.1 locked, v0.2 Events roadmap (task-00178)
 - Set product milestone baseline to **v0.1 (MVP locked)** for current release-state documentation.
 - Established **v0.2** as the next roadmap milestone with explicit focus on the **Events Module**.
@@ -278,3 +287,9 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added two linked detail pages for immediate operator onboarding:
   - Getting started with Create
   - Compliance review and remediation basics
+
+## 2026-03-04 — Events UI foundation phase 1 (task-00179)
+- Replaced the Events placeholder with a functional landing experience that includes a prominent **Create Event** call-to-action and an empty-state-friendly Upcoming Events section.
+- Added the first Event creation wizard step at `/app/events/new` with local form capture for title, date, summary, and location.
+- Added local submit placeholder feedback for step 1 and intentionally deferred downstream messaging/email plumbing.
+- Preserved existing app-shell navigation behavior and overall UI style contract.

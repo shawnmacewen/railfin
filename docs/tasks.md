@@ -1,3 +1,13 @@
+## task-00180 — SEC — Events v0.2 safety baseline phase 1
+
+- Status: **Done**
+- Branch: `chore/sec/task-00180-events-safety-baseline`
+- Scope delivered:
+  - Added Events v0.2 security baseline checklist to `docs/SECURITY_BASELINE.md` covering registration data-field handling, QR check-in trust model controls, and attendance/no-show segmentation safety.
+  - Added explicit deferred-email-plumbing safety note to keep outbound sends disabled in this phase.
+  - Added concrete acceptance criteria gates required before enabling real outbound attendance/no-show sends later.
+  - Updated sec lane report and changelog for task traceability.
+
 ## task-00178 — DEV/COO — Milestone state formalization (v0.1 locked, v0.2 Events roadmap)
 
 - Status: **Done**
@@ -1648,3 +1658,15 @@
   - Added two concise help detail pages linked from topic cards: `/app/help/getting-started` and `/app/help/compliance-basics`.
   - Added top-level shortcut route `/help` → `/app/help`.
   - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
+## task-00179 — UI — Events v0.2 UI foundation phase 1
+
+- Status: **Done**
+- Branch: `feat/ui/task-00179-events-ui-foundation`
+- Scope delivered:
+  - Implemented Events landing page with prominent **Create Event** CTA and empty-state-friendly events list section.
+  - Added Event creation wizard step-1 screen at `/app/events/new` with local form state fields (title, date, summary, location).
+  - Added step-1 submit placeholder behavior (local success state only; no email plumbing).
+  - Preserved existing app shell/nav behavior and styling patterns.
+  - Updated `docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`, and lane report.
+  - Ran `npm run build` (pass).

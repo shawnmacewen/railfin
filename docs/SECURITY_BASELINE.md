@@ -1,3 +1,60 @@
+## task-00180 — SEC — Events v0.2 safety baseline phase 1 (registration, QR check-in, attendance segmentation)
+
+Review scope:
+- `docs/PRD_Events_Module_v0.md`
+- `docs/tasks.md` (Events stream references)
+- `docs/CHANGELOG.md` (Events feature/change history context)
+
+### Events v0.2 security baseline checklist (phase 1)
+
+1. **Registration data fields handling baseline (required):**
+   - Data minimization: collect only fields strictly needed for event operations in v0.2 (e.g., attendee identity/contact + event-linked participation metadata).
+   - Field classification: tag each registration field as `public-display`, `operator-internal`, or `sensitive-contact` before persistence/use in downstream flows.
+   - Storage/transport: registration payloads must remain on authenticated internal API paths with existing authz checks; no unauthenticated registration export surfaces.
+   - Logging discipline: avoid raw registration PII in app/runtime logs; use redacted identifiers for operational diagnostics.
+   - Retention/deletion baseline: define explicit retention horizon for registration records and no-show status artifacts before outbound comms are enabled.
+
+2. **QR check-in trust model baseline (required):**
+   - Treat QR payloads as **untrusted input** by default; scan result alone is not sufficient proof of identity/entitlement.
+   - Validate QR token against server-side event context (event id, attendee id, status, expiry/nonce constraints) before marking attendance.
+   - Enforce single-use or bounded-reuse semantics per attendance policy to prevent replay-driven duplicate check-ins.
+   - Record immutable check-in audit facts (`who checked in`, `when`, `where/device context`, `result`) for dispute handling.
+   - Fail-safe behavior: invalid/expired/mismatched QR states must produce explicit operator-visible denial reason and no attendance mutation.
+
+3. **Attendance/no-show communications segmentation safety baseline (required):**
+   - Segment recipients by deterministic server-side attendance status (`attended`, `no-show`, `unknown`) with default-deny behavior for `unknown`.
+   - Prevent cross-segment leakage: no-show messaging must never target attended cohort and vice versa; enforce pre-send cohort count preview and mismatch checks.
+   - Require operator confirmation on cohort-affecting filters (event/date/status) before any delivery enablement.
+   - Maintain campaign/audit trace linking message intent to exact segmentation query snapshot.
+   - Keep legal/compliance disclaimer visible that attendance-derived outreach is guidance-assisted and operator-approved only.
+
+### Deferred-email-plumbing safety note (explicit)
+
+- Events v0.2 keeps outbound email plumbing intentionally **deferred** in this phase.
+- Until explicit enablement criteria below are met, the system must not execute real outbound sends from attendance/no-show flows.
+- Any interim UX for follow-up messaging must remain draft/simulation-only (no hidden side-channel dispatch paths).
+
+### Acceptance criteria for enabling outbound sends later
+
+- [ ] Segmentation gate: deterministic cohort builder tested for mutual exclusivity (`attended` vs `no-show`) and safe handling of `unknown`.
+- [ ] Recipient proofing gate: preflight preview shows final recipient counts + sample redacted records, requiring explicit operator acknowledgment.
+- [ ] Idempotency gate: outbound pipeline enforces idempotency keys and duplicate-send protection across retries.
+- [ ] Audit gate: send attempts persist actor, event id, segment, template/version, delivery provider response, and outcome.
+- [ ] Secrets/config gate: email provider credentials stored only in sanctioned secret management paths; no repo-checked credentials.
+- [ ] Rollback gate: documented kill-switch to disable Events outbound sends without impacting registration/check-in operations.
+- [ ] Security sign-off gate: sec lane rerun required before first production enablement of outbound attendance/no-show messaging.
+
+### Gate decision (task-00180)
+
+- **Events v0.2 phase-1 baseline status:** **GO (docs baseline established, send-path remains deferred)**
+- Rationale: required safety controls for registration, QR trust boundaries, and cohort segmentation are documented; outbound email remains intentionally disabled pending explicit acceptance-gate closure.
+
+### Verification outcome (task-00180)
+
+- Outcome: **PASS (docs-first baseline delivered)**
+- Code changes: none (runtime unchanged by design)
+- Build: not run (docs-only task)
+
 ## task-00151 — SEC — Lexical safety review phase 1 (HTML save/load/render + compliance extraction)
 
 Review scope:
