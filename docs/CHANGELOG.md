@@ -1,3 +1,9 @@
+## 2026-03-04 — Create Generate/Lock action alignment across Topics + AI prompt (task-00158)
+- Added **Generate Content** action to Topics mode and aligned Topics-mode action order to **Lock Prompt** then **Generate Content** under the selector area.
+- Moved AI prompt mode action row under the AI Instructions textarea, matching Topics-mode placement/order.
+- Unified both modes to the same generate entry pipeline so selected content type/topics/purposes continue feeding generation context.
+- Preserved save/compliance/history/remediation behavior with no API contract changes.
+
 ## 2026-03-04
 
 - Create page now places the four content-type buttons above the **Create content by** selector and adds toggleable **Topics**/**Purpose** controls in Topics mode.

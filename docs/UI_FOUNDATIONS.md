@@ -1,3 +1,12 @@
+## task-00158 — Generate/Lock action alignment across Create input modes
+
+- `src/ui/editor-shell.tsx` now renders a shared action pattern in both Create input modes:
+  - **Topics mode:** Topics/Purpose selectors followed by action row (**Lock Prompt**, then **Generate Content**).
+  - **AI prompt mode:** action row moved beneath the prompt textarea (same order and labels).
+- Topics mode can now generate directly without switching modes by using a deterministic UI-composed prompt scaffold while preserving the same backend generation path.
+- Both modes now execute the same `runGenerate` pipeline and preserve selected `contentType`, `topics[]`, and `purposes[]` context through existing generate requests.
+- Existing Create save/compliance/history/remediation surfaces remain unchanged.
+
 ## task-00157 — Create topics/purpose toggles + generation payload wiring
 
 - `src/ui/editor-shell.tsx` updates Create Generate controls so the four content-type buttons now render above the **Create content by** selector (applies to both Topics and AI Prompt modes).

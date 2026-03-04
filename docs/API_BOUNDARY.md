@@ -1,3 +1,11 @@
+## task-00158 — Create mode alignment (Topics + AI prompt) on shared generate pipeline
+
+- No generate endpoint schema change required. `POST /api/internal/content/generate` request/response contracts remain unchanged.
+- UI contract clarification (`src/ui/editor-shell.tsx`):
+  - Both Topics mode and AI prompt mode now trigger the same generate pipeline (`runGenerate(...)`).
+  - Topics mode composes a deterministic prompt scaffold client-side when freeform prompt text is not used.
+  - Existing request context fields (`contentType`, `topics`, `purposes`) continue to be passed to backend prompt scaffolding unchanged.
+
 ## task-00157 — Generate contract extension (topics/purposes context injection)
 
 Default generate prompt/context location (current source of truth):

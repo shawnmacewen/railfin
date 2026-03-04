@@ -924,6 +924,10 @@ button:disabled {
   margin: 0;
 }
 
+.rf-topic-purpose-grid > .rf-generate-action-row {
+  grid-column: 1 / -1;
+}
+
 .rf-topic-purpose-buttons {
   display: grid;
   gap: 0.45rem;
@@ -974,13 +978,14 @@ button:disabled {
   font-weight: 600;
 }
 
-.rf-prompt-header-actions {
+.rf-generate-action-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+  margin-top: 0.55rem;
 }
 
-.rf-prompt-header-actions button {
+.rf-generate-action-row button {
   margin: 0;
 }
 

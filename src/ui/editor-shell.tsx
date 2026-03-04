@@ -359,7 +359,35 @@ export function EditorShell() {
   }, [generationHistoryContextKey]);
 
   const canSave = isLexicalReady && contentText.trim().length > 0 && status !== "saving";
-  const canGenerate = isLexicalReady && promptInput.trim().length > 0 && generationStatus !== "generating";
+
+  const generationPrompt = useMemo(() => {
+    const trimmedPrompt = promptInput.trim();
+
+    if (createInputMode === "prompt") {
+      return trimmedPrompt;
+    }
+
+    const selectedTopicLabels = TOPIC_OPTIONS
+      .filter((option) => selectedTopics.includes(option.id))
+      .map((option) => option.label);
+    const selectedPurposeLabels = PURPOSE_OPTIONS
+      .filter((option) => selectedPurposes.includes(option.id))
+      .map((option) => option.label);
+    const selectedTypeLabel = CONTENT_TYPE_LABELS[contentType];
+
+    return [
+      `Generate a ${selectedTypeLabel} draft for this campaign.`,
+      selectedTopicLabels.length > 0
+        ? `Prioritize these topics: ${selectedTopicLabels.join(", ")}.`
+        : "No specific topic selected; choose the best angle from current context.",
+      selectedPurposeLabels.length > 0
+        ? `Optimize for these purposes: ${selectedPurposeLabels.join(", ")}.`
+        : "No specific purpose selected; optimize for general audience value.",
+      "Return a complete first draft ready for operator review.",
+    ].join("\n");
+  }, [contentType, createInputMode, promptInput, selectedPurposes, selectedTopics]);
+
+  const canGenerate = isLexicalReady && generationPrompt.trim().length > 0 && generationStatus !== "generating";
 
   const selectedContentOption = useMemo(() => {
     return CREATE_CONTENT_OPTIONS.find((option) => option.apiType === contentType)?.id ?? "blog";
@@ -572,11 +600,11 @@ export function EditorShell() {
   const onGenerate = async () => {
     if (!canGenerate) {
       setGenerationStatus("error");
-      setGenerationFeedback("Add AI instructions before generating.");
+      setGenerationFeedback(createInputMode === "prompt" ? "Add AI instructions before generating." : "Select topic/purpose filters before generating.");
       return;
     }
 
-    await runGenerate(promptInput);
+    await runGenerate(generationPrompt);
   };
 
   const onTogglePromptLock = () => {
@@ -586,15 +614,17 @@ export function EditorShell() {
       return;
     }
 
-    const trimmed = promptInput.trim();
+    const trimmed = (createInputMode === "prompt" ? promptInput : generationPrompt).trim();
     if (!trimmed) {
       setGenerationStatus("error");
-      setGenerationFeedback("Add AI instructions before locking prompt.");
+      setGenerationFeedback(createInputMode === "prompt" ? "Add AI instructions before locking prompt." : "Select topic/purpose filters before locking prompt.");
       return;
     }
 
     setLockedPrompt(trimmed);
-    setPromptInput(trimmed);
+    if (createInputMode === "prompt") {
+      setPromptInput(trimmed);
+    }
     setIsPromptLocked(true);
     setIsPromptAccordionCollapsed(true);
   };
@@ -933,20 +963,20 @@ export function EditorShell() {
                         ))}
                       </div>
                     </div>
-                    <p className="rf-status rf-status-muted" role="status">Pick topic/purpose filters, then switch to AI prompt to generate.</p>
+                    <p className="rf-status rf-status-muted" role="status">Pick topic and purpose filters, then generate directly from this mode.</p>
+                    <div className="rf-generate-action-row">
+                      <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
+                        {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
+                      </button>
+                      <button type="button" onClick={onGenerate} disabled={!canGenerate}>
+                        {generationStatus === "generating" ? "Generating..." : "Generate Content"}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>
                     <div className="rf-prompt-header-row">
                       <label htmlFor="editor-prompt">AI Instructions</label>
-                      <div className="rf-prompt-header-actions">
-                        <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
-                          {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
-                        </button>
-                        <button type="button" onClick={onGenerate} disabled={!canGenerate}>
-                          {generationStatus === "generating" ? "Generating..." : "Generate Content"}
-                        </button>
-                      </div>
                     </div>
                     {isPromptAccordionCollapsed ? (
                       <div className="rf-prompt-collapsed-summary">
@@ -967,6 +997,14 @@ export function EditorShell() {
                         {lockedPrompt ? (
                           <p className="rf-status rf-status-muted" role="status">Locked prompt saved for reference.</p>
                         ) : null}
+                        <div className="rf-generate-action-row">
+                          <button type="button" onClick={onTogglePromptLock} disabled={!isLexicalReady}>
+                            {isPromptLocked ? "Unlock Prompt" : "Lock Prompt"}
+                          </button>
+                          <button type="button" onClick={onGenerate} disabled={!canGenerate}>
+                            {generationStatus === "generating" ? "Generating..." : "Generate Content"}
+                          </button>
+                        </div>
                       </>
                     )}
                   </>

@@ -1,3 +1,15 @@
+## task-00158 — UI/DEV — Align Generate/Lock placement across Topics + AI Prompt modes
+
+- Status: **Done**
+- Branch: `feat/ui/task-00158-generate-buttons-topics-prompt`
+- Scope delivered:
+  - Added **Generate Content** action in Topics mode and aligned action order under mode content: **Lock Prompt** then **Generate Content**.
+  - Moved prompt-mode action row so Lock/Generate now render beneath the AI prompt textarea (instead of prompt header).
+  - Unified generation entrypoint so both Topics mode and AI Prompt mode call the same generate pipeline and preserve selected `contentType`, `topics[]`, and `purposes[]` in request context.
+  - Added Topics-mode prompt scaffolding fallback in UI so generation remains possible from Topics mode while backend prompt context still receives selected topic/purpose/type data.
+  - Preserved save/compliance/history/remediation behavior (no contract or remediation-flow regressions).
+  - Updated UI/API/changelog/lane-report docs and ran `npm run build` (pass).
+
 ## task-00157 — DEV/UI — Create topics/purpose UX additions + generation wiring
 
 - Status: **Done**
