@@ -1,3 +1,9 @@
+## 2026-03-04 — Left nav row-height hard fix across collapsed/expanded/transition states (task-00167)
+- Eliminated nav row stretch behavior by switching `.rf-nav-list` from grid to vertical flex layout so extra sidebar height is not distributed across item rows.
+- Locked `.rf-nav-item` to one fixed compact row height (`1.72rem`) with zero vertical padding growth and overflow constraints for consistent rhythm in expanded, collapsed, and transitioning states.
+- Kept icon + label vertically centered with explicit flex centering and normalized line-height on the row/label.
+- Preserved icon geometry and non-animated icon rendering while keeping collapse/expand animation scoped to label visibility only (`max-width` + `opacity`).
+
 ## 2026-03-04 — Left nav row-height + icon stability during collapse/expand (task-00166)
 - Tightened left-nav item vertical rhythm (padding/line-height/gap/min-height) so rows are compact and only as tall as needed.
 - Stabilized nav icon rendering with a fixed 1rem icon slot (.rf-nav-item-icon) and disabled icon-layer transform/opacity transitions to prevent flicker/disappearance.

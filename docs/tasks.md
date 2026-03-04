@@ -1,3 +1,15 @@
+## task-00167 — UI — Left-nav row-height hard fix across all states
+
+- Status: **Done**
+- Branch: `feat/ui/task-00167-nav-row-height-hard-fix`
+- Scope delivered:
+  - Fixed root cause of oversized/inconsistent nav row heights by replacing stretch-prone grid nav list layout with a column flex stack (`.rf-nav-list`) that never distributes extra vertical space across rows.
+  - Enforced a single fixed nav row height in all states (`height/min-height/max-height: 1.72rem`) and removed vertical padding-based growth from `.rf-nav-item`.
+  - Kept icon + label vertically centered with explicit flex alignment and line-height normalization on row + label.
+  - Prevented collapse/expand from affecting row height/vertical rhythm; only label visibility animation remains (`max-width` + `opacity`).
+  - Preserved icon slot size and rendering stability (`.rf-nav-item-icon` fixed 1rem box, no icon transition).
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00166 — UI — Left-nav row height + icon stability on collapse/expand
 
 - Status: **Done**
