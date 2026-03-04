@@ -606,6 +606,10 @@ button:disabled {
   color: #4e5879;
 }
 
+.rf-library-subtitle-standalone {
+  margin-top: 0;
+}
+
 .rf-library-section-title {
   margin: 0.2rem 0 0.65rem;
   font-size: 0.95rem;
@@ -824,6 +828,22 @@ button:disabled {
 .rf-page-subtitle {
   margin: 0.3rem 0 0;
   color: #4e5879;
+}
+
+.rf-page-subtitle-standalone {
+  margin-top: 0;
+}
+
+.rf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .rf-configure-page {
@@ -1363,13 +1383,6 @@ button:disabled {
   background: #f8faff;
 }
 
-.rf-help-kicker {
-  margin: 0 0 0.3rem;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #4e5879;
-}
 
 .rf-help-search-label {
   font-size: 0.82rem;

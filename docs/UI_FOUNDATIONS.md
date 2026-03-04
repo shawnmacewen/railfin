@@ -1,3 +1,11 @@
+## task-00173 — Remove duplicate in-page page-title headings under shell header
+
+- Audited primary shell pages for duplicated page labels between top header (`<h1 class="rf-header-title">`) and in-content headings.
+- Removed redundant visible in-content page titles for **Create**, **Library**, **Configure**, and **Events** surfaces while preserving layout rhythm.
+- Updated Help hero to avoid repeating the nav page label as visible body text and retained the existing welcome headline.
+- Preserved accessibility semantics by adding screen-reader-only section headings (` .rf-sr-only `) for page landmarks where visible titles were removed.
+- Added small spacing modifiers (`rf-page-subtitle-standalone`, `rf-library-subtitle-standalone`) to keep visual balance after title removal.
+
 ## task-00172 — Lock nav logo horizontal anchor across collapse/expand
 
 - Root cause: the brand row still allowed subtle x-axis drift because the logo lived directly in a content-width row where text reveal/hide and shrinking sidebar width could introduce small horizontal reflow.

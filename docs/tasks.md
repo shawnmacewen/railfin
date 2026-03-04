@@ -1,3 +1,14 @@
+## task-00173 — UI — Remove duplicate in-page page titles
+
+- Status: **Done**
+- Branch: `feat/ui/task-00173-remove-in-page-duplicate-titles`
+- Scope delivered:
+  - Audited shell pages for duplicate labels already represented in the top app header.
+  - Removed visible duplicate in-content page-title headings on Create/Library/Configure/Events.
+  - Kept page semantics accessible via screen-reader-only headings where visible labels were removed.
+  - Preserved spacing/visual rhythm with small subtitle spacing modifiers.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00172 — UI — Lock nav logo horizontal anchor across collapse/expand
 
 - Status: **Done**
