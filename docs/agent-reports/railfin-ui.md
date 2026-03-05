@@ -1,3 +1,13 @@
+## task-00188 — UI/DEV — Lexical Create editor typing/input hotfix
+
+- Status: **Done**
+- Branch: `fix/ui/task-00188-lexical-editor-typing-bug`
+- Scope delivered:
+  - Root-caused typing instability to Lexical sync-loop behavior that re-applied HTML into the editor during active typing.
+  - Added last-known HTML tracking across editor onChange + sync plugin to avoid unnecessary DOM re-import/reset cycles.
+  - Updated change extraction to use editor-state read path and preserved toolbar focus/selection behavior.
+  - Build verification: `npm run build` passed.
+
 ## task-00187 — UI — CRM basic lead tracking space phase 1
 
 - Status: **Done**
