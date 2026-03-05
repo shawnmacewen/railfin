@@ -1,3 +1,9 @@
+## 2026-03-05 — Lexical Create editor typing/input hotfix (task-00188)
+- Fixed unreliable typing in Create editor where some characters were intermittently dropped or felt stuck due to repeated value re-hydration into Lexical during active input.
+- Added a last-known HTML sync guard so editor-internal changes are not immediately re-imported as external updates.
+- Switched change serialization path to read current editor state directly (instead of nested update) to keep input/composition behavior stable.
+- Preserved existing toolbar formatting interactions and Create save/compliance/generate flows.
+
 ## 2026-03-04 — CRM basic lead tracking space phase 1 (task-00187)
 - Added new app-shell primary nav item **CRM** with landing route `/app/crm`.
 - Added basic Contact CRM page with lead list + create form (name, email, optional phone/source, status).

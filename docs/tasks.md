@@ -1,3 +1,14 @@
+## task-00188 — UI/DEV — Lexical Create editor typing/input hotfix
+
+- Status: **Done**
+- Branch: `fix/ui/task-00188-lexical-editor-typing-bug`
+- Scope delivered:
+  - Identified root cause of unreliable typing: editor content was being re-imported into Lexical on nearly every keystroke due to sync-loop coupling between parent value updates and SyncValuePlugin hydration logic.
+  - Hardened Lexical sync boundary so external value hydration is skipped when incoming value already matches the editor's latest emitted normalized HTML.
+  - Updated change extraction path to read editor state (no nested update call) and track last-known HTML for stable cursor/composition behavior during typing.
+  - Preserved toolbar behavior and selection retention semantics while removing typing/input instability.
+  - Verified build with `npm run build` (pass).
+
 ## task-00187 — DEV/UI — CRM basic lead tracking space phase 1
 
 - Status: **Done**

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import React, { useEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -358,13 +358,22 @@ function Toolbar() {
   );
 }
 
-function SyncValuePlugin({ value, onReadyChange }: { value: string; onReadyChange?: (isReady: boolean) => void }) {
+function SyncValuePlugin({
+  value,
+  onReadyChange,
+  lastKnownHtmlRef,
+}: {
+  value: string;
+  onReadyChange?: (isReady: boolean) => void;
+  lastKnownHtmlRef: MutableRefObject<string>;
+}) {
   const [editor] = useLexicalComposerContext();
   const lastAppliedValueRef = useRef("");
 
   useEffect(() => {
     const nextValue = normalizeHtml(value);
-    if (nextValue === lastAppliedValueRef.current) {
+    if (nextValue === lastAppliedValueRef.current || nextValue === lastKnownHtmlRef.current) {
+      lastAppliedValueRef.current = nextValue;
       onReadyChange?.(true);
       return;
     }
@@ -384,21 +393,28 @@ function SyncValuePlugin({ value, onReadyChange }: { value: string; onReadyChang
     });
 
     lastAppliedValueRef.current = nextValue;
+    lastKnownHtmlRef.current = nextValue;
     onReadyChange?.(true);
   }, [editor, onReadyChange, value]);
 
   return null;
 }
 
-function handleChange(editor: LexicalEditor, onChange: (change: LexicalChange) => void) {
-  editor.update(() => {
+function handleChange(
+  editor: LexicalEditor,
+  onChange: (change: LexicalChange) => void,
+  lastKnownHtmlRef: MutableRefObject<string>,
+) {
+  editor.getEditorState().read(() => {
     const html = $generateHtmlFromNodes(editor, null);
     const normalized = normalizeEditorChange(html);
+    lastKnownHtmlRef.current = normalized.html;
     onChange({ html: normalized.html, text: normalized.text });
   });
 }
 
 export function LexicalEditorField({ value, onChange, placeholder, onReadyChange }: LexicalEditorFieldProps) {
+  const lastKnownHtmlRef = useRef(normalizeHtml(value));
   const initialConfig = useMemo(
     () => ({
       namespace: "railfin-create-editor",
@@ -425,8 +441,8 @@ export function LexicalEditorField({ value, onChange, placeholder, onReadyChange
         <HistoryPlugin />
         <ListPlugin />
         <LinkPlugin />
-        <SyncValuePlugin value={value} onReadyChange={onReadyChange} />
-        <OnChangePlugin onChange={(_state, activeEditor) => handleChange(activeEditor, onChange)} />
+        <SyncValuePlugin value={value} onReadyChange={onReadyChange} lastKnownHtmlRef={lastKnownHtmlRef} />
+        <OnChangePlugin onChange={(_state, activeEditor) => handleChange(activeEditor, onChange, lastKnownHtmlRef)} />
       </div>
     </LexicalComposer>
   );
