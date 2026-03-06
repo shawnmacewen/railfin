@@ -251,6 +251,12 @@
 
 # Railfin Change Log
 
+## 2026-03-06 — Left-nav label-size refinement + brand-palette icon colors (task-00192)
+- Reduced left-nav label typography size for better scan density while keeping icon size unchanged.
+- Applied per-nav-item icon colors using Railfin brand family tones derived from teal (`#0298B8`), blue (`#0664B5`), and orange (`#E46A0C`).
+- Added explicit CRM icon color class wiring so all primary nav items now use consistent class-based icon coloring.
+- Preserved nav row-height/collapse alignment stability behavior and added dark-scheme icon tint overrides for contrast.
+
 This change log is written for humans. It tracks major shipped milestones and product-facing improvements.
 
 ## 2026-03-03 — Create single-content focus + prompt-lock accordion + editor/compliance upgrade (task-00147)

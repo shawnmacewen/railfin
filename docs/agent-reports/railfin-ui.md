@@ -1,3 +1,16 @@
+## task-00192 — UI — Left-nav label font down + icon palette refinement
+
+- Status: **Done**
+- Branch: `feat/ui/task-00192-nav-font-down-icon-palette`
+- Scope delivered:
+  - Reduced nav label size from `1.36rem` to `1.2rem` while preserving icon render size and slot dimensions.
+  - Added explicit per-item nav icon class wiring (including CRM) and remapped icon colors to Railfin brand-family tones from teal/blue/orange palette.
+  - Added dark-scheme icon tint overrides to maintain readability on dark surfaces.
+  - Kept row-height and collapse/expand alignment stability fixes intact (no jitter-related geometry changes).
+  - Build verification: `npm run build` passed.
+
+- 2026-03-06 04:44 UTC task-00192: reduced left-nav label typography size (icons unchanged), applied class-based per-item icon colors using brand palette derivatives (teal/blue/orange family) with dark-mode tints, preserved nav row/collapse jitter fixes, updated UI docs/tasks/changelog/lane report, and build passed.
+
 ## task-00190 — UI/DEV — Lexical editor functionality sweep + stabilization
 
 - Status: **Done**

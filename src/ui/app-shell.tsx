@@ -10,13 +10,13 @@ import { BookOpenText, Goal, LifeBuoy, Pickaxe, Settings, Tickets, Users } from 
 import { Badge, Button, NavItem } from "./primitives";
 
 const NAV_ITEMS = [
-  { label: "Create", href: "/app/create", icon: <Pickaxe size={23} strokeWidth={2} /> },
-  { label: "Library", href: "/app/library", icon: <BookOpenText size={23} strokeWidth={2} /> },
-  { label: "Campaigns", href: "/app/campaigns", icon: <Goal size={23} strokeWidth={2} /> },
-  { label: "CRM", href: "/app/crm", icon: <Users size={23} strokeWidth={2} /> },
-  { label: "Events", href: "/app/events", icon: <Tickets size={23} strokeWidth={2} /> },
-  { label: "Help Center", href: "/app/help", icon: <LifeBuoy size={23} strokeWidth={2} /> },
-  { label: "Configure", href: "/app/configure", icon: <Settings size={23} strokeWidth={2} /> },
+  { label: "Create", href: "/app/create", icon: <Pickaxe size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-create" },
+  { label: "Library", href: "/app/library", icon: <BookOpenText size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-library" },
+  { label: "Campaigns", href: "/app/campaigns", icon: <Goal size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-campaigns" },
+  { label: "CRM", href: "/app/crm", icon: <Users size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-crm" },
+  { label: "Events", href: "/app/events", icon: <Tickets size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-events" },
+  { label: "Help Center", href: "/app/help", icon: <LifeBuoy size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-help" },
+  { label: "Configure", href: "/app/configure", icon: <Settings size={23} strokeWidth={2} />, iconClassName: "rf-nav-icon-configure" },
 ];
 
 const AUTO_MINIMIZE_DELAY_MS = 3000;
@@ -93,7 +93,7 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
         </Link>
         <nav className="rf-nav-list">
           {NAV_ITEMS.map((item) => (
-            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(pathname, item.href)} />
+            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} iconClassName={item.iconClassName} active={isActive(pathname, item.href)} />
           ))}
         </nav>
         <div className="rf-sidebar-controls">

@@ -1,3 +1,15 @@
+## task-00192 — UI — Left-nav label font down + brand-palette icon refinement
+
+- Status: **Done**
+- Branch: `feat/ui/task-00192-nav-font-down-icon-palette`
+- Scope delivered:
+  - Reduced left-nav label typography size (`1.36rem -> 1.2rem`) while keeping nav icon render/slot sizing unchanged.
+  - Applied per-item icon color mapping across primary nav using teal/blue/orange brand-family tones derived from `#0298B8`, `#0664B5`, and `#E46A0C`.
+  - Added explicit CRM icon class wiring so all nav items use deterministic route-level icon color classes.
+  - Kept existing nav row-height/alignment stability contracts intact (no row metric changes; no collapse/expand jitter regressions).
+  - Added dark-scheme icon tint overrides to preserve contrast/readability on darker surfaces.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00191 — UI/DEV — Lexical selection-command + link/list hotfix
 
 - Status: **Done**

@@ -172,7 +172,7 @@ button:disabled {
   padding: 0 0.5rem;
   margin: 0;
   color: #3b4259;
-  font-size: 1.36rem;
+  font-size: 1.2rem;
   font-weight: 500;
   line-height: 1;
   overflow: hidden;
@@ -220,27 +220,61 @@ button:disabled {
 
 
 .rf-nav-icon-create {
-  color: #1d4ed8;
+  color: #e46a0c;
 }
 
 .rf-nav-icon-library {
-  color: #6d28d9;
+  color: #0664b5;
 }
 
 .rf-nav-icon-campaigns {
-  color: #0f766e;
+  color: #0298b8;
+}
+
+.rf-nav-icon-crm {
+  color: #0483b7;
 }
 
 .rf-nav-icon-events {
-  color: #0369a1;
+  color: #b95616;
 }
 
 .rf-nav-icon-help {
-  color: #4338ca;
+  color: #0476a6;
 }
 
 .rf-nav-icon-configure {
-  color: #334155;
+  color: #137fa0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rf-nav-icon-create {
+    color: #f08f3f;
+  }
+
+  .rf-nav-icon-library {
+    color: #3b8bd0;
+  }
+
+  .rf-nav-icon-campaigns {
+    color: #3db3cc;
+  }
+
+  .rf-nav-icon-crm {
+    color: #57a7ce;
+  }
+
+  .rf-nav-icon-events {
+    color: #ef8a43;
+  }
+
+  .rf-nav-icon-help {
+    color: #58a9d0;
+  }
+
+  .rf-nav-icon-configure {
+    color: #63b8d2;
+  }
 }
 
 .rf-main {

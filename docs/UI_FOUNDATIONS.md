@@ -1,3 +1,14 @@
+## task-00192 — Left-nav typography + brand-palette icon refinement
+
+- Updated app-shell nav icon wiring in `src/ui/app-shell.tsx` so every primary nav item passes a deterministic `iconClassName` (including CRM) into the shared `NavItem` primitive.
+- Reduced left-nav label size in `src/app/globals.css` from `1.36rem` to `1.2rem` to improve density while preserving current icon size and row geometry.
+- Replaced icon-color map with Railfin brand-family tones derived from:
+  - Teal: `#0298B8`
+  - Blue: `#0664B5`
+  - Orange: `#E46A0C`
+- Added dark-scheme icon tint overrides (`@media (prefers-color-scheme: dark)`) to keep icon contrast legible on darker backgrounds.
+- Preserved nav stability constraints from prior jitter-fix tasks by leaving row height, icon slot dimensions, and collapse/expand alignment contracts unchanged.
+
 ## task-00191 — Lexical toolbar selection-target + link popover model
 
 - Toolbar command contract in `src/ui/lexical-editor.tsx` now follows a strict selection-first model:
