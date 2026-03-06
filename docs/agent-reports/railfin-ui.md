@@ -125,3 +125,18 @@
 
 - 2026-03-04 07:28 UTC task-00173: audited app-shell primary pages for duplicated page labels, removed redundant visible in-content titles on Create/Library/Configure/Events, retained semantic structure via new `.rf-sr-only` headings + spacing modifiers (`rf-page-subtitle-standalone`, `rf-library-subtitle-standalone`), updated UI docs/tasks/changelog/lane report, and build passed.
 - 2026-03-04 07:35 UTC task-00175: updated left-nav icon map to requested set (Create=Pickaxe, Library=BookOpenText, Campaigns=Goal target-arrow SVG geometry from repo Lucide source, Help=LifeBuoy, Configure=Settings), preserved icon size/stroke/color-class behavior and existing collapse/expand jitter stability, documented prior default icon mapping fallback in app-shell + UI foundations docs, updated tasks/changelog, and build passed.
+
+
+## task-00191 — UI/DEV — Lexical selection-command + link/list hotfix
+
+- Status: **Done**
+- Branch: `fix/ui/task-00191-lexical-selection-command-fix`
+- Scope delivered:
+  - Enforced selection-scoped toolbar command execution for inline/alignment/list actions to stop full-editor fallback behavior.
+  - Replaced native prompt-based link flow with inline link popover UI and preserved selection for reliable apply/remove operations.
+  - Fixed list toggle handling (bullet/number/check) so wrap/unwrap works on selection without content wipe.
+  - Updated lexical sanitizer to preserve safe underline/line-through inline decorations needed for save/load persistence.
+  - Regression-checked generate→editor, save/load, and compliance extraction flows.
+  - Build verification: `npm run build` passed.
+
+- 2026-03-06 04:34 UTC task-00191: shipped Lexical selection-target command hardening, inline toolbar link popover (no native prompt), list toggle/content-preservation fixes, and underline persistence contract fix; updated UI foundations/tasks/changelog/lane report; build passed.

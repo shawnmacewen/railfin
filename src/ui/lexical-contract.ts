@@ -4,7 +4,7 @@ export const MAX_DRAFT_HTML_LENGTH = 150_000;
 export const MAX_COMPLIANCE_TEXT_LENGTH = 20_000;
 
 const BLOCK_TAGS = new Set(["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "blockquote"]);
-const ALLOWED_TAGS = new Set(["p", "br", "strong", "b", "em", "i", "u", "s", "code", "pre", "ul", "ol", "li", "h1", "h2", "h3", "blockquote", "a"]);
+const ALLOWED_TAGS = new Set(["p", "br", "strong", "b", "em", "i", "u", "s", "code", "pre", "ul", "ol", "li", "h1", "h2", "h3", "blockquote", "a", "span"]);
 const STRIP_TAGS = new Set(["script", "style", "iframe", "object", "embed", "form", "input", "button", "textarea", "select", "link", "meta", "base"]);
 
 function escapeHtml(input: string): string {
@@ -76,11 +76,15 @@ function sanitizeHtml(raw: string): string {
       }
 
       if (name === "style") {
-        const isBlock = tag === "p" || tag === "h1" || tag === "h2" || tag === "h3" || tag === "blockquote" || tag === "li";
         const style = value.toLowerCase().replace(/\s+/g, " ");
+        const isBlock = tag === "p" || tag === "h1" || tag === "h2" || tag === "h3" || tag === "blockquote" || tag === "li";
         const alignMatch = style.match(/(?:^|;)\s*text-align\s*:\s*(left|center|right|start|end)\s*(?:;|$)/);
+        const textDecorationMatch = style.match(/(?:^|;)\s*text-decoration\s*:\s*(underline|line-through)\s*(?:;|$)/);
+
         if (isBlock && alignMatch) {
           node.setAttribute("style", "text-align: " + alignMatch[1] + ";");
+        } else if (tag === "span" && textDecorationMatch) {
+          node.setAttribute("style", "text-decoration: " + textDecorationMatch[1] + ";");
         } else {
           node.removeAttribute("style");
         }

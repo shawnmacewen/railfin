@@ -15,6 +15,7 @@ import {
   $getRoot,
   $isRangeSelection,
   $isElementNode,
+  $setSelection,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
   COMMAND_PRIORITY_LOW,
@@ -28,7 +29,7 @@ import {
 import { $setBlocksType } from "@lexical/selection";
 import { $createHeadingNode, $createQuoteNode, HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { $createCodeNode, CodeNode } from "@lexical/code";
-import { LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
+import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import {
   ListItemNode,
   ListNode,
@@ -149,6 +150,9 @@ function Toolbar() {
     canUndo: false,
     canRedo: false,
   });
+  const [isLinkEditorOpen, setIsLinkEditorOpen] = useState(false);
+  const [linkUrlDraft, setLinkUrlDraft] = useState("https://");
+  const savedSelectionRef = useRef<ReturnType<typeof $getSelection> | null>(null);
 
   const updateToolbarState = () => {
     const selection = $getSelection();
@@ -252,6 +256,38 @@ function Toolbar() {
     };
   }, [editor]);
 
+  const withRangeSelection = (action: () => void) => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) return;
+      action();
+    });
+  };
+
+  const toggleTextFormat = (format: "bold" | "italic" | "underline" | "strikethrough" | "code") => {
+    withRangeSelection(() => {
+      editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+    });
+  };
+
+  const toggleAlignment = (align: "left" | "center" | "right") => {
+    withRangeSelection(() => {
+      editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, align);
+    });
+  };
+
+  const toggleList = (kind: "bullet" | "number" | "check") => {
+    withRangeSelection(() => {
+      if ((kind === "bullet" && toolbarState.bulletList) || (kind === "number" && toolbarState.orderedList) || (kind === "check" && toolbarState.checkList)) {
+        editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+        return;
+      }
+      if (kind === "bullet") editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+      if (kind === "number") editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+      if (kind === "check") editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+    });
+  };
+
   const setHeading = (tag: "h1" | "h2" | "h3") => {
     editor.update(() => {
       const selection = $getSelection();
@@ -284,24 +320,49 @@ function Toolbar() {
     });
   };
 
-  const toggleLink = () => {
-    editor.update(() => {
+  const toggleLinkEditor = () => {
+    editor.getEditorState().read(() => {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
 
-      const node = selection.anchor.getNode();
-      const parent = node.getParent();
-      const isLinked = node.getType() === "link" || parent?.getType() === "link";
+      const anchorNode = selection.anchor.getNode();
+      const focusNode = selection.focus.getNode();
+      const linkNode =
+        anchorNode.getParents().find((parentNode) => parentNode.getType() === "link") ||
+        focusNode.getParents().find((parentNode) => parentNode.getType() === "link");
 
-      if (isLinked) {
-        editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-        return;
+      const existingUrl = $isLinkNode(linkNode) ? linkNode.getURL() : "https://";
+      savedSelectionRef.current = selection.clone();
+      setLinkUrlDraft(existingUrl || "https://");
+      setIsLinkEditorOpen(true);
+    });
+  };
+
+  const applyLink = () => {
+    const nextUrl = linkUrlDraft.trim();
+    if (!nextUrl) return;
+
+    editor.update(() => {
+      if (savedSelectionRef.current) {
+        $setSelection(savedSelectionRef.current);
       }
 
-      const url = window.prompt("Enter URL", "https://");
-      if (!url) return;
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, url.trim());
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) return;
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, nextUrl);
     });
+
+    setIsLinkEditorOpen(false);
+  };
+
+  const removeLink = () => {
+    editor.update(() => {
+      if (savedSelectionRef.current) {
+        $setSelection(savedSelectionRef.current);
+      }
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+    });
+    setIsLinkEditorOpen(false);
   };
 
   const clearFormatting = () => {
@@ -330,10 +391,10 @@ function Toolbar() {
       </div>
       <div className="rf-lexical-toolbar-divider" aria-hidden="true" />
       <div className="rf-lexical-toolbar-group" aria-label="Inline formatting">
-        <ToolbarButton active={toolbarState.bold} pressed={toolbarState.bold} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")} icon={<Bold size={14} strokeWidth={2} />} label="Bold" />
-        <ToolbarButton active={toolbarState.italic} pressed={toolbarState.italic} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")} icon={<Italic size={14} strokeWidth={2} />} label="Italic" />
-        <ToolbarButton active={toolbarState.underline} pressed={toolbarState.underline} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")} icon={<Underline size={14} strokeWidth={2} />} label="Underline" />
-        <ToolbarButton active={toolbarState.strikethrough} pressed={toolbarState.strikethrough} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")} icon={<Strikethrough size={14} strokeWidth={2} />} label="Strike" />
+        <ToolbarButton active={toolbarState.bold} pressed={toolbarState.bold} onClick={() => toggleTextFormat("bold")} icon={<Bold size={14} strokeWidth={2} />} label="Bold" />
+        <ToolbarButton active={toolbarState.italic} pressed={toolbarState.italic} onClick={() => toggleTextFormat("italic")} icon={<Italic size={14} strokeWidth={2} />} label="Italic" />
+        <ToolbarButton active={toolbarState.underline} pressed={toolbarState.underline} onClick={() => toggleTextFormat("underline")} icon={<Underline size={14} strokeWidth={2} />} label="Underline" />
+        <ToolbarButton active={toolbarState.strikethrough} pressed={toolbarState.strikethrough} onClick={() => toggleTextFormat("strikethrough")} icon={<Strikethrough size={14} strokeWidth={2} />} label="Strike" />
       </div>
       <div className="rf-lexical-toolbar-divider" aria-hidden="true" />
       <div className="rf-lexical-toolbar-group" aria-label="Block formatting">
@@ -346,19 +407,33 @@ function Toolbar() {
       </div>
       <div className="rf-lexical-toolbar-divider" aria-hidden="true" />
       <div className="rf-lexical-toolbar-group" aria-label="Lists and links">
-        <ToolbarButton active={toolbarState.bulletList} pressed={toolbarState.bulletList} onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)} icon={<List size={14} strokeWidth={2} />} label="Bullets" />
-        <ToolbarButton active={toolbarState.orderedList} pressed={toolbarState.orderedList} onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)} icon={<ListOrdered size={14} strokeWidth={2} />} label="Numbered" />
-        <ToolbarButton active={toolbarState.checkList} pressed={toolbarState.checkList} onClick={() => editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)} icon={<CheckSquare size={14} strokeWidth={2} />} label="Checklist" />
-        <ToolbarButton active={toolbarState.link} pressed={toolbarState.link} onClick={toggleLink} icon={<LinkIcon size={14} strokeWidth={2} />} label="Link" />
-        <ToolbarButton onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)} icon={<Unlink size={14} strokeWidth={2} />} label="Unlink" />
+        <ToolbarButton active={toolbarState.bulletList} pressed={toolbarState.bulletList} onClick={() => toggleList("bullet")} icon={<List size={14} strokeWidth={2} />} label="Bullets" />
+        <ToolbarButton active={toolbarState.orderedList} pressed={toolbarState.orderedList} onClick={() => toggleList("number")} icon={<ListOrdered size={14} strokeWidth={2} />} label="Numbered" />
+        <ToolbarButton active={toolbarState.checkList} pressed={toolbarState.checkList} onClick={() => toggleList("check")} icon={<CheckSquare size={14} strokeWidth={2} />} label="Checklist" />
+        <ToolbarButton active={toolbarState.link} pressed={toolbarState.link} onClick={toggleLinkEditor} icon={<LinkIcon size={14} strokeWidth={2} />} label="Link" />
+        <ToolbarButton onClick={removeLink} icon={<Unlink size={14} strokeWidth={2} />} label="Unlink" />
       </div>
       <div className="rf-lexical-toolbar-divider" aria-hidden="true" />
       <div className="rf-lexical-toolbar-group" aria-label="Alignment and cleanup">
-        <ToolbarButton active={toolbarState.alignLeft} pressed={toolbarState.alignLeft} onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left")} icon={<AlignLeft size={14} strokeWidth={2} />} label="Left" />
-        <ToolbarButton active={toolbarState.alignCenter} pressed={toolbarState.alignCenter} onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center")} icon={<AlignCenter size={14} strokeWidth={2} />} label="Center" />
-        <ToolbarButton active={toolbarState.alignRight} pressed={toolbarState.alignRight} onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right")} icon={<AlignRight size={14} strokeWidth={2} />} label="Right" />
+        <ToolbarButton active={toolbarState.alignLeft} pressed={toolbarState.alignLeft} onClick={() => toggleAlignment("left")} icon={<AlignLeft size={14} strokeWidth={2} />} label="Left" />
+        <ToolbarButton active={toolbarState.alignCenter} pressed={toolbarState.alignCenter} onClick={() => toggleAlignment("center")} icon={<AlignCenter size={14} strokeWidth={2} />} label="Center" />
+        <ToolbarButton active={toolbarState.alignRight} pressed={toolbarState.alignRight} onClick={() => toggleAlignment("right")} icon={<AlignRight size={14} strokeWidth={2} />} label="Right" />
         <ToolbarButton onClick={clearFormatting} icon={<RemoveFormatting size={14} strokeWidth={2} />} label="Clear formatting" />
       </div>
+      {isLinkEditorOpen ? (
+        <div className="rf-lexical-link-popover" role="group" aria-label="Edit link">
+          <input
+            type="url"
+            value={linkUrlDraft}
+            onChange={(event) => setLinkUrlDraft(event.target.value)}
+            placeholder="https://example.com"
+            onMouseDown={(event) => event.stopPropagation()}
+          />
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={applyLink}>Apply</button>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={removeLink}>Remove</button>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => setIsLinkEditorOpen(false)}>Cancel</button>
+        </div>
+      ) : null}
     </div>
   );
 }

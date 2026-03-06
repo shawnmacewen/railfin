@@ -1,3 +1,19 @@
+## task-00191 — Lexical toolbar selection-target + link popover model
+
+- Toolbar command contract in `src/ui/lexical-editor.tsx` now follows a strict selection-first model:
+  - inline formatting, alignment, and list commands are gated by active Lexical range selection.
+  - block transforms (heading/paragraph/quote/code) continue to use selected block scope via `$setBlocksType`.
+  - no toolbar action path should reinitialize/replace root editor content.
+- Link interaction model:
+  - removed native `window.prompt` link UX.
+  - Link button opens inline popover in editor toolbar region (lower in viewport than browser prompt).
+  - popover supports URL apply/remove/cancel and restores saved selection before dispatching link command.
+- List interaction model:
+  - bullet/number/check controls are explicit toggles (apply when off, unwrap via remove-list when already active).
+  - toggles operate on selected blocks and must not clear unrelated content.
+- Persistence note:
+  - lexical contract sanitizer now preserves safe inline `span` text-decoration values used by Lexical for underline/line-through export so formatting survives save/load.
+
 ## task-00189 — Create input panel auto-collapse after successful generation
 
 - Updated `src/ui/editor-shell.tsx` Create Generate controls with a shared collapsed-input state that activates only when generation succeeds.

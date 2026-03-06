@@ -1302,7 +1302,7 @@ button:disabled {
   border-radius: 2px;
   background: #f3f4f6;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
   scrollbar-width: thin;
 }
 
@@ -1537,4 +1537,33 @@ button:disabled {
   border-radius: 2px;
   padding: 0.65rem;
   background: #fff;
+}
+
+
+.rf-lexical-link-popover {
+  position: absolute;
+  left: 0.35rem;
+  top: calc(100% + 0.3rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem;
+  border: 1px solid #cfd8eb;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+  z-index: 5;
+}
+
+.rf-lexical-link-popover input {
+  width: min(22rem, 58vw);
+  min-width: 11rem;
+  border: 1px solid #d1d5db;
+  border-radius: 2px;
+  padding: 0.34rem 0.42rem;
+  font-size: 0.82rem;
+}
+
+.rf-lexical-link-popover button {
+  border-right-width: 1px;
 }

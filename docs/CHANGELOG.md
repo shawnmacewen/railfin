@@ -1,3 +1,10 @@
+## 2026-03-06 — Lexical selection-targeting + link/list hotfix (task-00191)
+- Fixed toolbar command targeting so inline format, alignment, and list actions execute only against active editor range selection (preventing whole-editor fallback effects).
+- Replaced browser-native link prompt with inline link popover UI in the toolbar area and preserved selection for apply/update/remove link actions.
+- Fixed list toggle behavior to wrap/unwrap selected blocks without wiping content.
+- Updated Lexical HTML contract sanitization to preserve underline/strike text decorations required for formatting persistence across save/load.
+- Re-verified Create generate→editor, save/load, and compliance extraction flows; build passed.
+
 ## 2026-03-06 — Lexical editor functionality sweep + stabilization (task-00190)
 - Fixed multiple Lexical toolbar reliability issues by correcting selection-state derivation for list/link/block/align controls and removing false default active states.
 - Improved editor stability by avoiding selection-only content sync churn and reading selection changes through editor-state-safe listeners.

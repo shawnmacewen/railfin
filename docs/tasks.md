@@ -1,3 +1,15 @@
+## task-00191 — UI/DEV — Lexical selection-command + link/list hotfix
+
+- Status: **Done**
+- Branch: `fix/ui/task-00191-lexical-selection-command-fix`
+- Scope delivered:
+  - Fixed command-targeting behavior so inline/align/list toolbar actions require an active Lexical range selection and apply to the selected range/blocks rather than falling back to document-level behavior.
+  - Replaced native `window.prompt` link flow with an inline toolbar popover editor (URL input + apply/remove/cancel) and preserved selection while editing URL to ensure link apply/remove executes on intended text.
+  - Fixed list toggle behavior to cleanly wrap/unwrap selected blocks (bullet/number/check) without content wipe regressions.
+  - Hardened rich-text contract sanitization to preserve underline/strike inline decorations by allowing safe span text-decoration styles needed by Lexical HTML serialization.
+  - Re-verified generate→editor hydration, draft save/load, and compliance extraction behavior after command/link/list fixes.
+  - Updated UI docs/changelog/lane report and verified build with `npm run build` (pass).
+
 ## task-00190 — UI/DEV — Lexical editor functionality sweep + stabilization
 
 - Status: **Done**
