@@ -265,6 +265,7 @@ export function EditorShell() {
   const [lockedPrompt, setLockedPrompt] = useState<string | null>(null);
   const [isPromptLocked, setIsPromptLocked] = useState(false);
   const [isPromptAccordionCollapsed, setIsPromptAccordionCollapsed] = useState(false);
+  const [isCreateInputCollapsed, setIsCreateInputCollapsed] = useState(false);
   const [isComplianceCollapsed, setIsComplianceCollapsed] = useState(false);
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
@@ -585,7 +586,10 @@ export function EditorShell() {
           ? `Generation runtime: degraded fallback${generated.provider ? ` via ${generated.provider}` : ""}.`
           : `Generation runtime: success${generated.provider ? ` via ${generated.provider}` : ""}.`,
       );
-      setIsPromptAccordionCollapsed(true);
+      if (createInputMode === "prompt") {
+        setIsPromptAccordionCollapsed(true);
+      }
+      setIsCreateInputCollapsed(true);
 
       setRemediationPreview(null);
       setStatus("idle");
@@ -927,7 +931,22 @@ export function EditorShell() {
                   </div>
                 </div>
 
-                {createInputMode === "topics" ? (
+                {isCreateInputCollapsed ? (
+                  <div className="rf-create-input-collapsed-summary">
+                    <p className="rf-status rf-status-muted" role="status">
+                      {createInputMode === "topics"
+                        ? "Topics and purpose filters are minimized. Re-open to adjust, then generate again."
+                        : "AI prompt input is minimized. Re-open to review or edit instructions."}
+                    </p>
+                    <button
+                      type="button"
+                      className="rf-input-reopen-button"
+                      onClick={() => setIsCreateInputCollapsed(false)}
+                    >
+                      Edit inputs
+                    </button>
+                  </div>
+                ) : createInputMode === "topics" ? (
                   <div className="rf-topic-purpose-grid">
                     <div>
                       <p className="rf-status rf-status-muted">Topics</p>

@@ -1189,6 +1189,28 @@ button:disabled {
   gap: 0.6rem;
 }
 
+.rf-create-input-collapsed-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid #dbe4ff;
+  border-radius: 2px;
+  background: #f7f9ff;
+  padding: 0.45rem 0.55rem;
+}
+
+.rf-create-input-collapsed-summary .rf-status {
+  margin: 0;
+}
+
+.rf-input-reopen-button {
+  margin: 0;
+  font-size: 0.74rem;
+  padding: 0.28rem 0.48rem;
+  white-space: nowrap;
+}
+
 .rf-richtext-toolbar {
   display: flex;
   align-items: center;
