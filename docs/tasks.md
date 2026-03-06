@@ -1,3 +1,16 @@
+## task-00189 — UI — Auto-collapse Create input panel after successful generate
+
+- Status: **Done**
+- Branch: `feat/ui/task-00189-auto-collapse-input-panel-after-generate`
+- Scope delivered:
+  - Updated Create generate controls in `src/ui/editor-shell.tsx` so the active input section (Topics/Purpose or AI Prompt) auto-collapses only after successful draft generation.
+  - Added a compact, obvious **Edit inputs** reopen control in the collapsed state, shared across both input modes.
+  - Kept input-mode behavior consistent: collapse/reopen pattern now applies equally to Topics and AI Prompt paths.
+  - Preserved selected mode and existing field values (topics/purposes selections and prompt text) when re-opening inputs.
+  - Kept generate/save/compliance/remediation/history flows intact.
+  - Updated supporting Create styles in `src/app/globals.css` for collapsed-state summary + compact reopen control.
+  - Verified build with `npm run build` (pass).
+
 ## task-00188 — UI/DEV — Lexical Create editor typing/input hotfix
 
 - Status: **Done**

@@ -1,3 +1,9 @@
+## 2026-03-06 — Create input panel auto-collapse after generate (task-00189)
+- Create now auto-collapses the active input section after a **successful** content generation run (applies to both Topics mode and AI Prompt mode).
+- Added a compact, clear **Edit inputs** control to re-open the collapsed input section for follow-up edits/regeneration.
+- Preserved current mode + input values when re-opening (topic/purpose selections and prompt text stay intact).
+- Kept existing generate/save/compliance/remediation/history workflows intact.
+
 ## 2026-03-05 — Lexical Create editor typing/input hotfix (task-00188)
 - Fixed unreliable typing in Create editor where some characters were intermittently dropped or felt stuck due to repeated value re-hydration into Lexical during active input.
 - Added a last-known HTML sync guard so editor-internal changes are not immediately re-imported as external updates.

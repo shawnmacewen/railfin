@@ -1,3 +1,14 @@
+## task-00189 — Create input panel auto-collapse after successful generation
+
+- Updated `src/ui/editor-shell.tsx` Create Generate controls with a shared collapsed-input state that activates only when generation succeeds.
+- Applied consistent behavior for both input modes:
+  - **Topics mode:** topics/purpose selection area collapses after successful generate.
+  - **AI prompt mode:** prompt area collapses after successful generate.
+- Added a compact, visible reopen affordance (**Edit inputs**) so operators can quickly restore the input panel and iterate.
+- Preserved existing operator context while collapsed/re-opened (selected mode, topic/purpose toggles, and prompt values unchanged).
+- Kept generate/save/compliance/remediation/history flows unchanged outside the new collapse/reopen UX.
+- Added supporting styles in `src/app/globals.css` for collapsed summary presentation and compact reopen button.
+
 ## task-00187 — CRM space + lead tracking UI phase 1
 
 - Added new primary nav destination **CRM** in app shell, pointing to `/app/crm`.

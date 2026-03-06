@@ -1,3 +1,16 @@
+## task-00189 — UI — Auto-collapse Create input panel after successful generate
+
+- Status: **Done**
+- Branch: `feat/ui/task-00189-auto-collapse-input-panel-after-generate`
+- Scope delivered:
+  - Added post-success auto-collapse behavior for Create input controls in both Topics and AI Prompt modes.
+  - Added compact **Edit inputs** reopen control in collapsed state and preserved selected mode + existing field values on re-open.
+  - Scoped collapse trigger to successful generate completion only (no collapse on generate errors).
+  - Preserved generate/save/compliance/remediation/history flows.
+  - Build verification: `npm run build` passed.
+
+- 2026-03-06 04:09 UTC task-00189: shipped Create input auto-collapse after successful generation for both Topics and AI Prompt modes with compact Edit inputs reopen control; preserved mode/field state on reopen; updated UI docs/tasks/changelog; and build passed.
+
 ## task-00188 — UI/DEV — Lexical Create editor typing/input hotfix
 
 - Status: **Done**
