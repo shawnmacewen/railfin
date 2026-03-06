@@ -146,6 +146,19 @@
 - Flattened content-type placement by removing the standalone content-type wrapper/tile and keeping the four content-type buttons directly above prompt input in AI prompt mode.
 - Preserved existing behavior across generation, save, compliance, remediation actions, and generation history.
 
+## Lexical interaction QA checklist (task-00190)
+
+- [ ] Typing is continuous in Create editor (no lockups after a few characters).
+- [ ] Backspace/Delete behave reliably in plain paragraphs and formatted blocks.
+- [ ] Inline toggles (Bold/Italic/Underline/Strike) apply and unapply correctly.
+- [ ] Block toggles (H1/H2/H3/Paragraph/Quote/Code) switch correctly and active state reflects caret location.
+- [ ] List controls (Bulleted/Numbered/Checklist) apply correctly and active state tracks current list item.
+- [ ] Link/Unlink work for selected text and link active state only appears when selection is in a link.
+- [ ] Alignment controls (Left/Center/Right) apply correctly and persist through save/load.
+- [ ] Generate content hydrates editor without cursor/focus churn; manual edits continue normally afterward.
+- [ ] Save Draft + open draft preserves supported formatting and content text fidelity.
+- [ ] Compliance check reads current editor text after manual edits and formatting changes.
+
 ## task-00154 — Lexical toolbar icon-only solid row
 
 - Updated `src/ui/lexical-editor.tsx` toolbar controls to icon-only rendering (no visible text labels) while retaining command wiring and `aria-label` accessibility semantics.

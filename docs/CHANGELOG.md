@@ -1,3 +1,9 @@
+## 2026-03-06 — Lexical editor functionality sweep + stabilization (task-00190)
+- Fixed multiple Lexical toolbar reliability issues by correcting selection-state derivation for list/link/block/align controls and removing false default active states.
+- Improved editor stability by avoiding selection-only content sync churn and reading selection changes through editor-state-safe listeners.
+- Expanded draft HTML normalization to preserve supported Lexical formatting (strikethrough/code/codeblock) and safe text alignment persistence across save/load.
+- Re-verified Create generate→edit→save/load→compliance flow after stabilization pass.
+
 ## 2026-03-06 — Create input panel auto-collapse after generate (task-00189)
 - Create now auto-collapses the active input section after a **successful** content generation run (applies to both Topics mode and AI Prompt mode).
 - Added a compact, clear **Edit inputs** control to re-open the collapsed input section for follow-up edits/regeneration.

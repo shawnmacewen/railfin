@@ -136,13 +136,13 @@ function Toolbar() {
     h1: false,
     h2: false,
     h3: false,
-    paragraph: true,
+    paragraph: false,
     bulletList: false,
     orderedList: false,
     checkList: false,
     quote: false,
     codeBlock: false,
-    alignLeft: true,
+    alignLeft: false,
     alignCenter: false,
     alignRight: false,
     link: false,
@@ -162,13 +162,13 @@ function Toolbar() {
         h1: false,
         h2: false,
         h3: false,
-        paragraph: true,
+        paragraph: false,
         bulletList: false,
         orderedList: false,
         checkList: false,
         quote: false,
         codeBlock: false,
-        alignLeft: true,
+        alignLeft: false,
         alignCenter: false,
         alignRight: false,
         link: false,
@@ -176,14 +176,19 @@ function Toolbar() {
       return;
     }
 
-    const anchorTopLevel = selection.anchor.getNode().getTopLevelElementOrThrow();
+    const anchorNode = selection.anchor.getNode();
+    const focusNode = selection.focus.getNode();
+    const anchorTopLevel = anchorNode.getTopLevelElementOrThrow();
     const topLevelType = anchorTopLevel.getType();
-    const listType = topLevelType === "list" && anchorTopLevel instanceof ListNode ? anchorTopLevel.getListType() : null;
-    const formatType = $isElementNode(anchorTopLevel) ? anchorTopLevel.getFormatType() : "left";
+    const listNode = anchorNode.getParents().find((parentNode) => parentNode instanceof ListNode);
+    const listType = listNode instanceof ListNode ? listNode.getListType() : null;
+    const formatType = $isElementNode(anchorTopLevel) ? anchorTopLevel.getFormatType() : "";
 
-    const node = selection.anchor.getNode();
-    const parent = node.getParent();
-    const isLink = node.getType() === "link" || parent?.getType() === "link";
+    const isLink =
+      anchorNode.getType() === "link" ||
+      focusNode.getType() === "link" ||
+      anchorNode.getParents().some((parentNode) => parentNode.getType() === "link") ||
+      focusNode.getParents().some((parentNode) => parentNode.getType() === "link");
 
     setToolbarState((prev) => ({
       ...prev,
@@ -194,13 +199,13 @@ function Toolbar() {
       h1: topLevelType === "h1",
       h2: topLevelType === "h2",
       h3: topLevelType === "h3",
-      paragraph: topLevelType === "paragraph",
+      paragraph: topLevelType === "paragraph" || topLevelType === "root",
       bulletList: listType === "bullet",
       orderedList: listType === "number",
       checkList: listType === "check",
       quote: topLevelType === "quote",
       codeBlock: topLevelType === "code",
-      alignLeft: formatType === "left" || formatType === "start" || formatType === "",
+      alignLeft: formatType === "left" || formatType === "start" || formatType === "" || formatType === undefined,
       alignCenter: formatType === "center",
       alignRight: formatType === "right" || formatType === "end",
       link: Boolean(isLink),
@@ -215,7 +220,7 @@ function Toolbar() {
     const unregisterSelection = editor.registerCommand(
       SELECTION_CHANGE_COMMAND,
       () => {
-        updateToolbarState();
+        editor.getEditorState().read(updateToolbarState);
         return false;
       },
       COMMAND_PRIORITY_LOW,
@@ -442,7 +447,7 @@ export function LexicalEditorField({ value, onChange, placeholder, onReadyChange
         <ListPlugin />
         <LinkPlugin />
         <SyncValuePlugin value={value} onReadyChange={onReadyChange} lastKnownHtmlRef={lastKnownHtmlRef} />
-        <OnChangePlugin onChange={(_state, activeEditor) => handleChange(activeEditor, onChange, lastKnownHtmlRef)} />
+        <OnChangePlugin onChange={(_state, activeEditor) => handleChange(activeEditor, onChange, lastKnownHtmlRef)} ignoreSelectionChange />
       </div>
     </LexicalComposer>
   );

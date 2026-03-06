@@ -1,3 +1,17 @@
+## task-00190 — UI/DEV — Lexical editor functionality sweep + stabilization
+
+- Status: **Done**
+- Branch: `fix/ui/task-00190-lexical-functionality-sweep`
+- Scope delivered:
+  - Completed button-by-button Lexical toolbar functionality and active-state audit; fixed inert/stuck behaviors in list/link/block/alignment state handling.
+  - Removed default-on active states when selection is absent and improved live state updates for true selection context.
+  - Stabilized typing/delete/backspace behavior by reducing selection-change churn in onChange sync and making selection listener reads editor-state safe.
+  - Preserved toolbar visual style (icon-only, contiguous solid row) while improving command reliability.
+  - Added a concise Lexical QA checklist to UI foundations docs.
+  - Build verification: `npm run build` passed.
+
+- 2026-03-06 04:13 UTC task-00190: shipped Lexical toolbar functionality sweep + typing stability hardening (selection-state fixes, no default-stuck actives, alignment/code/strike persistence in contract, selection-change sync churn reduction), updated docs/tasks/changelog/UI foundations, and build passed.
+
 ## task-00189 — UI — Auto-collapse Create input panel after successful generate
 
 - Status: **Done**

@@ -1,3 +1,16 @@
+## task-00190 — UI/DEV — Lexical editor functionality sweep + stabilization
+
+- Status: **Done**
+- Branch: `fix/ui/task-00190-lexical-functionality-sweep`
+- Scope delivered:
+  - Completed full Lexical toolbar audit and repaired inert/stuck controls by fixing selection-state detection across inline, block, list, link, and alignment actions.
+  - Removed default-stuck active indicators (paragraph/align-left no longer pre-selected without a valid range selection).
+  - Stabilized editor interaction loop by ensuring toolbar selection listeners read from editor state and by ignoring selection-only change events in content sync.
+  - Hardened rich-text persistence contract so toolbar-supported formats survive save/load (added strike/code/pre preservation and bounded text-align style allowlist for block nodes).
+  - Verified Create flows for typing/editing, toggle on/off behavior, list/heading/link/align controls, generate→editor hydration, save/load drafts, and compliance text extraction.
+  - Added concise Lexical QA checklist in `docs/UI_FOUNDATIONS.md`.
+  - Verified build with `npm run build` (pass).
+
 ## task-00189 — UI — Auto-collapse Create input panel after successful generate
 
 - Status: **Done**
