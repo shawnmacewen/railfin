@@ -1,3 +1,9 @@
+## 2026-03-07 04:20 UTC — task-00197 Configure Features list refresh
+- Updated `/app/configure/features` content to reflect current shipped capabilities in operator-friendly language.
+- Re-grouped feature bullets around: Create/Lexical editing, compliance/remediation controls, CRM + Events operations, and nav/support visibility.
+- Added explicit in-progress note: outbound event email plumbing remains deferred to a later phase.
+- Updated `docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, and `docs/CHANGELOG.md`; build passed (`npm run build`).
+
 ## 2026-03-07 04:00 UTC — task-00196 Create mobile responsiveness + nav label fix
 - Root cause 1 (mobile nav labels): collapsed-state selector hid nav labels/brand text even when mobile off-canvas menu was open, causing blank labels while expanded.
 - Root cause 2 (Create phone layout): several Create controls/summaries/header/history sections remained row-oriented at narrow widths, creating crowding/overflow pressure on phones.
