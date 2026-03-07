@@ -1,3 +1,15 @@
+## task-00197 — Configure Features content refresh
+
+- Updated `src/app/app/configure/features/page.tsx` feature groups to reflect current shipped product state in plain-language operator terms.
+- Features coverage now explicitly includes:
+  - mature Create + Lexical rich-text editing flow
+  - compliance/remediation controls with manual apply/undo model
+  - CRM basics (table-first lead tracking + inline add flow)
+  - Events wizard + live create/list API status
+  - responsive app-shell navigation and in-product help/release visibility surfaces
+- Added explicit next-phase note that outbound event email plumbing remains intentionally deferred.
+- Kept page structure and styling contract unchanged; update is content clarity + scanability only.
+
 ## task-00196 — Create mobile responsiveness + expanded mobile-nav label visibility fix
 
 - Root cause (mobile nav labels): nav labels/brand text were hidden by the global collapsed-nav selector (`.is-sidebar-collapsed .rf-nav-item-label` / `.rf-brand-text`). On phone, sidebar state remains collapsed while the off-canvas menu opens, so labels could stay visually clipped/blank even when menu was expanded.

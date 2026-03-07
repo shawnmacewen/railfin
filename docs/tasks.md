@@ -1,3 +1,14 @@
+## task-00197 — UI/COO docs — Configure Features list refresh
+
+- Status: **Done**
+- Branch: `chore/ui/task-00197-update-features-list`
+- Scope delivered:
+  - Updated `/app/configure/features` copy to reflect current shipped capability set in plain-language operator terms.
+  - Refreshed feature grouping to cover Lexical editor maturity, responsive nav behavior, CRM basics, and Events wizard/API status.
+  - Added explicit in-progress note that outbound event email plumbing remains intentionally deferred to a later phase.
+  - Kept Features page scannable with concise grouped bullets and non-technical-first wording.
+  - Updated supporting docs/changelog/lane report and ran `npm run build` (pass).
+
 ## task-00196 — UI — Create mobile responsiveness + mobile nav expanded-label fix
 
 - Status: **Done**

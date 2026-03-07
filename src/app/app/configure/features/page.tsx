@@ -4,22 +4,22 @@ import { Card } from "../../../../ui/primitives";
 
 const FEATURE_GROUPS = [
   {
-    title: "Create and generate",
+    title: "Create and edit content",
     items: [
       {
-        label: "Generate fresh content drafts quickly",
+        label: "Draft faster with guided AI generation",
         detail:
-          "Use guided controls (mode, tone, intent, audience, objective) to produce first-pass copy with clear runtime status.",
+          "Create supports prompt controls for tone, intent, audience, and objective, with clear success/degraded runtime feedback.",
       },
       {
-        label: "Build campaign packages in one flow",
+        label: "Edit in a true rich-text workspace",
         detail:
-          "Package mode can generate coordinated multi-channel variants (for example email, LinkedIn, and X-thread) from one prompt.",
+          "The Lexical editor now supports reliable formatting tools (headings, lists, links, alignment, inline styles) plus save/load fidelity.",
       },
       {
-        label: "Choose a primary output format",
+        label: "Generate single drafts or campaign packages",
         detail:
-          "Single-draft generation supports common content targets such as blog, newsletter, LinkedIn, and X-thread.",
+          "Operators can create one draft or a coordinated multi-channel package and quickly restore/copy variants from history.",
       },
     ],
   },
@@ -27,54 +27,59 @@ const FEATURE_GROUPS = [
     title: "Review, compliance, and remediation",
     items: [
       {
-        label: "Run compliance checks before saving or sharing",
+        label: "Run compliance checks before publish steps",
         detail:
-          "Findings are grouped by severity and include practical remediation hints plus protected-zone warnings.",
+          "Findings are grouped by severity with practical hints, protected-zone warnings, and plain-language status messaging.",
       },
       {
-        label: "Apply remediation actions manually (with control)",
+        label: "Keep remediation manual and operator-controlled",
         detail:
-          "Operators can apply selected context, apply + regenerate, and undo the latest apply action without auto-triggered edits.",
+          "Apply Selected Context, Apply + Regenerate, and Undo Last Apply are explicit actions—no hidden auto-edits.",
       },
       {
-        label: "Keep an audit-friendly remediation trail",
+        label: "Maintain traceable remediation activity",
         detail:
-          "Recent apply/undo actions are visible in-session, with backend support for deterministic remediation event tracking.",
-      },
-    ],
-  },
-  {
-    title: "Drafts, history, and recovery",
-    items: [
-      {
-        label: "Save drafts and continue work later",
-        detail:
-          "Drafts are available in Library with search and quick handoff back into Create for editing.",
-      },
-      {
-        label: "Use generation history as a safety net",
-        detail:
-          "Restore prior generated outputs, compare package variants side-by-side, and copy/restore specific variants as needed.",
-      },
-      {
-        label: "Carry policy context into compliance checks",
-        detail:
-          "Latest Configure policy metadata is surfaced in Create so reviewers can see policy freshness while working.",
+          "Recent apply/undo actions remain visible in-session with deterministic audit metadata support in backend flows.",
       },
     ],
   },
   {
-    title: "Visibility and product updates",
+    title: "CRM and Events operations",
     items: [
       {
-        label: "Read human-friendly product updates",
+        label: "Track leads in a lightweight CRM",
         detail:
-          "The Configure Change Log page presents dated release highlights for non-technical stakeholders.",
+          "CRM is live with table-first lead management, search, and inline Add New Lead flow for fast operator updates.",
       },
       {
-        label: "Browse policy, features, and change notes in one place",
+        label: "Plan events with a practical two-step wizard",
         detail:
-          "Configure now includes dedicated subpages for Policy, Features, and Change Log.",
+          "Events supports create/list APIs and a step-2 communications planner for pre-event touchpoints.",
+      },
+      {
+        label: "Know what is intentionally still in progress",
+        detail:
+          "Outbound event email delivery/plumbing is intentionally deferred to a later phase while planning and data flows are stabilized.",
+      },
+    ],
+  },
+  {
+    title: "Navigation, support, and visibility",
+    items: [
+      {
+        label: "Use responsive navigation across desktop and mobile",
+        detail:
+          "The app shell includes stable left-nav behavior, plus mobile off-canvas menu patterns that keep core pages easy to reach.",
+      },
+      {
+        label: "Get in-product help and release context quickly",
+        detail:
+          "Help Center, Features, and Change Log pages are available in-app for onboarding, capability checks, and release visibility.",
+      },
+      {
+        label: "Browse Configure information in one place",
+        detail:
+          "Configure keeps Policy, Features, and Change Log together so operators can review guidance and product updates without context switching.",
       },
     ],
   },

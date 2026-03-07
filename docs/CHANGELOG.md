@@ -1,3 +1,9 @@
+## 2026-03-07 — Configure Features page refresh for current capability state (task-00197)
+- Refreshed the Configure > Features page so capability bullets match the current shipped app state in plain language.
+- Updated feature coverage to reflect: Create + Lexical rich-text editing maturity, compliance/remediation controls, CRM basics, and Events wizard + API status.
+- Added explicit “next phase” note that outbound event email plumbing remains intentionally deferred.
+- Kept the page clean and easy to scan with concise grouped sections for operators/non-technical stakeholders.
+
 ## 2026-03-07 — Create mobile responsiveness + mobile-nav label visibility fix (task-00196)
 - Fixed a phone-navigation bug where left-nav item labels could appear blank while the mobile menu was open.
 - Root cause was a collapsed-nav label-hiding selector also applying during mobile off-canvas expanded state.
