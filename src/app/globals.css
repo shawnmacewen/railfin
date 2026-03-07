@@ -172,7 +172,7 @@ button:disabled {
   padding: 0 0.5rem;
   margin: 0;
   color: #3b4259;
-  font-size: 1.2rem;
+  font-size: 1.13rem;
   font-weight: 500;
   line-height: 1;
   overflow: hidden;
@@ -1555,24 +1555,64 @@ button:disabled {
   gap: 0.8rem;
 }
 
-.rf-crm-lead-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.6rem;
-}
-
-.rf-crm-lead-item {
+.rf-crm-header-row {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  border: 1px solid #e4e8f5;
-  border-radius: 2px;
-  padding: 0.65rem;
-  background: #fff;
+  align-items: flex-start;
+  gap: 0.7rem;
 }
 
+.rf-crm-add-button {
+  white-space: nowrap;
+}
+
+.rf-crm-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.rf-crm-search-wrap input {
+  width: min(26rem, 62vw);
+}
+
+.rf-crm-table-scroll {
+  overflow-x: auto;
+}
+
+.rf-crm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.rf-crm-table th,
+.rf-crm-table td {
+  text-align: left;
+  padding: 0.46rem 0.5rem;
+  border-bottom: 1px solid #e4e8f5;
+  white-space: nowrap;
+}
+
+.rf-crm-table th {
+  font-weight: 600;
+  color: #2e3650;
+  background: #f8faff;
+}
+
+@media (max-width: 860px) {
+  .rf-crm-header-row,
+  .rf-crm-table-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rf-crm-search-wrap input {
+    width: min(100%, 30rem);
+  }
+}
 
 .rf-lexical-link-popover {
   position: absolute;

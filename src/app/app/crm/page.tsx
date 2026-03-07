@@ -32,10 +32,22 @@ function formatDate(input: string): string {
   return date.toLocaleString();
 }
 
+function matchesLeadSearch(lead: Lead, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+
+  return [lead.name, lead.email, lead.source ?? "", lead.status].some((value) =>
+    value.toLowerCase().includes(normalized),
+  );
+}
+
 export default function CrmPage() {
   const [items, setItems] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -73,92 +85,53 @@ export default function CrmPage() {
     void loadLeads();
   }, [loadLeads]);
 
-  const hasLeads = useMemo(() => items.length > 0, [items.length]);
+  const filteredItems = useMemo(
+    () => items.filter((lead) => matchesLeadSearch(lead, searchQuery)),
+    [items, searchQuery],
+  );
+
+  const hasLeads = items.length > 0;
+  const hasFilteredLeads = filteredItems.length > 0;
 
   return (
     <div className="rf-crm-page">
       <Card>
-        <h2 className="rf-library-section-title">Contact CRM</h2>
-        <p className="rf-status rf-status-muted">Track leads with a lightweight phase-1 pipeline.</p>
+        <div className="rf-crm-header-row">
+          <div>
+            <h2 className="rf-library-section-title">Contact CRM</h2>
+            <p className="rf-status rf-status-muted">Leads-first view with quick add when needed.</p>
+          </div>
+          <button
+            type="button"
+            className="rf-crm-add-button"
+            onClick={() => {
+              setIsCreateOpen((prev) => !prev);
+              setSaveError(null);
+              setSaveSuccess(null);
+            }}
+            aria-expanded={isCreateOpen}
+            aria-controls="rf-crm-create-lead"
+          >
+            {isCreateOpen ? "Close New Lead" : "Add New Lead"}
+          </button>
+        </div>
       </Card>
 
       <Card>
-        <h3 className="rf-library-section-title">Create Lead</h3>
-        <form
-          className="rf-events-form"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            setSaveError(null);
-            setSaveSuccess(null);
-            setIsSaving(true);
+        <div className="rf-crm-table-toolbar">
+          <h3 className="rf-library-section-title">Leads</h3>
+          <div className="rf-crm-search-wrap">
+            <label htmlFor="crm-lead-search" className="rf-sr-only">Search leads</label>
+            <input
+              id="crm-lead-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search name, email, source, or status"
+            />
+          </div>
+        </div>
 
-            try {
-              const response = await fetch("/api/internal/crm/leads", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                  name,
-                  email,
-                  phone: phone || undefined,
-                  source: source || undefined,
-                  status,
-                }),
-              });
-
-              const payload = (await response.json().catch(() => null)) as LeadCreateResponse | null;
-
-              if (!response.ok || !payload?.ok) {
-                const validationMessage = payload && !payload.ok
-                  ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
-                  : "";
-                const fallback = payload && !payload.ok ? payload.error : null;
-                setSaveError(validationMessage || fallback || "Could not save lead.");
-                return;
-              }
-
-              setName("");
-              setEmail("");
-              setPhone("");
-              setSource("");
-              setStatus("new");
-              setSaveSuccess("Lead created.");
-              await loadLeads();
-            } catch {
-              setSaveError("Could not save lead.");
-            } finally {
-              setIsSaving(false);
-            }
-          }}
-        >
-          <label htmlFor="crm-name">Name</label>
-          <input id="crm-name" value={name} onChange={(event) => setName(event.target.value)} required />
-
-          <label htmlFor="crm-email">Email</label>
-          <input id="crm-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-
-          <label htmlFor="crm-phone">Phone (optional)</label>
-          <input id="crm-phone" value={phone} onChange={(event) => setPhone(event.target.value)} />
-
-          <label htmlFor="crm-source">Source (optional)</label>
-          <input id="crm-source" value={source} onChange={(event) => setSource(event.target.value)} />
-
-          <label htmlFor="crm-status">Status</label>
-          <select id="crm-status" value={status} onChange={(event) => setStatus(event.target.value as LeadStatus)}>
-            {STATUS_OPTIONS.map((value) => (
-              <option key={value} value={value}>{value}</option>
-            ))}
-          </select>
-
-          <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Create Lead"}</button>
-        </form>
-
-        {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
-        {saveSuccess ? <p className="rf-status rf-status-success" role="status">{saveSuccess}</p> : null}
-      </Card>
-
-      <Card>
-        <h3 className="rf-library-section-title">Leads</h3>
         {isLoading ? (
           <p className="rf-status rf-status-muted" role="status">Loading leads...</p>
         ) : loadError ? (
@@ -167,26 +140,118 @@ export default function CrmPage() {
             <button type="button" onClick={() => void loadLeads()}>Retry</button>
           </div>
         ) : hasLeads ? (
-          <ul className="rf-crm-lead-list">
-            {items.map((lead) => (
-              <li key={lead.id} className="rf-crm-lead-item">
-                <div>
-                  <strong>{lead.name}</strong>
-                  <p className="rf-status rf-status-muted">{lead.email}</p>
-                  {lead.phone ? <p className="rf-status rf-status-muted">{lead.phone}</p> : null}
-                  {lead.source ? <p className="rf-status rf-status-muted">Source: {lead.source}</p> : null}
-                </div>
-                <div>
-                  <p className="rf-status rf-status-muted">Status: {lead.status}</p>
-                  <p className="rf-status rf-status-muted">{formatDate(lead.createdAt)}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          hasFilteredLeads ? (
+            <div className="rf-crm-table-scroll">
+              <table className="rf-crm-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredItems.map((lead) => (
+                    <tr key={lead.id}>
+                      <td>{lead.name}</td>
+                      <td>{lead.email}</td>
+                      <td>{lead.phone ?? "—"}</td>
+                      <td>{lead.source ?? "—"}</td>
+                      <td>{lead.status}</td>
+                      <td>{formatDate(lead.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="rf-status rf-status-muted">No leads match “{searchQuery.trim()}”.</p>
+          )
         ) : (
-          <p className="rf-status rf-status-muted">No leads yet. Create your first lead above.</p>
+          <p className="rf-status rf-status-muted">No leads yet. Use Add New Lead to create your first record.</p>
         )}
       </Card>
+
+      {isCreateOpen ? (
+        <Card><div id="rf-crm-create-lead">
+          <h3 className="rf-library-section-title">Create Lead</h3>
+          <form
+            className="rf-events-form"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              setSaveError(null);
+              setSaveSuccess(null);
+              setIsSaving(true);
+
+              try {
+                const response = await fetch("/api/internal/crm/leads", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({
+                    name,
+                    email,
+                    phone: phone || undefined,
+                    source: source || undefined,
+                    status,
+                  }),
+                });
+
+                const payload = (await response.json().catch(() => null)) as LeadCreateResponse | null;
+
+                if (!response.ok || !payload?.ok) {
+                  const validationMessage = payload && !payload.ok
+                    ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
+                    : "";
+                  const fallback = payload && !payload.ok ? payload.error : null;
+                  setSaveError(validationMessage || fallback || "Could not save lead.");
+                  return;
+                }
+
+                setName("");
+                setEmail("");
+                setPhone("");
+                setSource("");
+                setStatus("new");
+                setSaveSuccess("Lead created.");
+                await loadLeads();
+              } catch {
+                setSaveError("Could not save lead.");
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+          >
+            <label htmlFor="crm-name">Name</label>
+            <input id="crm-name" value={name} onChange={(event) => setName(event.target.value)} required />
+
+            <label htmlFor="crm-email">Email</label>
+            <input id="crm-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+
+            <label htmlFor="crm-phone">Phone (optional)</label>
+            <input id="crm-phone" value={phone} onChange={(event) => setPhone(event.target.value)} />
+
+            <label htmlFor="crm-source">Source (optional)</label>
+            <input id="crm-source" value={source} onChange={(event) => setSource(event.target.value)} />
+
+            <label htmlFor="crm-status">Status</label>
+            <select id="crm-status" value={status} onChange={(event) => setStatus(event.target.value as LeadStatus)}>
+              {STATUS_OPTIONS.map((value) => (
+                <option key={value} value={value}>{value}</option>
+              ))}
+            </select>
+
+            <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Create Lead"}</button>
+          </form>
+
+          {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
+          {saveSuccess ? <p className="rf-status rf-status-success" role="status">{saveSuccess}</p> : null}
+          </div>
+        </Card>
+      ) : null}
     </div>
   );
 }

@@ -1,3 +1,16 @@
+## task-00193 — UI/DEV — Nav font adjustment + CRM leads-first table refactor
+
+- Status: **Done**
+- Branch: `feat/ui/task-00193-nav-font-and-crm-table-refactor`
+- Scope delivered:
+  - Reduced left-nav label typography size (`1.2rem -> 1.13rem`) while keeping icon render/slot sizes unchanged.
+  - Preserved nav row-height and collapse/expand stability contracts (no row metric changes).
+  - Refactored `/app/crm` default view to table-first layout with larger, cleaner lead table as primary focus.
+  - Added client-side searchable leads table (name/email/source/status query matching).
+  - Moved New Lead form behind an **Add New Lead** toggle so default footprint is compact and form is on-demand.
+  - Preserved existing create/list API behavior and validation feedback flow.
+  - Updated UI docs/changelog/lane report and re-ran `npm run build` (pass).
+
 ## task-00192 — UI — Left-nav label font down + brand-palette icon refinement
 
 - Status: **Done**

@@ -1,3 +1,10 @@
+## 2026-03-07 — Nav font trim + CRM leads-first table refactor (task-00193)
+- Reduced left-nav label font size from `1.2rem` to `1.13rem` while keeping nav icon sizing unchanged and preserving row/collapse stability.
+- Reorganized CRM page default UX to a larger leads table-first view with a cleaner data grid presentation.
+- Added client-side lead search for name/email/source/status.
+- Changed New Lead entry to an on-demand pattern: compact **Add New Lead** toggle opens/closes the full form; form is hidden by default.
+- Preserved existing create/list API integration and validation error/success feedback behavior.
+
 ## 2026-03-06 — Lexical selection-targeting + link/list hotfix (task-00191)
 - Fixed toolbar command targeting so inline format, alignment, and list actions execute only against active editor range selection (preventing whole-editor fallback effects).
 - Replaced browser-native link prompt with inline link popover UI in the toolbar area and preserved selection for apply/update/remove link actions.

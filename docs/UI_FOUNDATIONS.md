@@ -1,3 +1,13 @@
+## task-00193 — Nav typography trim + CRM leads-first table UX
+
+- Reduced left-nav label size in `src/app/globals.css` from `1.2rem` to `1.13rem` to tighten scan density while preserving existing icon slot/render sizing and row-height geometry.
+- Refactored `src/app/app/crm/page.tsx` to a leads-first flow:
+  - default landing presents searchable leads table before any data-entry form
+  - added client-side search across `name`, `email`, `source`, and `status`
+  - moved create-lead form behind a compact **Add New Lead** toggle (closed by default)
+- Preserved existing CRM create/list behaviors and validation messaging by keeping current POST/GET integration and field-error handling paths intact.
+- Added supporting CRM table/layout styles in `src/app/globals.css` for cleaner primary-table presentation and responsive toolbar behavior.
+
 ## task-00192 — Left-nav typography + brand-palette icon refinement
 
 - Updated app-shell nav icon wiring in `src/ui/app-shell.tsx` so every primary nav item passes a deterministic `iconClassName` (including CRM) into the shared `NavItem` primitive.
