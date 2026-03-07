@@ -1,3 +1,14 @@
+## task-00196 — UI — Create mobile responsiveness + mobile nav expanded-label fix
+
+- Status: **Done**
+- Branch: `fix/ui/task-00196-create-mobile-and-nav-label-fix`
+- Scope delivered:
+  - Fixed mobile nav expanded-state label visibility by scoping collapsed-label hide selectors so they no longer apply when off-canvas nav is open on phone.
+  - Completed Create page phone-width responsiveness cleanup: stacked header/summary/history/control rows, improved action-button reachability, and reduced overflow/clipping risk in narrow viewports.
+  - Preserved prior nav jitter/row-height stability contracts and desktop behavior.
+  - Updated `docs/UI_FOUNDATIONS.md`, `docs/CHANGELOG.md`, and UI lane report.
+  - Ran `npm run build` (pass).
+
 ## task-00195 — UI — responsive design pass across primary app surfaces
 
 - Status: **Done**

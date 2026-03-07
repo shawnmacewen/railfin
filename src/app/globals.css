@@ -147,13 +147,13 @@ button:disabled {
   padding-bottom: 0.85rem;
 }
 
-.rf-shell.is-sidebar-collapsed .rf-brand-text {
+.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-brand-text {
   opacity: 0;
   clip-path: inset(0 100% 0 0);
   pointer-events: none;
 }
 
-.rf-shell.is-sidebar-collapsed .rf-nav-item-label {
+.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-item-label {
   opacity: 0;
   clip-path: inset(0 100% 0 0);
   pointer-events: none;
@@ -1927,6 +1927,36 @@ button:disabled {
 
   .rf-crm-create-panel {
     padding: 0.5rem;
+  }
+
+  .rf-create-flow-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rf-page-header-create,
+  .rf-prompt-collapsed-summary,
+  .rf-create-input-collapsed-summary,
+  .rf-generation-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rf-status-pill,
+  .rf-input-reopen-button {
+    width: 100%;
+  }
+
+  .rf-generate-mode-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .rf-generation-history-header .rf-status,
+  .rf-generation-history-item p {
+    overflow-wrap: anywhere;
+  }
+
+  .rf-create-compliance-card {
+    padding: 0.65rem;
   }
 
   .rf-build-sha-badge {

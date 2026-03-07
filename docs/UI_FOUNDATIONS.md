@@ -1,3 +1,19 @@
+## task-00196 — Create mobile responsiveness + expanded mobile-nav label visibility fix
+
+- Root cause (mobile nav labels): nav labels/brand text were hidden by the global collapsed-nav selector (`.is-sidebar-collapsed .rf-nav-item-label` / `.rf-brand-text`). On phone, sidebar state remains collapsed while the off-canvas menu opens, so labels could stay visually clipped/blank even when menu was expanded.
+- Fix: constrained collapsed-label hiding to non-mobile-open state only by updating selectors to:
+  - `.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-item-label`
+  - `.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-brand-text`
+- Create page/mobile responsiveness refinements (<=640px) in `src/app/globals.css`:
+  - improved Create control stacking for phone widths (prompt/input summaries, page header status pill, generation-history header all stack cleanly)
+  - made key action controls full-width/touch-friendly (`.rf-input-reopen-button`, status pill)
+  - shifted generate-mode toggles to one-column for narrow screens for readability/reachability
+  - tightened create-flow shortcut columns to 2-up and improved long-text wrapping in generation history
+  - reduced mobile compliance-card padding slightly to avoid clipping/crowding
+- Stability notes:
+  - preserved existing nav row-height/jitter contracts (no row metric changes)
+  - preserved desktop behavior by scoping changes to collapsed selector logic + mobile breakpoints only
+
 ## task-00195 — Responsive design pass across primary app surfaces
 
 - Added an app-shell responsive navigation mode for small screens (<=900px):
