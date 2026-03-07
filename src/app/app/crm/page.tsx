@@ -211,32 +211,47 @@ export default function CrmPage() {
           </div>
         ) : hasLeads ? (
           hasFilteredLeads ? (
-            <div className="rf-crm-table-scroll">
-              <table className="rf-crm-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Phone</th>
-                    <th scope="col">Source</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((lead) => (
-                    <tr key={lead.id}>
-                      <td>{lead.name}</td>
-                      <td>{lead.email}</td>
-                      <td>{lead.phone ?? "—"}</td>
-                      <td>{lead.source ?? "—"}</td>
-                      <td>{lead.status}</td>
-                      <td>{formatDate(lead.createdAt)}</td>
+            <>
+              <div className="rf-crm-table-scroll">
+                <table className="rf-crm-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Phone</th>
+                      <th scope="col">Source</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Created</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((lead) => (
+                      <tr key={lead.id}>
+                        <td>{lead.name}</td>
+                        <td>{lead.email}</td>
+                        <td>{lead.phone ?? "—"}</td>
+                        <td>{lead.source ?? "—"}</td>
+                        <td>{lead.status}</td>
+                        <td>{formatDate(lead.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <ul className="rf-crm-cards" aria-label="Leads list">
+                {filteredItems.map((lead) => (
+                  <li key={`card-${lead.id}`} className="rf-crm-card">
+                    <h4>{lead.name}</h4>
+                    <p><strong>Email:</strong> {lead.email}</p>
+                    <p><strong>Phone:</strong> {lead.phone ?? "—"}</p>
+                    <p><strong>Source:</strong> {lead.source ?? "—"}</p>
+                    <p><strong>Status:</strong> {lead.status}</p>
+                    <p><strong>Created:</strong> {formatDate(lead.createdAt)}</p>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
             <p className="rf-status rf-status-muted">No leads match “{searchQuery.trim()}”.</p>
           )

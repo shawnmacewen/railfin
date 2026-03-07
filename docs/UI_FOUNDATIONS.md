@@ -1,3 +1,26 @@
+## task-00195 — Responsive design pass across primary app surfaces
+
+- Added an app-shell responsive navigation mode for small screens (<=900px):
+  - left navigation becomes off-canvas
+  - header-level Menu/Close toggle controls nav visibility
+  - backdrop click dismisses nav without blocking main content interaction
+- Updated shared responsive foundations for key controls and layout rhythm:
+  - header action wrapping and compact spacing on tablet/mobile
+  - card/content padding reductions at narrower breakpoints
+  - generate/review/action button rows stack to full-width on smaller phones
+- Create page responsive refinements:
+  - split layout collapses cleanly to single-column
+  - compliance rail control hides on mobile to prevent crowding
+  - content-type/topic-purpose controls wrap/stack for touch usability
+- Library/Help/Configure responsive refinements:
+  - Library grid simplifies to single-column on small phones
+  - Help topic grid and detail lists tighten spacing for narrow screens
+  - Configure subnav chips remain tappable with compact padding
+- CRM responsive list behavior now supports dual presentation:
+  - table-first desktop/tablet remains intact with horizontal scroll handling
+  - compact stacked lead cards render on mobile for readability/touch access
+- Added foundational style support for nav controls/status text surfaces introduced in recent iterations (`rf-sidebar-controls`, mobile shell backdrop/menu button, `rf-editor-opened`, CRM mobile cards).
+
 ## task-00194 — CRM add-lead inline toolbar control + table-first emphasis
 
 - Simplified `src/app/app/crm/page.tsx` layout by removing the separate standalone new-lead section/card framing.

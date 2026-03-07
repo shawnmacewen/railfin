@@ -1,3 +1,14 @@
+## task-00195 — UI — responsive design pass across primary app surfaces
+
+- Status: **Done**
+- Branch: `feat/ui/task-00195-responsive-design-pass`
+- Scope delivered:
+  - Implemented broad responsive layout fixes across Create, Library, Campaigns, Events, CRM, Configure (+ subpages), Help Center, and app shell/nav behavior.
+  - Added mobile/off-canvas nav behavior with header Menu toggle and non-blocking overlay/backdrop interaction on small viewports.
+  - Improved small-screen control stacking, header/action wrapping, content spacing, and card/form density across core pages.
+  - Added CRM responsive fallback cards for mobile while preserving table-first desktop/tablet behavior and horizontal scroll support.
+  - Updated UI foundations/changelog/lane report and ran `npm run build` (pass).
+
 ## task-00194 — UI — CRM inline Add New Lead control above leads table
 
 - Status: **Done**

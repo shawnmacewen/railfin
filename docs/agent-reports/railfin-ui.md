@@ -1,3 +1,10 @@
+## 2026-03-07 04:35 UTC — task-00195 responsive design pass
+- Completed a broad responsive pass across Create, Library, Campaigns, Events, CRM, Configure (+ subpages), Help Center, and shell-level navigation behavior.
+- Added small-screen app-shell off-canvas nav mode with header Menu/Close control and dismissible backdrop to keep content unobstructed.
+- Added shared breakpoint refinements for spacing/control stacking/header wrapping and button reachability on mobile/tablet.
+- Added CRM mobile card fallback while preserving desktop/tablet table-first behavior with horizontal scroll support.
+- Updated docs/UI_FOUNDATIONS.md, docs/tasks.md, docs/CHANGELOG.md, and this lane report; build passed.
+
 ## task-00194 — UI — CRM inline Add New Lead control above leads table
 
 - Status: **Done**

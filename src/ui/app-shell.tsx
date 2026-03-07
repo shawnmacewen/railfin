@@ -31,6 +31,7 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isAutoMinimizeEnabled, setIsAutoMinimizeEnabled] = useState(true);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearInactivityTimer = useCallback(() => {
@@ -41,6 +42,10 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
   }, []);
 
   const registerActivity = useCallback(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+      return;
+    }
+
     if (!isAutoMinimizeEnabled) {
       return;
     }
@@ -69,8 +74,31 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
     return clearInactivityTimer;
   }, [clearInactivityTimer]);
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px)");
+
+    const syncForViewport = () => {
+      if (media.matches) {
+        setIsSidebarExpanded(false);
+        setIsMobileNavOpen(false);
+      } else {
+        setIsSidebarExpanded(true);
+        setIsMobileNavOpen(false);
+      }
+    };
+
+    syncForViewport();
+    media.addEventListener("change", syncForViewport);
+
+    return () => media.removeEventListener("change", syncForViewport);
+  }, []);
+
+  useEffect(() => {
+    setIsMobileNavOpen(false);
+  }, [pathname]);
+
   return (
-    <div className={`rf-shell ${isSidebarExpanded ? "" : "is-sidebar-collapsed"}`}>
+    <div className={`rf-shell ${isSidebarExpanded ? "" : "is-sidebar-collapsed"} ${isMobileNavOpen ? "is-mobile-nav-open" : ""}`}>
       {buildSha ? <div className="rf-build-sha-badge" aria-label="Build version">{buildSha}</div> : null}
       <aside
         className="rf-sidebar"
@@ -134,8 +162,23 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
         </div>
       </aside>
 
+      <div
+        className={`rf-shell-backdrop ${isMobileNavOpen ? "is-visible" : ""}`}
+        aria-hidden="true"
+        onClick={() => setIsMobileNavOpen(false)}
+      />
+
       <div className="rf-main">
         <header className="rf-header">
+          <button
+            type="button"
+            className="rf-header-menu-button"
+            aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={isMobileNavOpen}
+            onClick={() => setIsMobileNavOpen((current) => !current)}
+          >
+            {isMobileNavOpen ? "Close" : "Menu"}
+          </button>
           <h1 className="rf-header-title">{activeItem?.label || "App"}</h1>
           <div className="rf-header-actions">
             <Badge>Env</Badge>

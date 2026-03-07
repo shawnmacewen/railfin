@@ -1,3 +1,10 @@
+## 2026-03-07 — Responsive design pass across core app pages (task-00195)
+- Completed a broad responsive UX pass across Create, Library, Campaigns, Events, CRM, Configure, Help Center, and shared app shell surfaces.
+- Added mobile navigation behavior with an off-canvas left rail, explicit header Menu toggle, and tap-to-dismiss backdrop so nav interaction does not block content.
+- Improved control reachability and readability on mobile/tablet by tightening spacing, stacking action rows, and wrapping toolbar/header actions at narrower widths.
+- Added CRM responsive list behavior: desktop/tablet keep table with horizontal scroll, while mobile uses compact lead cards for easier scanning/tapping.
+- Preserved existing product functionality and endpoint contracts; changes are layout/usability only.
+
 ## 2026-03-07 — CRM inline Add New Lead control above table (task-00194)
 - Removed the standalone New Lead section framing on CRM so the page defaults to a clean table-first layout.
 - Placed a compact **Add New Lead** button inline in the leads toolbar (above the table) next to search.
