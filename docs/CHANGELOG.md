@@ -1,3 +1,9 @@
+## 2026-03-07 — CRM inline Add New Lead control above table (task-00194)
+- Removed the standalone New Lead section framing on CRM so the page defaults to a clean table-first layout.
+- Placed a compact **Add New Lead** button inline in the leads toolbar (above the table) next to search.
+- Kept create flow functionality intact by revealing the existing create form inline under the toolbar button.
+- Preserved lead search/table behavior and existing create validation + refresh behavior.
+
 ## 2026-03-07 — Nav font trim + CRM leads-first table refactor (task-00193)
 - Reduced left-nav label font size from `1.2rem` to `1.13rem` while keeping nav icon sizing unchanged and preserving row/collapse stability.
 - Reorganized CRM page default UX to a larger leads table-first view with a cleaner data grid presentation.

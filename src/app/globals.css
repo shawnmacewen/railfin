@@ -1555,15 +1555,10 @@ button:disabled {
   gap: 0.8rem;
 }
 
-.rf-crm-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.7rem;
-}
-
 .rf-crm-add-button {
   white-space: nowrap;
+  padding: 0.3rem 0.58rem;
+  font-size: 0.8rem;
 }
 
 .rf-crm-table-toolbar {
@@ -1574,8 +1569,21 @@ button:disabled {
   margin-bottom: 0.35rem;
 }
 
+.rf-crm-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .rf-crm-search-wrap input {
   width: min(26rem, 62vw);
+}
+
+.rf-crm-create-panel {
+  margin-bottom: 0.7rem;
+  padding: 0.6rem;
+  border: 1px solid #d9e1f4;
+  background: #fbfcff;
 }
 
 .rf-crm-table-scroll {
@@ -1603,8 +1611,8 @@ button:disabled {
 }
 
 @media (max-width: 860px) {
-  .rf-crm-header-row,
-  .rf-crm-table-toolbar {
+  .rf-crm-table-toolbar,
+  .rf-crm-toolbar-actions {
     flex-direction: column;
     align-items: flex-start;
   }

@@ -1,3 +1,16 @@
+## task-00194 — UI — CRM inline Add New Lead control above leads table
+
+- Status: **Done**
+- Branch: `feat/ui/task-00194-crm-add-button-inline`
+- Scope delivered:
+  - Removed standalone new-lead section/card framing from CRM.
+  - Moved **Add New Lead** into compact toolbar position above leads table and kept table as primary visual focus.
+  - Preserved create form validation/API flow by revealing form inline under toolbar button.
+  - Preserved search + table filtering behavior.
+  - Build verification: `npm run build` passed.
+
+- 2026-03-07 01:46 UTC task-00194: simplified CRM to table-first layout with compact inline Add New Lead toolbar control, removed separate standalone new-lead section framing, preserved create/search/table behaviors, updated docs/tasks/changelog/lane report, and build passed.
+
 ## task-00193 — UI/DEV — Nav font adjustment + CRM leads-first table refactor
 
 - Status: **Done**

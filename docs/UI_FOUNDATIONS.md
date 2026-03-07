@@ -1,3 +1,11 @@
+## task-00194 — CRM add-lead inline toolbar control + table-first emphasis
+
+- Simplified `src/app/app/crm/page.tsx` layout by removing the separate standalone new-lead section/card framing.
+- Kept the leads table as the primary focal surface by housing create controls inside the same leads card, directly above the table content.
+- Placed **Add New Lead** as a compact toolbar button adjacent to search; toggle now reveals an inline create panel within the table area (instead of a dedicated full section).
+- Preserved existing lead create flow behavior (validation feedback, success state reset, list refresh after create) and existing search + table filtering behavior.
+- Updated CRM styles in `src/app/globals.css` to support compact toolbar actions and a lightweight inline create panel treatment.
+
 ## task-00193 — Nav typography trim + CRM leads-first table UX
 
 - Reduced left-nav label size in `src/app/globals.css` from `1.2rem` to `1.13rem` to tighten scan density while preserving existing icon slot/render sizing and row-height geometry.
