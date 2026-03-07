@@ -1,3 +1,13 @@
+## 2026-03-07 04:00 UTC — task-00196 Create mobile responsiveness + nav label fix
+- Root cause 1 (mobile nav labels): collapsed-state selector hid nav labels/brand text even when mobile off-canvas menu was open, causing blank labels while expanded.
+- Root cause 2 (Create phone layout): several Create controls/summaries/header/history sections remained row-oriented at narrow widths, creating crowding/overflow pressure on phones.
+- Fixes shipped in `src/app/globals.css`:
+  - collapse-label hide now excludes mobile-open state (`:not(.is-mobile-nav-open)`) so expanded mobile nav labels stay visible
+  - phone breakpoint Create refinements: stacked page header + collapsed summaries + history header; full-width reopen/status controls; single-column generate-mode buttons; 2-up shortcuts; stronger overflow wrapping; tighter compliance card padding
+- Stability: preserved existing nav row-height/jitter fixes and desktop behavior.
+- Docs updated: `docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/agent-reports/railfin-ui.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-07 04:35 UTC — task-00195 responsive design pass
 - Completed a broad responsive pass across Create, Library, Campaigns, Events, CRM, Configure (+ subpages), Help Center, and shell-level navigation behavior.
 - Added small-screen app-shell off-canvas nav mode with header Menu/Close control and dismissible backdrop to keep content unobstructed.

@@ -1,3 +1,10 @@
+## 2026-03-07 — Create mobile responsiveness + mobile-nav label visibility fix (task-00196)
+- Fixed a phone-navigation bug where left-nav item labels could appear blank while the mobile menu was open.
+- Root cause was a collapsed-nav label-hiding selector also applying during mobile off-canvas expanded state.
+- Updated nav-label/brand visibility logic so labels hide only when truly collapsed and **not** in mobile menu-open state.
+- Completed a follow-up Create mobile responsiveness pass for narrow screens: cleaner stacking for controls/action rows, improved compact header/history layout, and stronger overflow wrapping to prevent clipping.
+- Preserved desktop behavior and prior nav jitter/row-height stability fixes.
+
 ## 2026-03-07 — Responsive design pass across core app pages (task-00195)
 - Completed a broad responsive UX pass across Create, Library, Campaigns, Events, CRM, Configure, Help Center, and shared app shell surfaces.
 - Added mobile navigation behavior with an off-canvas left rail, explicit header Menu toggle, and tap-to-dismiss backdrop so nav interaction does not block content.
