@@ -1,3 +1,11 @@
+## 2026-03-08 08:20 UTC — task-00206 Fix Create compliance controls dropping when minimized
+- Updated `src/app/globals.css` collapsed Create layout so minimized compliance controls stay anchored near the top instead of dropping to page bottom.
+- Desktop fix (`@media (min-width: 960px)`): `.rf-create-layout.is-compliance-collapsed` now keeps a second auto column (`minmax(0, 1fr) auto`) and right-aligns compliance controls.
+- Mobile/tablet fix (`@media (max-width: 900px)`): collapsed compliance block is ordered before main content (`order: -1`) so reopen/run controls are top-reachable in single-column flow.
+- Preserved task-00204 no-overlap behavior by keeping controls in normal flow; no floating overlay introduced.
+- Preserved task-00203 compliance cache behavior (panel remains mounted/hidden behavior unchanged).
+- Updated docs (`docs/tasks.md`, `docs/CHANGELOG.md`, `docs/UI_FOUNDATIONS.md`, lane report) and verified `npm run build` passes.
+
 ## 2026-03-08 08:10 UTC — task-00205 Create prompt payload debug drawer
 - Added compact **View prompt payload** toggle on Create generation controls (`src/ui/editor-shell.tsx`).
 - Added debug drawer to display latest in-session generation payload with assembled prompt string + metadata (`mode/contentType/template/tone/intent/controls/topics/purposes`) and copy-to-clipboard action.

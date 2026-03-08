@@ -1,3 +1,11 @@
+## task-00206 — Create compliance controls anchoring when collapsed
+
+- `src/app/globals.css` now keeps minimized compliance controls anchored near the top of Create across breakpoints.
+- Desktop (`@media (min-width: 960px)`) collapsed state now uses a two-track grid (`minmax(0, 1fr) auto`) so the compliance controls remain in a dedicated right-side column instead of flowing below content.
+- Mobile/tablet (`@media (max-width: 900px)`) collapsed state now reorders compliance controls above the main Create stack (`order: -1`) so controls remain top-reachable in single-column flow.
+- Preserved task-00204 non-overlap contract by keeping controls in-flow (no fixed/absolute floating controls over editor surfaces).
+- Preserved task-00203 cache contract since compliance panel mount/hidden behavior in `EditorShell` is unchanged.
+
 ## task-00205 — Create prompt payload debug drawer
 
 - `src/ui/editor-shell.tsx` now exposes a compact operator-facing **View prompt payload** toggle in Create generation controls.

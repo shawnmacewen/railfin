@@ -1,3 +1,15 @@
+## task-00206 — UI — Fix Create compliance controls position when panel is minimized
+
+- Status: **Done**
+- Branch: `fix/ui/task-00206-compliance-controls-position-collapsed`
+- Scope delivered:
+  - Fixed collapsed compliance controls placement in Create so the minimized controls remain anchored near the top of the workspace instead of dropping to the bottom.
+  - Updated desktop collapsed layout to keep a dedicated narrow compliance-controls column (`minmax(0,1fr) auto`) while expanded state remains unchanged.
+  - Updated mobile/tablet collapsed ordering so compliance controls render above main Create content in single-column layouts, preventing bottom-of-page drift.
+  - Preserved task-00204 non-overlap behavior by keeping controls in normal layout flow (no floating overlay/absolute overlap on editor inputs).
+  - Preserved task-00203 compliance result caching behavior (compliance panel still remains mounted while collapsed).
+  - Verified with `npm run build` (pass).
+
 ## task-00205 — UI — Create prompt payload debug drawer
 
 - Status: **Done**

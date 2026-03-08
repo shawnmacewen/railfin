@@ -1,3 +1,9 @@
+## 2026-03-08 — Create collapsed compliance controls stay top-anchored (task-00206)
+- Fixed Create minimized compliance controls so reopen/run controls no longer fall to the bottom of the page when the panel is collapsed.
+- Desktop collapsed layout now keeps a narrow right-side controls column, so controls remain top-aligned beside Create content.
+- Mobile/tablet collapsed layout now reorders minimized controls above main Create content in single-column mode, keeping controls immediately reachable.
+- Preserved non-overlap behavior (controls stay in normal page flow), compliance result caching, and responsive behavior.
+
 ## 2026-03-08 — Create prompt payload debug drawer on Create (task-00205)
 - Added a compact **View prompt payload** debug toggle on the Create screen.
 - Added an operator-focused debug drawer that shows the most recent generation payload in-session, including:

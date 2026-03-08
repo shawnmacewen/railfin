@@ -987,7 +987,11 @@ button:disabled {
   }
 
   .rf-create-layout.is-compliance-collapsed {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rf-create-layout.is-compliance-collapsed .rf-create-compliance {
+    justify-self: end;
   }
 
   .rf-create-compliance {
@@ -2002,6 +2006,10 @@ button:disabled {
   .rf-create-compliance,
   .rf-create-compliance.is-collapsed {
     width: 100%;
+  }
+
+  .rf-create-layout.is-compliance-collapsed .rf-create-compliance {
+    order: -1;
   }
 
   .rf-create-compliance-minimized,
