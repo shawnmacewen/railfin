@@ -208,7 +208,7 @@ function buildRemediationBlock(hint: string, finding: ComplianceFinding) {
   const safeHint = hint.trim().slice(0, 240) || "Add a compliant revision and rerun the check.";
   const safeIssue = (finding.issue || "unknown issue").trim().slice(0, 180);
   const safeSeverity = (finding.severity || "unknown").trim().toLowerCase();
-  const safeLocation = (finding.location || "unknown:0:0").trim().slice(0, 120);
+  const safeLocation = (finding.location || "Location unavailable").trim().slice(0, 120);
 
   return [
     REMEDIATION_BLOCK_START,
@@ -761,7 +761,7 @@ export function EditorShell() {
   const onApplyRemediationHint = async (hint: string, finding: ComplianceFinding) => {
     const issue = finding.issue || "unknown issue";
     const severity = (finding.severity || "unknown").toLowerCase();
-    const location = finding.location || "N/A";
+    const location = finding.location || "Location unavailable";
 
     if (!selectedFindingContext) {
       setRemediationApplyStatus("error");
@@ -896,7 +896,7 @@ export function EditorShell() {
     setRemediationPreview({
       issue: finding.issue || "unknown issue",
       severity: (finding.severity || "unknown").toLowerCase(),
-      location: finding.location || "N/A",
+      location: finding.location || "Location unavailable",
       previousBlock: applied.previousBlock,
       appliedBlock: applied.appliedBlock,
       summary: applied.summary,
@@ -905,7 +905,7 @@ export function EditorShell() {
       {
         issue: finding.issue || "unknown issue",
         severity: (finding.severity || "unknown").toLowerCase(),
-        location: finding.location || "N/A",
+        location: finding.location || "Location unavailable",
         hint: selectedFindingContext.remediationHint,
         appliedAt: new Date().toISOString(),
       },

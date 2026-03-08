@@ -9,6 +9,11 @@ type RawFinding = {
   details?: string;
   suggestion?: string;
   location?: unknown;
+  file?: unknown;
+  source?: unknown;
+  section?: unknown;
+  line?: unknown;
+  column?: unknown;
 };
 
 type ComplianceFinding = {
@@ -17,6 +22,7 @@ type ComplianceFinding = {
   details: string;
   suggestion: string;
   location: string;
+  locationLabel: string | null;
 };
 
 type ComplianceRequestBody = {
@@ -33,39 +39,105 @@ function isContentType(value: unknown): value is ComplianceRequestBody["contentT
   return typeof value === "string" && CONTENT_TYPES.includes(value as (typeof CONTENT_TYPES)[number]);
 }
 
-function normalizeLocation(location: unknown): string {
-  if (typeof location === "string") {
-    const trimmed = location.trim();
-    return trimmed || "unknown:0:0";
+function normalizeString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
   }
 
-  if (location && typeof location === "object") {
-    const asObject = location as {
-      file?: unknown;
-      line?: unknown;
-      column?: unknown;
-    };
+  const trimmed = value.trim();
+  return trimmed || null;
+}
 
-    const file =
-      typeof asObject.file === "string" && asObject.file.trim()
-        ? asObject.file.trim()
-        : "unknown";
-    const line =
-      typeof asObject.line === "number" && Number.isFinite(asObject.line)
-        ? Math.max(0, Math.trunc(asObject.line))
-        : 0;
-    const column =
-      typeof asObject.column === "number" && Number.isFinite(asObject.column)
-        ? Math.max(0, Math.trunc(asObject.column))
-        : 0;
-
-    return `${file}:${line}:${column}`;
+function normalizePositiveInt(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
   }
 
-  return "unknown:0:0";
+  const normalized = Math.max(0, Math.trunc(value));
+  return normalized > 0 ? normalized : null;
+}
+
+function isUnknownLocationLabel(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return true;
+
+  return ["unknown", "unknown:0:0", "n/a", "na", "none", "null"].includes(normalized);
+}
+
+function formatLocationLabel(parts: {
+  source?: string | null;
+  section?: string | null;
+  line?: number | null;
+  column?: number | null;
+}): string | null {
+  const source = parts.source?.trim() || null;
+  const section = parts.section?.trim() || null;
+  const line = parts.line ?? null;
+  const column = parts.column ?? null;
+
+  const hasCoordinates = line !== null;
+  const lineAndColumn = hasCoordinates
+    ? `${line}${column !== null ? `:${column}` : ""}`
+    : null;
+
+  if (source && lineAndColumn) {
+    return `${source}:${lineAndColumn}`;
+  }
+
+  if (source && section) {
+    return `${source} (${section})`;
+  }
+
+  if (source) {
+    return source;
+  }
+
+  if (section && lineAndColumn) {
+    return `${section}:${lineAndColumn}`;
+  }
+
+  if (section) {
+    return section;
+  }
+
+  return lineAndColumn;
+}
+
+function normalizeLocation(input: RawFinding): string | null {
+  const locationText = normalizeString(input.location);
+  if (locationText && !isUnknownLocationLabel(locationText)) {
+    return locationText;
+  }
+
+  const objectLocation = input.location && typeof input.location === "object"
+    ? (input.location as {
+        file?: unknown;
+        path?: unknown;
+        source?: unknown;
+        section?: unknown;
+        line?: unknown;
+        column?: unknown;
+      })
+    : null;
+
+  const source =
+    normalizeString(objectLocation?.file) ||
+    normalizeString(objectLocation?.path) ||
+    normalizeString(objectLocation?.source) ||
+    normalizeString(input.file) ||
+    normalizeString(input.source);
+
+  const section = normalizeString(objectLocation?.section) || normalizeString(input.section);
+  const line = normalizePositiveInt(objectLocation?.line) ?? normalizePositiveInt(input.line);
+  const column = normalizePositiveInt(objectLocation?.column) ?? normalizePositiveInt(input.column);
+
+  const formatted = formatLocationLabel({ source, section, line, column });
+  return formatted && !isUnknownLocationLabel(formatted) ? formatted : null;
 }
 
 function normalizeFinding(input: RawFinding): ComplianceFinding {
+  const normalizedLocation = normalizeLocation(input);
+
   return {
     severity: (input.severity || "unknown").trim() || "unknown",
     issue: (input.issue || "Unknown issue").trim() || "Unknown issue",
@@ -73,7 +145,8 @@ function normalizeFinding(input: RawFinding): ComplianceFinding {
     suggestion:
       (input.suggestion || "No suggestion provided.").trim() ||
       "No suggestion provided.",
-    location: normalizeLocation(input.location),
+    location: normalizedLocation || "",
+    locationLabel: normalizedLocation,
   };
 }
 
@@ -117,7 +190,7 @@ function buildCompliancePrompt(input: {
     "Analyze the content and return strict JSON only.",
     "Do not include markdown, prose, or code fences.",
     "Output schema:",
-    '{"findings":[{"severity":"low|medium|high|unknown","issue":"string","details":"string","suggestion":"string","location":"file:line:column or unknown:0:0"}]}',
+    '{"findings":[{"severity":"low|medium|high|unknown","issue":"string","details":"string","suggestion":"string","location":"optional location label","source":"optional source/file","section":"optional section","line":"optional number","column":"optional number"}]}',
     "If there are no issues, return {\"findings\":[]}",
     `Policy set: ${input.policySet}`,
     `Content type: ${input.contentType}`,
@@ -235,7 +308,8 @@ export async function POST(request: NextRequest) {
       details:
         buildComplianceFallbackDetails(runtime.diagnostic.attempts[0]?.errorKind),
       suggestion: "Retry shortly or review content manually before publishing.",
-      location: "unknown:0:0",
+      location: "",
+      locationLabel: null,
     },
   ];
 

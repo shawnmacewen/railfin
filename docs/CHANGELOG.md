@@ -1,3 +1,10 @@
+## 2026-03-08 — Compliance finding location mapping + unknown fallback cleanup (task-00202)
+- Compliance-check normalization now extracts location metadata from richer provider payload shapes (string/object `location`, plus `source`/`file`/`section`/`line`/`column` when present).
+- Added additive finding field `locationLabel` (nullable) so UI can consume a stable normalized display location without parsing heuristics.
+- Compliance finding cards no longer render placeholder `unknown:0:0`; when no meaningful location exists, the Location row is omitted.
+- Selected remediation context and remediation block fallbacks now use friendly `Location unavailable` text.
+- Existing compliance run/list/remediation behavior remains intact.
+
 ## 2026-03-08 — Create unsaved-warning + compliance panel cleanup (task-00201)
 - Added Create-route unsaved-content guard for app-shell navigation: attempting to leave /app/create with meaningful unsaved generated/edited content now opens a clear stay-vs-leave warning dialog.
 - Guard now covers left-nav/app-shell route changes and browser/tab close refresh while Create has unsaved meaningful edits.

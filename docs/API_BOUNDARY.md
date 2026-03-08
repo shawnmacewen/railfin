@@ -108,13 +108,14 @@ Response JSON:
 - Validation error response: `400` with `{ ok: false, error: string }` (for missing content)
 - Provider failures/timeouts: endpoint returns a safe fallback success payload with normalized findings (contract preserved)
 
-`ComplianceFinding` response object fields (exactly):
+`ComplianceFinding` response object fields:
 
 - `severity: string`
 - `issue: string`
 - `details: string`
 - `suggestion: string`
-- `location: string`
+- `location: string` (legacy compatibility field; may be empty when unknown)
+- `locationLabel: string | null` (stable UI display field; `null` when unavailable)
 
 ### Evaluation context path
 
@@ -295,16 +296,22 @@ Strict response validation behavior:
 - [ ] Add per-service safety assertions in tests (e.g., no legal-approval wording in Compliance outputs).
 - [x] Add provider-chain tests proving primary/fallback/degraded behavior using deterministic provider injection harness (`src/ai/runtime/providerChain.test.ts`).
 
-### `location` normalization
+### Compliance location normalization
 
-`location` is normalized to canonical string format:
+Compliance findings now normalize location data into a UI-friendly contract:
 
-- `file:line:column`
+- `locationLabel` is derived from the richest available source in this order:
+  - explicit `location` string (when meaningful)
+  - object location fields (`file/path/source`, `section`, `line`, `column`)
+  - top-level finding fields (`file/source/section/line/column`)
+- Unknown placeholders (`unknown`, `unknown:0:0`, `N/A`, etc.) normalize to `locationLabel: null`.
+- `location` remains in the response for backward compatibility and mirrors `locationLabel` (or empty string when unavailable).
 
 Examples:
 
-- `controls/access-control.yaml:12:3`
-- `unknown:0:0` (fallback when source location is missing/invalid)
+- `privacy.md:42:7`
+- `terms.md (disclaimer section)`
+- `locationLabel: null` when no meaningful source location is provided
 
 ## Configure policy contract (`GET/POST /api/internal/configure/policy`)
 

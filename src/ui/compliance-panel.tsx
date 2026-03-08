@@ -8,6 +8,7 @@ export type ComplianceFinding = {
   details?: string;
   suggestion?: string;
   location?: string;
+  locationLabel?: string | null;
 };
 
 type ComplianceCheckResponse = {
@@ -51,13 +52,29 @@ function toRemediationHint(suggestion?: string) {
   return text.length > 120 ? `${text.slice(0, 117).trimEnd()}...` : text;
 }
 
+function normalizeLocationDisplay(location?: string | null): string | null {
+  const text = (location || "").trim();
+  if (!text) return null;
+
+  const normalized = text.toLowerCase();
+  if (["unknown", "unknown:0:0", "n/a", "na", "none", "null"].includes(normalized)) {
+    return null;
+  }
+
+  return text;
+}
+
+function getLocationDisplay(finding: ComplianceFinding): string | null {
+  return normalizeLocationDisplay(finding.locationLabel) || normalizeLocationDisplay(finding.location);
+}
+
 function getFindingKey(finding: ComplianceFinding, severity: string, index: number) {
   return `${finding.issue || "issue"}-${severity}-${index}`;
 }
 
 
 function getProtectedZoneWarning(finding: ComplianceFinding): string | null {
-  const source = [finding.issue, finding.details, finding.suggestion, finding.location]
+  const source = [finding.issue, finding.details, finding.suggestion, finding.locationLabel, finding.location]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -178,7 +195,7 @@ export function CompliancePanel({
       findingId: selectedFindingKey,
       issue: selectedFindingMeta.finding.issue || "N/A",
       severity: selectedFindingMeta.severity,
-      location: selectedFindingMeta.finding.location || "N/A",
+      location: getLocationDisplay(selectedFindingMeta.finding) || "Location unavailable",
       remediationHint: selectedFindingMeta.remediationHint,
     });
   }, [onSelectedFindingChange, selectedFindingKey, selectedFindingMeta]);
@@ -319,6 +336,8 @@ export function CompliancePanel({
                   const remediationHint = toRemediationHint(finding.suggestion);
                   const isSelected = selectedFindingKey === findingKey;
 
+                  const locationDisplay = getLocationDisplay(finding);
+
                   return (
                     <li key={findingKey} className={`rf-finding-card${isSelected ? " is-selected" : ""}`}>
                       <p>
@@ -349,9 +368,11 @@ export function CompliancePanel({
                           Remind Later
                         </button>
                       </div>
-                      <p>
-                        <strong>Location:</strong> {finding.location || "N/A"}
-                      </p>
+                      {locationDisplay ? (
+                        <p>
+                          <strong>Location:</strong> {locationDisplay}
+                        </p>
+                      ) : null}
                       {getProtectedZoneWarning(finding) ? (
                         <p className="rf-status rf-status-error">{getProtectedZoneWarning(finding)}</p>
                       ) : null}

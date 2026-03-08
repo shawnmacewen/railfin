@@ -1,3 +1,14 @@
+## task-00202 — DEV/UI — Compliance finding location mapping + unknown fallback cleanup
+
+- Status: **Done**
+- Branch: `fix/dev/task-00202-compliance-location-mapping-fallback`
+- Scope delivered:
+  - Upgraded compliance finding location normalization in `POST /api/internal/compliance/check` to extract meaningful labels from either `location` string/object or top-level `source/file/section/line/column` fields.
+  - Added stable additive contract field `locationLabel` (nullable) while preserving legacy `location` string for compatibility.
+  - Removed `unknown:0:0` fallback rendering from compliance finding cards; location row is now hidden when no meaningful location exists.
+  - Updated selected-finding context and remediation-path location fallbacks to use friendly `Location unavailable` text instead of placeholder coordinates.
+  - Preserved existing run-check/findings/remediation flows and verified with `npm run build` (pass).
+
 ## task-00201 — UI/UX — Create unsaved warning + compliance panel cleanup
 
 - Status: **Done**

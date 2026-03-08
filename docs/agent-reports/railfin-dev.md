@@ -1,3 +1,11 @@
+## 2026-03-08 08:05 UTC — task-00202 compliance location mapping + unknown fallback cleanup
+- Updated `src/app/api/internal/compliance/check/route.ts` location normalization to extract meaningful labels from flexible provider payloads (`location` string/object and top-level `source/file/section/line/column`).
+- Added additive compliance finding response field `locationLabel` (nullable) and preserved compatibility `location` field.
+- Updated compliance UI rendering in `src/ui/compliance-panel.tsx` to hide Location row when unavailable (no `unknown:0:0` output), while still showing real locations consistently.
+- Updated remediation location fallback defaults in `src/ui/editor-shell.tsx` and `src/api/internal/compliance/remediation.ts` to use `Location unavailable`.
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/API_BOUNDARY.md`, `docs/agent-reports/railfin-dev.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-04 19:54 UTC — task-00187 CRM basic lead tracking space phase 1
 - Added internal CRM contracts and persistence helper:
   - `src/api/internal/crm/leads.ts`
