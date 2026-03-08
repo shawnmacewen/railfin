@@ -1,3 +1,13 @@
+## task-00199 — Left-nav expanded width tighten (reduced right whitespace)
+
+- Tightened expanded desktop/tablet sidebar track widths in `src/app/globals.css` to reduce excess right-side label whitespace while preserving readability and icon geometry.
+- Updated expanded-state width values:
+  - default: `minmax(14rem, 15rem) -> minmax(12.75rem, 13.5rem)`
+  - <=1200px: `13rem -> 12.25rem`
+  - <=860px: `12rem -> 11.5rem`
+- Kept collapsed rail width (`4.5rem`), nav icon slot size (`1.44rem`), nav label font size (`1.13rem`), and clip/opacity collapse transitions unchanged to preserve anti-jitter alignment behavior.
+- Preserved mobile/off-canvas nav behavior (`<=900px`) and drawer width contract (`width: min(17rem, calc(100vw - 2rem))`).
+
 ## task-00198 — Create toolbar tooltips + compliance panel default minimized behavior
 
 - `src/ui/lexical-editor.tsx` now provides delayed toolbar tooltips for icon-only controls:

@@ -1,3 +1,12 @@
+## 2026-03-08 07:05 UTC — task-00199 tightened expanded left-nav width
+- Reduced expanded sidebar width values in `src/app/globals.css` to cut right-side whitespace while preserving nav readability:
+  - default `minmax(14rem, 15rem) -> minmax(12.75rem, 13.5rem)`
+  - `@media (max-width: 1200px)`: `13rem -> 12.25rem`
+  - `@media (max-width: 860px)`: `12rem -> 11.5rem`
+- Left collapsed rail width (`4.5rem`), nav icon size/slot (`23` render, `1.44rem` slot), row height, and label reveal/hide transitions unchanged to preserve hover-expand + anti-jitter behavior.
+- Mobile/off-canvas behavior unchanged (`<=900px` drawer and backdrop/menu interactions retained).
+- Updated docs (`docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`) and reran build.
+
 ## 2026-03-08 06:55 UTC — task-00198 toolbar tooltip + compliance collapse rerun
 - Confirmed work executed in canonical repo context (`/work/railfin`) and reimplemented task-00198 fixes.
 - Added delayed Lexical toolbar tooltips in `src/ui/lexical-editor.tsx` with keyboard-accessible labels/ARIA (`title`, `aria-describedby`, `role="tooltip"`), ~500ms show delay, and delayed dismiss behavior.

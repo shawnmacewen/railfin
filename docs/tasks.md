@@ -1,3 +1,18 @@
+## task-00199 — UI — Tighten expanded left-nav width / reduce right whitespace
+
+- Status: **Done**
+- Branch: `fix/ui/task-00199-nav-expanded-width-tighten`
+- Scope delivered:
+  - Reduced expanded sidebar track width so nav labels no longer sit with excess right-side whitespace.
+  - Updated expanded width values in `src/app/globals.css`:
+    - default: `minmax(14rem, 15rem) -> minmax(12.75rem, 13.5rem)`
+    - `@media (max-width: 1200px)`: `13rem -> 12.25rem`
+    - `@media (max-width: 860px)`: `12rem -> 11.5rem`
+  - Kept icon sizing and label readability intact (no changes to icon slot/render size, label font size, or row height).
+  - Preserved hover-expand/auto-collapse behavior and prior anti-jitter alignment fixes by leaving collapsed-state selectors/transitions untouched.
+  - Preserved mobile/off-canvas behavior and drawer width contract at `<=900px`.
+  - Updated UI docs/changelog/lane report and ran `npm run build` (pass).
+
 ## task-00198 — UI — Create toolbar tooltips + compliance panel default minimize behavior
 
 - Status: **Done**

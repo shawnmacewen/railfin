@@ -1,3 +1,12 @@
+## 2026-03-08 — Tightened expanded left-nav width to reduce right-side whitespace (task-00199)
+- Reduced expanded sidebar track widths in `src/app/globals.css` so labels sit in a tighter, cleaner column without changing icon/row geometry.
+- Updated widths:
+  - default: `minmax(14rem, 15rem) -> minmax(12.75rem, 13.5rem)`
+  - `@media (max-width: 1200px)`: `13rem -> 12.25rem`
+  - `@media (max-width: 860px)`: `12rem -> 11.5rem`
+- Preserved collapsed rail behavior, hover-expand/auto-collapse interaction model, and anti-jitter alignment constraints.
+- Preserved mobile/off-canvas nav behavior (`<=900px`) and drawer width contract.
+
 ## 2026-03-08 — Create toolbar tooltip + compliance panel collapse behavior fix (task-00198)
 - Added delayed icon-toolbar tooltips in Create editor (~500ms show delay) with keyboard-friendly labels and ARIA tooltip semantics.
 - Tooltips now stay visible while hovered/focused and dismiss with a short delayed hide when interaction ends.
