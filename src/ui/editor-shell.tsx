@@ -1333,29 +1333,32 @@ export function EditorShell() {
 
         </div>
 
-        {isComplianceCollapsed ? (
-          <button
-            type="button"
-            className="rf-create-compliance-reopen"
-            onClick={() => setIsComplianceCollapsed(false)}
-            aria-label="Open compliance panel"
-          >
-            Compliance ⇤
-          </button>
-        ) : null}
-
         <aside className={`rf-create-compliance ${isComplianceCollapsed ? "is-collapsed" : ""}`} aria-label="Compliance feedback panel">
-          <div className="rf-create-compliance-rail-control">
-            <button
-              type="button"
-              onClick={() => setIsComplianceCollapsed((current) => !current)}
-              aria-label={isComplianceCollapsed ? "Open compliance panel" : "Minimize compliance panel"}
-            >
-              {isComplianceCollapsed ? "⇤" : "⇥"}
-            </button>
-          </div>
+          {isComplianceCollapsed ? (
+            <div className="rf-create-compliance-minimized">
+              <button
+                type="button"
+                className="rf-create-compliance-toggle"
+                onClick={() => setIsComplianceCollapsed(false)}
+                aria-label="Open compliance panel"
+              >
+                ⇤ Open Compliance
+              </button>
+            </div>
+          ) : null}
+
           <div className="rf-create-compliance-card" hidden={isComplianceCollapsed} aria-hidden={isComplianceCollapsed}>
-            <h3>Compliance Feedback</h3>
+            <div className="rf-create-compliance-card-header">
+              <h3>Compliance Feedback</h3>
+              <button
+                type="button"
+                className="rf-create-compliance-toggle"
+                onClick={() => setIsComplianceCollapsed(true)}
+                aria-label="Minimize compliance panel"
+              >
+                ⇥ Minimize Panel
+              </button>
+            </div>
             <CompliancePanel
               activePolicyContext={activePolicyContext}
               content={contentText}

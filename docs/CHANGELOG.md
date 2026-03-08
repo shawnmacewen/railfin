@@ -1,3 +1,10 @@
+## 2026-03-08 — Create compliance rail overlap + control placement cleanup (task-00204)
+- Fixed Create compliance minimized-state control so reopen button is anchored in normal page flow and no longer overlays editor controls/content.
+- Moved collapse/minimize control into the compliance card header (inside the main container) and widened it with a clearer arrow + text label.
+- Removed the blue vertical rail/divider between editor and compliance panes by dropping the narrow rail-control column and keeping separation via card spacing/layout.
+- Preserved local compliance-result caching behavior from task-00203 by keeping the compliance card mounted while collapsed (`hidden`) and only toggling visibility.
+- Preserved existing run compliance/findings/remediation behavior and Create unsaved-warning/responsive behavior.
+
 ## 2026-03-08 — Create compliance results persist while panel is minimized (task-00203)
 - Create-page compliance findings now persist locally for the active Create session, even when the compliance panel is minimized and reopened.
 - Compliance panel collapse now hides without unmounting, so prior findings and run summary return immediately on reopen.
