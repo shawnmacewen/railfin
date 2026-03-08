@@ -147,8 +147,49 @@ type GenerateResponse = {
       degraded?: boolean;
       provider?: string;
     };
+    debug?: {
+      assembledPrompt?: string;
+      metadata?: {
+        mode?: string;
+        contentType?: string;
+        template?: string;
+        tone?: string;
+        intent?: string;
+        controls?: {
+          lengthTarget?: string;
+          formatStyle?: string;
+          audience?: string;
+          objective?: string;
+          controlProfile?: string;
+        };
+        topics?: string[];
+        purposes?: string[];
+      };
+    };
   };
   error?: string;
+};
+
+type PromptPayloadDebugState = {
+  capturedAt: string;
+  assembledPrompt: string;
+  metadata: {
+    mode: string;
+    contentType: string;
+    template: string;
+    tone: string;
+    intent: string;
+    controls: {
+      lengthTarget: string;
+      formatStyle: string;
+      audience: string;
+      objective: string;
+      controlProfile: string;
+    };
+    topics: string[];
+    purposes: string[];
+  };
+  requestBody: Record<string, unknown>;
 };
 
 type RemediationApplyResponse = {
@@ -285,6 +326,9 @@ export function EditorShell() {
   const [isLexicalReady, setIsLexicalReady] = useState(false);
   const [savedBaselineText, setSavedBaselineText] = useState("");
   const [complianceResetToken, setComplianceResetToken] = useState(0);
+  const [isPromptPayloadDrawerOpen, setIsPromptPayloadDrawerOpen] = useState(false);
+  const [promptPayloadDebugState, setPromptPayloadDebugState] = useState<PromptPayloadDebugState | null>(null);
+  const [promptPayloadCopyFeedback, setPromptPayloadCopyFeedback] = useState<string | null>(null);
 
   const generationHistoryContextKey = draftId || "session-new";
 
@@ -444,6 +488,80 @@ export function EditorShell() {
     );
   };
 
+  const capturePromptPayloadDebugState = (params: {
+    assembledPrompt?: string;
+    requestBody: Record<string, unknown>;
+    metadata?: {
+      mode?: string;
+      contentType?: string;
+      template?: string;
+      tone?: string;
+      intent?: string;
+      controls?: {
+        lengthTarget?: string;
+        formatStyle?: string;
+        audience?: string;
+        objective?: string;
+        controlProfile?: string;
+      };
+      topics?: string[];
+      purposes?: string[];
+    };
+  }) => {
+    const assembledPrompt = params.assembledPrompt?.trim();
+
+    if (!assembledPrompt) {
+      return;
+    }
+
+    setPromptPayloadDebugState({
+      capturedAt: new Date().toISOString(),
+      assembledPrompt,
+      metadata: {
+        mode: params.metadata?.mode || String(params.requestBody.mode || "single"),
+        contentType: params.metadata?.contentType || String(params.requestBody.contentType || "n/a"),
+        template: params.metadata?.template || "default",
+        tone: params.metadata?.tone || "professional",
+        intent: params.metadata?.intent || "educate",
+        controls: {
+          lengthTarget: params.metadata?.controls?.lengthTarget || "medium",
+          formatStyle: params.metadata?.controls?.formatStyle || "standard",
+          audience: params.metadata?.controls?.audience || "practitioner",
+          objective: params.metadata?.controls?.objective || "consideration",
+          controlProfile: params.metadata?.controls?.controlProfile || "balanced-default",
+        },
+        topics: params.metadata?.topics || ((params.requestBody.topics as string[] | undefined) ?? []),
+        purposes: params.metadata?.purposes || ((params.requestBody.purposes as string[] | undefined) ?? []),
+      },
+      requestBody: params.requestBody,
+    });
+
+    setPromptPayloadCopyFeedback(null);
+  };
+
+  const onCopyPromptPayload = async () => {
+    if (!promptPayloadDebugState) {
+      return;
+    }
+
+    const payloadText = JSON.stringify(
+      {
+        assembledPrompt: promptPayloadDebugState.assembledPrompt,
+        metadata: promptPayloadDebugState.metadata,
+        requestBody: promptPayloadDebugState.requestBody,
+      },
+      null,
+      2,
+    );
+
+    try {
+      await navigator.clipboard.writeText(payloadText);
+      setPromptPayloadCopyFeedback("Copied payload.");
+    } catch {
+      setPromptPayloadCopyFeedback("Copy failed.");
+    }
+  };
+
   const onTogglePurpose = (purposeId: PurposeOptionId) => {
     setSelectedPurposes((current) =>
       current.includes(purposeId) ? current.filter((item) => item !== purposeId) : [...current, purposeId],
@@ -481,19 +599,21 @@ export function EditorShell() {
   }, [policyUpdatedAt]);
 
   const generateDraftForType = async (prompt: string, requestedType: ContentType, selections: { topics: TopicOptionId[]; purposes: PurposeOptionId[] }) => {
+    const requestBody = {
+      prompt,
+      mode: "single" as const,
+      contentType: requestedType,
+      topics: selections.topics,
+      purposes: selections.purposes,
+    };
+
     const response = await fetch("/api/internal/content/generate", {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        prompt,
-        mode: "single",
-        contentType: requestedType,
-        topics: selections.topics,
-        purposes: selections.purposes,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     const payload = (await response.json().catch(() => ({}))) as GenerateResponse;
@@ -508,6 +628,8 @@ export function EditorShell() {
       notes: payload.data?.generationMeta?.notes?.trim(),
       degraded: Boolean(payload.data?.generationMeta?.degraded),
       provider: payload.data?.generationMeta?.provider?.trim() || null,
+      debug: payload.data?.debug,
+      requestBody,
     };
   };
 
@@ -595,6 +717,12 @@ export function EditorShell() {
     try {
       const generated = await generateDraftForType(trimmedPrompt, contentType, generationSelections);
       const variantId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      capturePromptPayloadDebugState({
+        assembledPrompt: generated.debug?.assembledPrompt,
+        metadata: generated.debug?.metadata,
+        requestBody: generated.requestBody,
+      });
 
       const generatedHtml = plainTextToHtml(generated.generatedText);
       setContentHtml(generatedHtml);
@@ -970,6 +1098,14 @@ export function EditorShell() {
                       AI prompt
                     </button>
                   </div>
+                  <button
+                    type="button"
+                    className="rf-prompt-payload-toggle"
+                    onClick={() => setIsPromptPayloadDrawerOpen((current) => !current)}
+                    aria-expanded={isPromptPayloadDrawerOpen}
+                  >
+                    View prompt payload
+                  </button>
                 </div>
 
                 {isCreateInputCollapsed ? (
@@ -1092,6 +1228,36 @@ export function EditorShell() {
         >
           {generationFeedback}
         </p>
+      ) : null}
+
+      {isPromptPayloadDrawerOpen ? (
+        <section className="rf-prompt-payload-drawer" aria-label="Prompt payload debug">
+          <div className="rf-prompt-payload-drawer-header">
+            <h3>Prompt payload debug</h3>
+            <button type="button" onClick={onCopyPromptPayload} disabled={!promptPayloadDebugState}>
+              Copy payload
+            </button>
+          </div>
+          {promptPayloadCopyFeedback ? <p className="rf-status rf-status-muted">{promptPayloadCopyFeedback}</p> : null}
+          {promptPayloadDebugState ? (
+            <>
+              <p className="rf-status rf-status-muted">Captured: {new Date(promptPayloadDebugState.capturedAt).toLocaleString()}</p>
+              <div className="rf-prompt-payload-meta">
+                <span>mode: {promptPayloadDebugState.metadata.mode}</span>
+                <span>contentType: {promptPayloadDebugState.metadata.contentType}</span>
+                <span>template: {promptPayloadDebugState.metadata.template}</span>
+                <span>tone: {promptPayloadDebugState.metadata.tone}</span>
+                <span>intent: {promptPayloadDebugState.metadata.intent}</span>
+                <span>controls: {promptPayloadDebugState.metadata.controls.controlProfile} / {promptPayloadDebugState.metadata.controls.lengthTarget} / {promptPayloadDebugState.metadata.controls.formatStyle} / {promptPayloadDebugState.metadata.controls.audience} / {promptPayloadDebugState.metadata.controls.objective}</span>
+                <span>topics: {promptPayloadDebugState.metadata.topics.length > 0 ? promptPayloadDebugState.metadata.topics.join(", ") : "none"}</span>
+                <span>purposes: {promptPayloadDebugState.metadata.purposes.length > 0 ? promptPayloadDebugState.metadata.purposes.join(", ") : "none"}</span>
+              </div>
+              <pre className="rf-prompt-payload-pre">{promptPayloadDebugState.assembledPrompt}</pre>
+            </>
+          ) : (
+            <p className="rf-status rf-status-muted">No generation payload captured yet in this Create session.</p>
+          )}
+        </section>
       ) : null}
 
       <section id="create-save" className="rf-create-stage" aria-label="Save draft stage">

@@ -696,6 +696,26 @@ type NormalizedGenerationConfig = {
   controls: GenerationControls;
 };
 
+type GenerationDebugPayload = {
+  assembledPrompt: string;
+  metadata: {
+    mode: GenerateMode;
+    contentType: ContentType;
+    template: GenerateTemplateId;
+    tone: GenerateToneId;
+    intent: GenerateIntentId;
+    controls: {
+      lengthTarget: GenerateLengthTargetId;
+      formatStyle: GenerateFormatStyleId;
+      audience: GenerateAudienceId;
+      objective: GenerateObjectiveId;
+      controlProfile: GenerateControlProfileId;
+    };
+    topics: GenerateTopicId[];
+    purposes: GeneratePurposeId[];
+  };
+};
+
 async function generateDraftForContentType(input: {
   prompt: string;
   contentType: ContentType;
@@ -703,19 +723,41 @@ async function generateDraftForContentType(input: {
   topics: GenerateTopicId[];
   purposes: GeneratePurposeId[];
 }) {
+  const assembledPrompt = buildGenerationPrompt({
+    prompt: input.prompt,
+    contentType: input.contentType,
+    template: input.config.template,
+    preset: input.config.preset,
+    controlProfile: input.config.controlProfile,
+    controls: input.config.controls,
+    topics: input.topics,
+    purposes: input.purposes,
+  });
+
   const runtime = await completeWithDeterministicFallback({
     flow: "content-generate",
-    prompt: buildGenerationPrompt({
-      prompt: input.prompt,
+    prompt: assembledPrompt,
+  });
+
+  const debug: GenerationDebugPayload = {
+    assembledPrompt,
+    metadata: {
+      mode: "single",
       contentType: input.contentType,
-      template: input.config.template,
-      preset: input.config.preset,
-      controlProfile: input.config.controlProfile,
-      controls: input.config.controls,
+      template: input.config.template.id,
+      tone: input.config.preset.tone,
+      intent: input.config.preset.intent,
+      controls: {
+        lengthTarget: input.config.controls.lengthTarget,
+        formatStyle: input.config.controls.formatStyle,
+        audience: input.config.controls.audience,
+        objective: input.config.controls.objective,
+        controlProfile: input.config.controlProfile.id,
+      },
       topics: input.topics,
       purposes: input.purposes,
-    }),
-  });
+    },
+  };
 
   if ("completion" in runtime) {
     try {
@@ -735,6 +777,7 @@ async function generateDraftForContentType(input: {
           notes: generated.notes || "Generation completed",
           providerChain: runtime.diagnostic,
         },
+        debug,
       };
     } catch {
       // degrade safely
@@ -749,6 +792,7 @@ async function generateDraftForContentType(input: {
       providerChain: runtime.diagnostic,
       degraded: true,
     },
+    debug,
   };
 }
 
@@ -1008,6 +1052,7 @@ export async function internalContentGenerate(request: {
       data: {
         draft: result.draft,
         generationMeta: result.generationMeta,
+        debug: result.debug,
       },
     };
   }

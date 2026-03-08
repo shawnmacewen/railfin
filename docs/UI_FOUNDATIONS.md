@@ -1,3 +1,13 @@
+## task-00205 — Create prompt payload debug drawer
+
+- `src/ui/editor-shell.tsx` now exposes a compact operator-facing **View prompt payload** toggle in Create generation controls.
+- Added a lightweight debug drawer (`rf-prompt-payload-*`) that renders latest in-session generation payload details:
+  - exact assembled prompt string sent to generation runtime
+  - request metadata: `mode`, `contentType`, `template`, `tone`, `intent`, `controls`, `topics`, `purposes`
+  - clipboard copy action for payload export
+- `src/api/internal/content/generate.ts` now returns additive `data.debug` for single-mode generation responses; this is non-breaking and does not alter existing success/error contracts consumed by normal UX.
+- Guardrail posture: debug affordance is compact/low-noise and opt-in via explicit toggle opening; normal create flow visual priority remains unchanged.
+
 ## task-00204 — Create compliance rail overlap + control placement cleanup
 
 - `src/ui/editor-shell.tsx` compliance rail controls were refactored to remove floating/absolute reopen behavior:
