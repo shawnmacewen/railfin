@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Card } from "../../../ui/primitives";
 
@@ -58,6 +58,16 @@ export default function CrmPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+
+  const closeCreateModal = useCallback(() => {
+    setIsCreateOpen(false);
+    setSaveError(null);
+    setIsSaving(false);
+  }, []);
+
   const loadLeads = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
@@ -85,6 +95,55 @@ export default function CrmPage() {
     void loadLeads();
   }, [loadLeads]);
 
+  useEffect(() => {
+    if (!isCreateOpen) return;
+
+    const focusTimer = window.setTimeout(() => {
+      nameInputRef.current?.focus();
+    }, 0);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeCreateModal();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const modal = modalRef.current;
+      if (!modal) return;
+
+      const focusable = Array.from(
+        modal.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKeyDown);
+      triggerRef.current?.focus();
+    };
+  }, [closeCreateModal, isCreateOpen]);
+
   const filteredItems = useMemo(
     () => items.filter((lead) => matchesLeadSearch(lead, searchQuery)),
     [items, searchQuery],
@@ -100,17 +159,19 @@ export default function CrmPage() {
           <h2 className="rf-library-section-title">Leads</h2>
           <div className="rf-crm-toolbar-actions">
             <button
+              ref={triggerRef}
               type="button"
               className="rf-crm-add-button"
               onClick={() => {
-                setIsCreateOpen((prev) => !prev);
+                setIsCreateOpen(true);
                 setSaveError(null);
                 setSaveSuccess(null);
               }}
+              aria-haspopup="dialog"
               aria-expanded={isCreateOpen}
-              aria-controls="rf-crm-create-lead"
+              aria-controls="rf-crm-create-lead-modal"
             >
-              {isCreateOpen ? "Close New Lead" : "Add New Lead"}
+              Add New Lead
             </button>
             <div className="rf-crm-search-wrap">
               <label htmlFor="crm-lead-search" className="rf-sr-only">Search leads</label>
@@ -125,80 +186,103 @@ export default function CrmPage() {
           </div>
         </div>
 
+        {saveSuccess ? <p className="rf-status rf-status-success" role="status">{saveSuccess}</p> : null}
+
         {isCreateOpen ? (
-          <div id="rf-crm-create-lead" className="rf-crm-create-panel">
-            <h3 className="rf-library-section-title">Create Lead</h3>
-            <form
-              className="rf-events-form"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                setSaveError(null);
-                setSaveSuccess(null);
-                setIsSaving(true);
-
-                try {
-                  const response = await fetch("/api/internal/crm/leads", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({
-                      name,
-                      email,
-                      phone: phone || undefined,
-                      source: source || undefined,
-                      status,
-                    }),
-                  });
-
-                  const payload = (await response.json().catch(() => null)) as LeadCreateResponse | null;
-
-                  if (!response.ok || !payload?.ok) {
-                    const validationMessage = payload && !payload.ok
-                      ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
-                      : "";
-                    const fallback = payload && !payload.ok ? payload.error : null;
-                    setSaveError(validationMessage || fallback || "Could not save lead.");
-                    return;
-                  }
-
-                  setName("");
-                  setEmail("");
-                  setPhone("");
-                  setSource("");
-                  setStatus("new");
-                  setSaveSuccess("Lead created.");
-                  await loadLeads();
-                } catch {
-                  setSaveError("Could not save lead.");
-                } finally {
-                  setIsSaving(false);
-                }
-              }}
+          <div
+            className="rf-crm-modal-backdrop"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) closeCreateModal();
+            }}
+          >
+            <div
+              id="rf-crm-create-lead-modal"
+              ref={modalRef}
+              className="rf-crm-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="rf-crm-create-lead-title"
             >
-              <label htmlFor="crm-name">Name</label>
-              <input id="crm-name" value={name} onChange={(event) => setName(event.target.value)} required />
+              <div className="rf-crm-modal-header">
+                <h3 id="rf-crm-create-lead-title" className="rf-library-section-title">Create Lead</h3>
+                <button type="button" className="rf-crm-modal-close" aria-label="Close new lead modal" onClick={closeCreateModal}>×</button>
+              </div>
 
-              <label htmlFor="crm-email">Email</label>
-              <input id="crm-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+              <form
+                className="rf-events-form"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setSaveError(null);
+                  setSaveSuccess(null);
+                  setIsSaving(true);
 
-              <label htmlFor="crm-phone">Phone (optional)</label>
-              <input id="crm-phone" value={phone} onChange={(event) => setPhone(event.target.value)} />
+                  try {
+                    const response = await fetch("/api/internal/crm/leads", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({
+                        name,
+                        email,
+                        phone: phone || undefined,
+                        source: source || undefined,
+                        status,
+                      }),
+                    });
 
-              <label htmlFor="crm-source">Source (optional)</label>
-              <input id="crm-source" value={source} onChange={(event) => setSource(event.target.value)} />
+                    const payload = (await response.json().catch(() => null)) as LeadCreateResponse | null;
 
-              <label htmlFor="crm-status">Status</label>
-              <select id="crm-status" value={status} onChange={(event) => setStatus(event.target.value as LeadStatus)}>
-                {STATUS_OPTIONS.map((value) => (
-                  <option key={value} value={value}>{value}</option>
-                ))}
-              </select>
+                    if (!response.ok || !payload?.ok) {
+                      const validationMessage = payload && !payload.ok
+                        ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
+                        : "";
+                      const fallback = payload && !payload.ok ? payload.error : null;
+                      setSaveError(validationMessage || fallback || "Could not save lead.");
+                      return;
+                    }
 
-              <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Create Lead"}</button>
-            </form>
+                    setName("");
+                    setEmail("");
+                    setPhone("");
+                    setSource("");
+                    setStatus("new");
+                    await loadLeads();
+                    setSaveSuccess("Lead created.");
+                    closeCreateModal();
+                  } catch {
+                    setSaveError("Could not save lead.");
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+              >
+                <label htmlFor="crm-name">Name</label>
+                <input id="crm-name" ref={nameInputRef} value={name} onChange={(event) => setName(event.target.value)} required />
 
-            {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
-            {saveSuccess ? <p className="rf-status rf-status-success" role="status">{saveSuccess}</p> : null}
+                <label htmlFor="crm-email">Email</label>
+                <input id="crm-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+
+                <label htmlFor="crm-phone">Phone (optional)</label>
+                <input id="crm-phone" value={phone} onChange={(event) => setPhone(event.target.value)} />
+
+                <label htmlFor="crm-source">Source (optional)</label>
+                <input id="crm-source" value={source} onChange={(event) => setSource(event.target.value)} />
+
+                <label htmlFor="crm-status">Status</label>
+                <select id="crm-status" value={status} onChange={(event) => setStatus(event.target.value as LeadStatus)}>
+                  {STATUS_OPTIONS.map((value) => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+
+                <div className="rf-crm-modal-actions">
+                  <button type="button" onClick={closeCreateModal}>Cancel</button>
+                  <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Create Lead"}</button>
+                </div>
+              </form>
+
+              {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
+            </div>
           </div>
         ) : null}
 

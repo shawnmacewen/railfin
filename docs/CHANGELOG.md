@@ -1,3 +1,11 @@
+## 2026-03-08 — CRM Add New Lead moved to modal dialog (task-00200)
+- Updated CRM page so clicking **Add New Lead** opens the create form in a modal dialog instead of expanding inline.
+- Kept leads table/list as the primary in-page focus while create happens in an overlay.
+- Added complete close behavior for the modal: **X**, **Cancel**, backdrop click, and keyboard **Escape**.
+- Preserved existing validation and create behavior; failed saves continue to show clear errors in-context.
+- After successful create, modal now closes automatically, lead list refreshes, and success feedback remains visible on the CRM page.
+- Added dialog accessibility/focus semantics (`role="dialog"`, `aria-modal`, title association, open-focus + close-focus return, tab containment).
+
 ## 2026-03-08 — Tightened expanded left-nav width to reduce right-side whitespace (task-00199)
 - Reduced expanded sidebar track widths in `src/app/globals.css` so labels sit in a tighter, cleaner column without changing icon/row geometry.
 - Updated widths:

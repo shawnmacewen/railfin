@@ -1,3 +1,11 @@
+## 2026-03-08 07:20 UTC — task-00200 CRM Add New Lead modal flow
+- Converted CRM create-lead interaction in `src/app/app/crm/page.tsx` from inline panel to modal dialog opened by toolbar **Add New Lead**.
+- Kept page body table-first/list-first so lead data remains primary visual focus.
+- Added modal close pathways: top-right close button, Cancel action, backdrop click, and Escape key support.
+- Preserved create validation + API wiring and in-modal error feedback; on success: reset form, refresh list, close modal, and show page-level success status.
+- Added dialog accessibility + focus behavior (`role="dialog"`, `aria-modal`, `aria-labelledby`, open focus to first field, return focus to trigger, tab-loop containment) and responsive modal styles in `src/app/globals.css`.
+- Updated docs (`docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`) and reran build.
+
 ## 2026-03-08 07:05 UTC — task-00199 tightened expanded left-nav width
 - Reduced expanded sidebar width values in `src/app/globals.css` to cut right-side whitespace while preserving nav readability:
   - default `minmax(14rem, 15rem) -> minmax(12.75rem, 13.5rem)`
