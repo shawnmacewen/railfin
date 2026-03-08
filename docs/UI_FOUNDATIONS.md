@@ -1,3 +1,25 @@
+## task-00200 — CRM Add New Lead modal conversion
+
+- Updated `src/app/app/crm/page.tsx` so **Add New Lead** opens a modal dialog instead of expanding an inline panel.
+- Kept CRM page body table-first: leads table/cards remain primary visual content and the create form is now an overlay interaction.
+- Modal close contracts implemented:
+  - top-right close button (X)
+  - explicit **Cancel** button
+  - backdrop click to dismiss
+  - keyboard **Escape** to dismiss
+- Preserved existing create-lead API + validation behavior and error messaging.
+- Success behavior after create:
+  - reset form state
+  - refresh lead list
+  - close modal
+  - show clear success status in page body (`Lead created.`)
+- Accessibility/interaction semantics:
+  - `role="dialog"`, `aria-modal="true"`, `aria-labelledby` title wiring
+  - initial focus placement into first form field on open
+  - focus-return to trigger button on close
+  - basic tab-loop containment inside modal while open
+- Added modal styling primitives in `src/app/globals.css` (`rf-crm-modal-*`) with responsive behavior at small breakpoints.
+
 ## task-00199 — Left-nav expanded width tighten (reduced right whitespace)
 
 - Tightened expanded desktop/tablet sidebar track widths in `src/app/globals.css` to reduce excess right-side label whitespace while preserving readability and icon geometry.

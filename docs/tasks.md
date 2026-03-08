@@ -1,3 +1,16 @@
+## task-00200 — UI — CRM Add New Lead modal flow
+
+- Status: **Done**
+- Branch: `feat/ui/task-00200-crm-add-lead-modal`
+- Scope delivered:
+  - Converted CRM **Add New Lead** from inline panel to modal dialog opened from the toolbar button.
+  - Kept leads table/list as the default in-page primary surface while create form now overlays in modal context.
+  - Added full close behavior support: top-right **X**, **Cancel** action, backdrop click, and **Escape** key.
+  - Preserved existing validation + create API behavior and field-level flow; create errors remain visible in modal.
+  - On successful create, modal closes, leads list refreshes, and clear success feedback remains visible in CRM page body.
+  - Added dialog accessibility semantics (`role="dialog"`, `aria-modal`, title association) with modal focus management and tab-loop containment.
+  - Updated UI docs/changelog/lane report and ran `npm run build` (pass).
+
 ## task-00199 — UI — Tighten expanded left-nav width / reduce right whitespace
 
 - Status: **Done**
