@@ -961,6 +961,7 @@ button:disabled {
 }
 
 .rf-create-layout {
+  position: relative;
   display: grid;
   gap: 0.85rem;
 }
@@ -1003,9 +1004,11 @@ button:disabled {
     align-items: start;
   }
 
+  .rf-create-layout.is-compliance-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .rf-create-compliance {
-    position: sticky;
-    top: 0.75rem;
     align-self: start;
   }
 
@@ -1273,10 +1276,13 @@ button:disabled {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr);
   gap: 0.5rem;
+  transition: opacity 140ms ease, transform 180ms ease;
 }
 
 .rf-create-compliance.is-collapsed {
-  grid-template-columns: 2rem;
+  opacity: 0;
+  transform: translateX(1rem);
+  pointer-events: none;
 }
 
 .rf-create-compliance-rail-control {
@@ -1294,6 +1300,19 @@ button:disabled {
   width: 100%;
   min-width: 0;
   padding: 0.35rem 0.2rem;
+}
+
+.rf-create-compliance-reopen {
+  position: absolute;
+  right: 0;
+  top: 0.2rem;
+  z-index: 3;
+  margin: 0;
+  border: 1px solid #c9d2f2;
+  background: #eef2ff;
+  color: #1b378a;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.74rem;
 }
 
 
@@ -1352,7 +1371,13 @@ button:disabled {
 }
 
 
-.rf-lexical-toolbar button {
+.rf-lexical-toolbar-button-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.rf-lexical-toolbar-button-wrap > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1371,11 +1396,11 @@ button:disabled {
   min-width: 2rem;
 }
 
-.rf-lexical-toolbar button:last-child {
+.rf-lexical-toolbar-button-wrap:last-child > button {
   border-right-width: 1px;
 }
 
-.rf-lexical-toolbar button:focus-visible {
+.rf-lexical-toolbar-button-wrap > button:focus-visible {
   position: relative;
   z-index: 1;
 }
@@ -1387,15 +1412,31 @@ button:disabled {
   color: #4b5563;
 }
 
-.rf-lexical-toolbar button.is-active {
+.rf-lexical-toolbar-button-wrap > button.is-active {
   border-color: #9ca3af;
   background: #e5e7eb;
   color: #111827;
   box-shadow: inset 0 0 0 1px #d1d5db;
 }
 
-.rf-lexical-toolbar button.is-active .rf-lexical-toolbar-icon {
+.rf-lexical-toolbar-button-wrap > button.is-active .rf-lexical-toolbar-icon {
   color: #111827;
+}
+
+.rf-lexical-toolbar-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.34rem);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.68rem;
+  line-height: 1;
+  color: #f8fafc;
+  background: #111827;
+  border-radius: 2px;
+  padding: 0.22rem 0.34rem;
+  pointer-events: none;
+  z-index: 6;
 }
 
 .rf-lexical-editor-shell {
@@ -1830,6 +1871,16 @@ button:disabled {
 
   .rf-create-compliance-rail-control {
     display: none;
+  }
+
+  .rf-create-compliance.is-collapsed {
+    display: none;
+  }
+
+  .rf-create-compliance-reopen {
+    position: static;
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
 
   .rf-topic-purpose-grid {

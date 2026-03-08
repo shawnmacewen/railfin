@@ -1,3 +1,10 @@
+## 2026-03-08 — Create toolbar tooltip + compliance panel collapse behavior fix (task-00198)
+- Added delayed icon-toolbar tooltips in Create editor (~500ms show delay) with keyboard-friendly labels and ARIA tooltip semantics.
+- Tooltips now stay visible while hovered/focused and dismiss with a short delayed hide when interaction ends.
+- Updated Create compliance panel to default minimized on load, with a clear reopen control.
+- On desktop, minimizing compliance now slides panel out to the right and expands main editor content to full-width workspace.
+- Removed sticky/lingering compliance side behavior while collapsed and preserved compliance actions when reopened.
+
 ## 2026-03-07 — Configure Features page refresh for current capability state (task-00197)
 - Refreshed the Configure > Features page so capability bullets match the current shipped app state in plain language.
 - Updated feature coverage to reflect: Create + Lexical rich-text editing maturity, compliance/remediation controls, CRM basics, and Events wizard + API status.
