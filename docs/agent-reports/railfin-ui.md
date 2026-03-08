@@ -1,3 +1,10 @@
+## 2026-03-08 08:10 UTC — task-00205 Create prompt payload debug drawer
+- Added compact **View prompt payload** toggle on Create generation controls (`src/ui/editor-shell.tsx`).
+- Added debug drawer to display latest in-session generation payload with assembled prompt string + metadata (`mode/contentType/template/tone/intent/controls/topics/purposes`) and copy-to-clipboard action.
+- Extended content generate internal API (`src/api/internal/content/generate.ts`) with additive `data.debug` payload for exact assembled prompt visibility in UI.
+- Added additive debug drawer styles in `src/app/globals.css` (`rf-prompt-payload-*`) and kept normal create UX low-noise.
+- Updated docs (`docs/tasks.md`, `docs/CHANGELOG.md`, `docs/UI_FOUNDATIONS.md`) and verified build passes.
+
 ## 2026-03-08 07:55 UTC — task-00204 Create compliance rail overlap + divider cleanup
 - Refactored Create compliance rail controls in `src/ui/editor-shell.tsx` to eliminate overlap risk from floating minimize/reopen UI.
 - Minimized state now uses an in-flow reopen button (`⇤ Open Compliance`) within the compliance column, preventing overlap with Create editor controls/content.

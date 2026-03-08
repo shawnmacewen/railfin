@@ -1,3 +1,17 @@
+## task-00205 — UI — Create prompt payload debug drawer
+
+- Status: **Done**
+- Branch: `feat/ui/task-00205-create-prompt-payload-debug-drawer`
+- Scope delivered:
+  - Added a compact **View prompt payload** toggle on Create generation controls for operator/debug use.
+  - Added a small in-page debug drawer showing the latest captured model prompt payload for this Create session.
+  - Drawer includes:
+    - exact assembled prompt string sent to the model
+    - key request metadata (mode/contentType/template/tone/intent/controls/topics/purposes)
+    - **Copy payload** action (clipboard)
+  - Extended generate API response with additive debug metadata (`data.debug`) so UI can display exact assembled prompt without affecting normal flows.
+  - Preserved generate/compliance/save/history behavior and verified with `npm run build` (pass).
+
 ## task-00204 — UI — Create compliance rail overlap + control placement cleanup
 
 - Status: **Done**

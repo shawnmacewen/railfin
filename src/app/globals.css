@@ -1112,6 +1112,57 @@ button:disabled {
   margin: 0;
 }
 
+.rf-prompt-payload-toggle {
+  margin: 0;
+  padding: 0.18rem 0.42rem;
+  border: 1px solid #d2daef;
+  background: #f8faff;
+  color: #3c4a70;
+  font-size: 0.72rem;
+}
+
+.rf-prompt-payload-drawer {
+  border: 1px solid #dde5fb;
+  border-radius: 2px;
+  background: #fbfcff;
+  padding: 0.6rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.rf-prompt-payload-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.rf-prompt-payload-drawer-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.rf-prompt-payload-meta {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: #2f3a5f;
+}
+
+.rf-prompt-payload-pre {
+  margin: 0;
+  border: 1px solid #dde3f4;
+  border-radius: 2px;
+  background: #fff;
+  padding: 0.55rem;
+  max-height: 14rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
 .rf-content-type-buttons {
   display: flex;
   flex-wrap: nowrap;

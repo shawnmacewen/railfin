@@ -1,3 +1,11 @@
+## 2026-03-08 — Create prompt payload debug drawer on Create (task-00205)
+- Added a compact **View prompt payload** debug toggle on the Create screen.
+- Added an operator-focused debug drawer that shows the most recent generation payload in-session, including:
+  - final assembled prompt string sent to model runtime
+  - key metadata: mode, content type, template, tone, intent, controls, topics, purposes
+- Added a **Copy payload** action to copy assembled prompt + metadata for troubleshooting.
+- Extended generate API success payload with additive `data.debug` metadata so UI can render exact assembled prompt without changing existing generation/compliance/save behavior.
+
 ## 2026-03-08 — Create compliance rail overlap + control placement cleanup (task-00204)
 - Fixed Create compliance minimized-state control so reopen button is anchored in normal page flow and no longer overlays editor controls/content.
 - Moved collapse/minimize control into the compliance card header (inside the main container) and widened it with a clearer arrow + text label.
