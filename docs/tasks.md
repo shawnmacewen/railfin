@@ -1,3 +1,15 @@
+## task-00203 — UI — Persist Create compliance results locally while panel is minimized
+
+- Status: **Done**
+- Branch: `feat/ui/task-00203-create-compliance-results-local-cache`
+- Scope delivered:
+  - Persisted latest compliance results in Create-session local state so minimizing/reopening the compliance rail no longer clears findings.
+  - Kept compliance panel mounted while collapsed (hidden-only), preserving run summary, findings, and selection context on reopen.
+  - Added stale-results indicator when editor content/policy context changes after a compliance run: **"Content changed since last check..."** while keeping prior findings visible.
+  - Added explicit compliance-result invalidation on successful Save Draft via reset token wiring from `EditorShell` to `CompliancePanel`.
+  - Preserved manual run behavior (no auto-rerun on panel toggle), existing run button/findings rendering, and current compliance API contracts.
+  - Verified with `npm run build` (pass).
+
 ## task-00202 — DEV/UI — Compliance finding location mapping + unknown fallback cleanup
 
 - Status: **Done**

@@ -1,3 +1,17 @@
+## task-00203 — Create compliance local-result persistence (panel minimize-safe)
+
+- `src/ui/editor-shell.tsx` now keeps the compliance component mounted even when the rail is collapsed (hidden), preventing local compliance state loss on panel toggle.
+- `src/ui/compliance-panel.tsx` now tracks last successful check input signature and computes stale state when current content/policy context diverges after a run.
+- Stale behavior contract:
+  - prior findings remain visible
+  - stale warning is explicit (`Content changed since last check...`)
+  - no automatic rerun is triggered
+- Save invalidation contract:
+  - successful draft save increments a `resetToken` from `EditorShell`
+  - `CompliancePanel` clears cached findings/run metadata on reset token change
+- Session-scope behavior remains local-only in UI state (no persistence to server/storage).
+- Existing compliance request contract and findings rendering are preserved.
+
 ## task-00201 — Create unsaved-navigation warning + compliance panel cleanup
 
 - `src/ui/editor-shell.tsx` now tracks a Create-session saved baseline and emits unsaved-state events only when content changed meaningfully (normalized-text diff + minimum content threshold) to avoid warning noise from trivial/no-op edits.

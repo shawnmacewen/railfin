@@ -1,3 +1,10 @@
+## 2026-03-08 — Create compliance results persist while panel is minimized (task-00203)
+- Create-page compliance findings now persist locally for the active Create session, even when the compliance panel is minimized and reopened.
+- Compliance panel collapse now hides without unmounting, so prior findings and run summary return immediately on reopen.
+- Added clear stale-results warning when content changes after a compliance run: findings stay visible but are marked as potentially outdated until rerun.
+- Compliance cache now clears on successful Save Draft, while still clearing naturally when leaving Create or manually rerunning checks.
+- No auto-rerun on panel toggle; existing run button and findings rendering remain unchanged.
+
 ## 2026-03-08 — Compliance finding location mapping + unknown fallback cleanup (task-00202)
 - Compliance-check normalization now extracts location metadata from richer provider payload shapes (string/object `location`, plus `source`/`file`/`section`/`line`/`column` when present).
 - Added additive finding field `locationLabel` (nullable) so UI can consume a stable normalized display location without parsing heuristics.
