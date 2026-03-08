@@ -266,7 +266,7 @@ export function EditorShell() {
   const [isPromptLocked, setIsPromptLocked] = useState(false);
   const [isPromptAccordionCollapsed, setIsPromptAccordionCollapsed] = useState(false);
   const [isCreateInputCollapsed, setIsCreateInputCollapsed] = useState(false);
-  const [isComplianceCollapsed, setIsComplianceCollapsed] = useState(false);
+  const [isComplianceCollapsed, setIsComplianceCollapsed] = useState(true);
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
@@ -887,7 +887,7 @@ export function EditorShell() {
 
       {loadedDraftTitle ? <p className="rf-editor-opened">Editing: {loadedDraftTitle}</p> : null}
 
-      <div className="rf-create-layout">
+      <div className={`rf-create-layout ${isComplianceCollapsed ? "is-compliance-collapsed" : ""}`}>
         <div className="rf-create-main">
           <section id="create-generate" className="rf-create-stage" aria-label="Generate draft stage">
             <div className="rf-generate-controls">
@@ -1292,9 +1292,24 @@ export function EditorShell() {
 
         </div>
 
+        {isComplianceCollapsed ? (
+          <button
+            type="button"
+            className="rf-create-compliance-reopen"
+            onClick={() => setIsComplianceCollapsed(false)}
+            aria-label="Open compliance panel"
+          >
+            Compliance ⇤
+          </button>
+        ) : null}
+
         <aside className={`rf-create-compliance ${isComplianceCollapsed ? "is-collapsed" : ""}`} aria-label="Compliance feedback panel">
           <div className="rf-create-compliance-rail-control">
-            <button type="button" onClick={() => setIsComplianceCollapsed((current) => !current)}>
+            <button
+              type="button"
+              onClick={() => setIsComplianceCollapsed((current) => !current)}
+              aria-label={isComplianceCollapsed ? "Open compliance panel" : "Minimize compliance panel"}
+            >
               {isComplianceCollapsed ? "⇤" : "⇥"}
             </button>
           </div>

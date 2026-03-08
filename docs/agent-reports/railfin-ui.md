@@ -1,3 +1,14 @@
+## 2026-03-08 06:55 UTC — task-00198 toolbar tooltip + compliance collapse rerun
+- Confirmed work executed in canonical repo context (`/work/railfin`) and reimplemented task-00198 fixes.
+- Added delayed Lexical toolbar tooltips in `src/ui/lexical-editor.tsx` with keyboard-accessible labels/ARIA (`title`, `aria-describedby`, `role="tooltip"`), ~500ms show delay, and delayed dismiss behavior.
+- Updated Create compliance behavior in `src/ui/editor-shell.tsx` + `src/app/globals.css`:
+  - defaults minimized on page load
+  - collapsed state slides panel out right and disables pointer capture
+  - main Create editor area expands to full width when compliance is collapsed
+  - added clear reopen control while collapsed
+  - removed sticky side behavior to avoid lingering hover footprint
+- Updated docs (`docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`) and reran build.
+
 ## 2026-03-07 04:20 UTC — task-00197 Configure Features list refresh
 - Updated `/app/configure/features` content to reflect current shipped capabilities in operator-friendly language.
 - Re-grouped feature bullets around: Create/Lexical editing, compliance/remediation controls, CRM + Events operations, and nav/support visibility.

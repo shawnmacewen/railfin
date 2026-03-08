@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -112,18 +112,98 @@ type ToolbarButtonProps = {
 };
 
 function ToolbarButton({ active = false, pressed = false, disabled = false, onClick, icon, label }: ToolbarButtonProps) {
+  const tooltipId = useId();
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTimers = () => {
+    if (showTimerRef.current) {
+      clearTimeout(showTimerRef.current);
+      showTimerRef.current = null;
+    }
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
+
+  const scheduleShow = () => {
+    if (disabled) return;
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    if (isTooltipVisible || showTimerRef.current) {
+      return;
+    }
+    showTimerRef.current = setTimeout(() => {
+      setIsTooltipVisible(true);
+      showTimerRef.current = null;
+    }, 500);
+  };
+
+  const scheduleHide = () => {
+    if (showTimerRef.current) {
+      clearTimeout(showTimerRef.current);
+      showTimerRef.current = null;
+    }
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+    hideTimerRef.current = setTimeout(() => {
+      setIsTooltipVisible(false);
+      hideTimerRef.current = null;
+    }, 1000);
+  };
+
+  useEffect(() => {
+    return () => clearTimers();
+  }, []);
+
   return (
-    <button
-      type="button"
-      className={active ? "is-active" : ""}
-      aria-label={label}
-      aria-pressed={pressed}
-      disabled={disabled}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
-    >
-      <span className="rf-lexical-toolbar-icon" aria-hidden="true">{icon}</span>
-    </button>
+    <span className="rf-lexical-toolbar-button-wrap">
+      <button
+        type="button"
+        className={active ? "is-active" : ""}
+        aria-label={label}
+        aria-pressed={pressed}
+        aria-describedby={isTooltipVisible ? tooltipId : undefined}
+        title={label}
+        disabled={disabled}
+        onMouseDown={(event) => event.preventDefault()}
+        onMouseEnter={() => {
+          setIsHovering(true);
+          scheduleShow();
+        }}
+        onMouseLeave={() => {
+          setIsHovering(false);
+          if (!isFocused) {
+            scheduleHide();
+          }
+        }}
+        onFocus={() => {
+          setIsFocused(true);
+          scheduleShow();
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+          if (!isHovering) {
+            scheduleHide();
+          }
+        }}
+        onClick={onClick}
+      >
+        <span className="rf-lexical-toolbar-icon" aria-hidden="true">{icon}</span>
+      </button>
+      {isTooltipVisible ? (
+        <span id={tooltipId} role="tooltip" className="rf-lexical-toolbar-tooltip">
+          {label}
+        </span>
+      ) : null}
+    </span>
   );
 }
 

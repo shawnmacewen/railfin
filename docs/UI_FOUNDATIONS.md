@@ -1,3 +1,20 @@
+## task-00198 — Create toolbar tooltips + compliance panel default minimized behavior
+
+- `src/ui/lexical-editor.tsx` now provides delayed toolbar tooltips for icon-only controls:
+  - show delay ~500ms on hover/focus
+  - visible while hover/focus persists
+  - delayed hide when interaction ends
+  - keyboard/accessibility support retained via `aria-label`, `title`, and `role="tooltip"` + `aria-describedby`
+- `src/ui/editor-shell.tsx` Create layout updates:
+  - compliance panel defaults to minimized on initial page load
+  - explicit reopen button remains available while minimized
+  - minimized state does not remove compliance functionality; reopening restores existing panel behavior
+- `src/app/globals.css` Create workspace behavior:
+  - desktop collapsed compliance state now shifts to single-column main workspace (`.rf-create-layout.is-compliance-collapsed`)
+  - compliance panel minimizes with rightward slide/fade and disabled pointer capture when collapsed
+  - removed sticky side-panel behavior to avoid lingering hover footprint
+- Preserved recent responsive/nav/editor fixes (no row-height/nav jitter regressions; no create-flow contract changes).
+
 ## task-00197 — Configure Features content refresh
 
 - Updated `src/app/app/configure/features/page.tsx` feature groups to reflect current shipped product state in plain-language operator terms.

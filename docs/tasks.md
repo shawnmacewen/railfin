@@ -1,3 +1,15 @@
+## task-00198 — UI — Create toolbar tooltips + compliance panel default minimize behavior
+
+- Status: **Done**
+- Branch: `fix/ui/task-00198-tooltip-compliance`
+- Scope delivered:
+  - Added delayed editor toolbar tooltips (~500ms) that remain visible while hovered/focused, with graceful delayed hide and keyboard-accessible `title`/ARIA semantics.
+  - Updated Create compliance panel behavior to load minimized by default and provide a clear reopen control.
+  - When minimized on desktop, compliance panel slides out and Create main/editor area expands to full width.
+  - Removed sticky/lingering compliance side behavior that caused persistent hover footprint while collapsed.
+  - Preserved compliance functionality, responsive/nav/editor stability work from recent tasks, and existing reopen/minimize controls.
+  - Updated UI docs/changelog/lane report and ran `npm run build` (pass).
+
 ## task-00197 — UI/COO docs — Configure Features list refresh
 
 - Status: **Done**
