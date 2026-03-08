@@ -284,6 +284,7 @@ export function EditorShell() {
   const [generationHistory, setGenerationHistory] = useState<GenerationHistoryEntry[]>([]);
   const [isLexicalReady, setIsLexicalReady] = useState(false);
   const [savedBaselineText, setSavedBaselineText] = useState("");
+  const [complianceResetToken, setComplianceResetToken] = useState(0);
 
   const generationHistoryContextKey = draftId || "session-new";
 
@@ -710,6 +711,7 @@ export function EditorShell() {
 
       setStatus("saved");
       setSavedBaselineText(contentText);
+      setComplianceResetToken((current) => current + 1);
       const savedTitle = payload.data.title?.trim() || resolvedTitle;
       const savedId = payload.data.id?.trim();
       const draftHint = [savedTitle ? `title: ${savedTitle}` : null, savedId ? `id: ${savedId}` : null]
@@ -1352,20 +1354,19 @@ export function EditorShell() {
               {isComplianceCollapsed ? "⇤" : "⇥"}
             </button>
           </div>
-          {!isComplianceCollapsed ? (
-            <div className="rf-create-compliance-card">
-              <h3>Compliance Feedback</h3>
-              <CompliancePanel
-                activePolicyContext={activePolicyContext}
-                content={contentText}
-                contentType={contentType}
-                policySet="default"
-                onApplyRemediationHint={undefined}
-                onRemindRemediationHint={undefined}
-                onSelectedFindingChange={setSelectedFindingContext}
-              />
-            </div>
-          ) : null}
+          <div className="rf-create-compliance-card" hidden={isComplianceCollapsed} aria-hidden={isComplianceCollapsed}>
+            <h3>Compliance Feedback</h3>
+            <CompliancePanel
+              activePolicyContext={activePolicyContext}
+              content={contentText}
+              contentType={contentType}
+              policySet="default"
+              resetToken={complianceResetToken}
+              onApplyRemediationHint={undefined}
+              onRemindRemediationHint={undefined}
+              onSelectedFindingChange={setSelectedFindingContext}
+            />
+          </div>
         </aside>
       </div>
     </section>

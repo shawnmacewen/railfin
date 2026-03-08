@@ -72,6 +72,14 @@ function getFindingKey(finding: ComplianceFinding, severity: string, index: numb
   return `${finding.issue || "issue"}-${severity}-${index}`;
 }
 
+function createContentSignature(content?: string, contentType?: string, policySet?: string) {
+  const normalizedContent = (content || "").replace(/\s+/g, " ").trim();
+  return JSON.stringify({
+    content: normalizedContent,
+    contentType: contentType || "",
+    policySet: policySet || "",
+  });
+}
 
 function getProtectedZoneWarning(finding: ComplianceFinding): string | null {
   const source = [finding.issue, finding.details, finding.suggestion, finding.locationLabel, finding.location]
@@ -110,6 +118,7 @@ type CompliancePanelProps = {
   content?: string;
   contentType?: "blog" | "linkedin" | "newsletter" | "x-thread";
   policySet?: string;
+  resetToken?: number;
   onApplyRemediationHint?: (hint: string, finding: ComplianceFinding) => void;
   onRemindRemediationHint?: (hint: string, finding: ComplianceFinding) => void;
   onSelectedFindingChange?: (selected: SelectedFindingContext | null) => void;
@@ -120,6 +129,7 @@ export function CompliancePanel({
   content,
   contentType,
   policySet,
+  resetToken,
   onApplyRemediationHint,
   onRemindRemediationHint,
   onSelectedFindingChange,
@@ -130,6 +140,7 @@ export function CompliancePanel({
   const [selectedFindingKey, setSelectedFindingKey] = useState<string | null>(null);
   const [runSummary, setRunSummary] = useState<string | null>(null);
   const [runDegraded, setRunDegraded] = useState(false);
+  const [lastCheckSignature, setLastCheckSignature] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ComplianceFinding[]>();
@@ -200,9 +211,25 @@ export function CompliancePanel({
     });
   }, [onSelectedFindingChange, selectedFindingKey, selectedFindingMeta]);
 
+  const currentContentSignature = useMemo(
+    () => createContentSignature(content, contentType, policySet),
+    [content, contentType, policySet],
+  );
+
+  const isResultStale = Boolean(lastCheckSignature && currentContentSignature !== lastCheckSignature);
+
   useEffect(() => {
+    if (resetToken === undefined) {
+      return;
+    }
+
+    setFindings([]);
     setSelectedFindingKey(null);
-  }, [content, contentType, policySet]);
+    setError(null);
+    setRunSummary(null);
+    setRunDegraded(false);
+    setLastCheckSignature(null);
+  }, [resetToken]);
 
   const runComplianceCheck = async () => {
     if (running) return;
@@ -211,6 +238,7 @@ export function CompliancePanel({
     if (!trimmedContent) {
       setFindings([]);
       setSelectedFindingKey(null);
+      setLastCheckSignature(null);
       setError("Add editor content before running compliance check.");
       return;
     }
@@ -240,6 +268,7 @@ export function CompliancePanel({
       if (!response.ok || payload?.ok === false) {
         setFindings([]);
         setSelectedFindingKey(null);
+        setLastCheckSignature(null);
         setError(payload?.error || payload?.message || "Compliance check failed.");
         return;
       }
@@ -253,6 +282,7 @@ export function CompliancePanel({
 
       setFindings(nextFindings);
       setSelectedFindingKey(null);
+      setLastCheckSignature(currentContentSignature);
       setRunDegraded(degraded);
       setRunSummary(
         degraded
@@ -262,6 +292,7 @@ export function CompliancePanel({
     } catch {
       setFindings([]);
       setSelectedFindingKey(null);
+      setLastCheckSignature(null);
       setRunSummary(null);
       setRunDegraded(false);
       setError("Compliance check failed. Please try again.");
@@ -288,6 +319,12 @@ export function CompliancePanel({
         {runSummary ? (
           <p className={`rf-status rf-compliance-run-summary ${runDegraded ? "rf-status-muted" : "rf-status-success"}`} role="status">
             {runSummary}
+          </p>
+        ) : null}
+
+        {isResultStale ? (
+          <p className="rf-status rf-status-error" role="status">
+            Content changed since last check. Findings shown below may be stale until you rerun compliance.
           </p>
         ) : null}
 

@@ -1,3 +1,11 @@
+## 2026-03-08 07:43 UTC — task-00203 Create compliance results local cache
+- Implemented local compliance-result persistence for Create session in `src/ui/compliance-panel.tsx` + `src/ui/editor-shell.tsx`.
+- Compliance panel now stays mounted while collapsed (`hidden` instead of unmount), so minimizing/reopening does not clear findings or run summary.
+- Added stale-state detection based on content/policy signature at run time, with explicit warning text when content changed after last check while preserving old findings for operator reference.
+- Added save-path invalidation by wiring `complianceResetToken` in `EditorShell` and passing `resetToken` to `CompliancePanel`; successful save clears cached compliance results.
+- Preserved manual run model and existing compliance API/UX rendering behavior (no auto-rerun on panel toggle).
+- Updated docs/tasks/changelog/UI foundations + lane report and verified `npm run build` passes.
+
 ## 2026-03-08 07:25 UTC — task-00201 Create unsaved warning + compliance cleanup
 - Added unsaved-navigation guard across app-shell route changes from Create: when meaningful unsaved generated/edited content exists, nav attempts open a clear two-choice modal (**Stay on Create** / **Leave Without Saving**).
 - Guard wiring implemented via Create unsaved-state event emission in `src/ui/editor-shell.tsx` and app-shell listener/interceptor in `src/ui/app-shell.tsx`; includes browser `beforeunload` prompt for refresh/close while dirty.
