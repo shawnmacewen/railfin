@@ -1,3 +1,20 @@
+## task-00204 — Create compliance rail overlap + control placement cleanup
+
+- `src/ui/editor-shell.tsx` compliance rail controls were refactored to remove floating/absolute reopen behavior:
+  - minimized state now renders an in-flow reopen control (`⇤ Open Compliance`) within the compliance aside container
+  - expanded state now hosts collapse control in the compliance card header (`⇥ Minimize Panel`)
+- `src/app/globals.css` removed the dedicated narrow rail-control column and associated blue divider treatment.
+- New compliance control primitives:
+  - `.rf-create-compliance-card-header`
+  - `.rf-create-compliance-toggle`
+  - `.rf-create-compliance-minimized`
+- Cache/regression contract preserved from task-00203:
+  - compliance card remains mounted while collapsed via `hidden`/`aria-hidden`
+  - no unmount-on-collapse, so findings/run state persists until explicit reset/save invalidation
+- Responsive contract retained:
+  - collapsed reopen control stays discoverable and non-overlapping on desktop/mobile
+  - small-screen header stacks minimize control under title for tap/readability
+
 ## task-00203 — Create compliance local-result persistence (panel minimize-safe)
 
 - `src/ui/editor-shell.tsx` now keeps the compliance component mounted even when the rail is collapsed (hidden), preventing local compliance state loss on panel toggle.

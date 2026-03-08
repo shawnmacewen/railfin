@@ -1,3 +1,15 @@
+## task-00204 — UI — Create compliance rail overlap + control placement cleanup
+
+- Status: **Done**
+- Branch: `fix/ui/task-00204-compliance-rail-overlap-divider-fix`
+- Scope delivered:
+  - Reworked Create compliance rail controls so minimized state uses an in-flow reopen button (`⇤ Open Compliance`) instead of an absolute/floating toggle that could overlap editor form controls.
+  - Moved minimize affordance into the compliance card header and widened it with arrow icon + readable label (`⇥ Minimize Panel`).
+  - Removed the middle blue rail/divider treatment by deleting the separate narrow rail control column and using card/header spacing instead.
+  - Kept task-00203 compliance cache behavior intact by continuing to keep the compliance card mounted while collapsed (`hidden`), preserving findings/run state until explicit reset/save invalidation.
+  - Preserved Create unsaved warning, responsive breakpoints, and compliance run/findings/remediation flows.
+  - Verified with `npm run build` (pass).
+
 ## task-00203 — UI — Persist Create compliance results locally while panel is minimized
 
 - Status: **Done**

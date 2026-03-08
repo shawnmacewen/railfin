@@ -1,3 +1,11 @@
+## 2026-03-08 07:55 UTC — task-00204 Create compliance rail overlap + divider cleanup
+- Refactored Create compliance rail controls in `src/ui/editor-shell.tsx` to eliminate overlap risk from floating minimize/reopen UI.
+- Minimized state now uses an in-flow reopen button (`⇤ Open Compliance`) within the compliance column, preventing overlap with Create editor controls/content.
+- Expanded state now keeps minimize control inside the compliance card header and uses a wider arrow+label affordance (`⇥ Minimize Panel`).
+- Removed the blue vertical middle rail by deleting the separate rail control column/styles in `src/app/globals.css`; separation now comes from layout/card spacing.
+- Preserved task-00203 cache behavior by keeping compliance panel mounted while collapsed (`hidden`) so findings/run state persists across toggle.
+- Updated docs (`docs/tasks.md`, `docs/CHANGELOG.md`, `docs/UI_FOUNDATIONS.md`) and verified `npm run build` passes.
+
 ## 2026-03-08 07:43 UTC — task-00203 Create compliance results local cache
 - Implemented local compliance-result persistence for Create session in `src/ui/compliance-panel.tsx` + `src/ui/editor-shell.tsx`.
 - Compliance panel now stays mounted while collapsed (`hidden` instead of unmount), so minimizing/reopening does not clear findings or run summary.
