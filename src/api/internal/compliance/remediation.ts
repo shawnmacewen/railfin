@@ -284,7 +284,7 @@ export function applySingleFindingRemediation(input: ApplyRemediationInput): App
   const safeHint = sanitize(input.finding?.remediationHint, "Add a compliant revision and rerun the check.", MAX_HINT_LENGTH);
   const safeIssue = sanitize(input.finding?.issue, "unknown issue", MAX_ISSUE_LENGTH);
   const safeSeverity = sanitize(input.finding?.severity, "unknown", 24).toLowerCase();
-  const safeLocation = sanitize(input.finding?.location, "unknown:0:0", MAX_LOCATION_LENGTH);
+  const safeLocation = sanitize(input.finding?.location, "Location unavailable", MAX_LOCATION_LENGTH);
 
   const remediationBlock = buildRemediationBlock({
     issue: safeIssue,
