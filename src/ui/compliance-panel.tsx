@@ -164,11 +164,6 @@ export function CompliancePanel({
     return null;
   }, [groupedFindings, selectedFindingKey]);
 
-  const selectedProtectedZoneWarning = useMemo(() => {
-    if (!selectedFindingMeta) return null;
-    return getProtectedZoneWarning(selectedFindingMeta.finding);
-  }, [selectedFindingMeta]);
-
   useEffect(() => {
     if (!onSelectedFindingChange) {
       return;
@@ -274,7 +269,7 @@ export function CompliancePanel({
         ) : null}
 
         {runSummary ? (
-          <p className={`rf-status ${runDegraded ? "rf-status-muted" : "rf-status-success"}`} role="status">
+          <p className={`rf-status rf-compliance-run-summary ${runDegraded ? "rf-status-muted" : "rf-status-success"}`} role="status">
             {runSummary}
           </p>
         ) : null}
@@ -308,58 +303,6 @@ export function CompliancePanel({
               ))}
             </div>
 
-            <div className="rf-selected-finding-panel" aria-label="Selected finding actions">
-              <h4>Selected Finding Actions</h4>
-              {selectedFindingMeta ? (
-                <>
-                  <p>
-                    <strong>Issue:</strong> {selectedFindingMeta.finding.issue || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Severity:</strong> {selectedFindingMeta.severity}
-                  </p>
-                  <p>
-                    <strong>Remediation Hint:</strong> {selectedFindingMeta.remediationHint}
-                  </p>
-                  <p>
-                    <strong>Location:</strong> {selectedFindingMeta.finding.location || "N/A"}
-                  </p>
-                  {selectedProtectedZoneWarning ? (
-                    <p className="rf-status rf-status-error" role="alert">
-                      {selectedProtectedZoneWarning}
-                    </p>
-                  ) : null}
-                </>
-              ) : (
-                <p className="rf-status rf-status-muted">Select a finding below to unlock remediation actions.</p>
-              )}
-
-              <div className="rf-finding-actions" aria-label="Selected remediation actions">
-                <button
-                  type="button"
-                  onClick={() =>
-                    selectedFindingMeta &&
-                    onApplyRemediationHint?.(selectedFindingMeta.remediationHint, selectedFindingMeta.finding)
-                  }
-                  disabled={!selectedFindingMeta}
-                >
-                  Apply Selected
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    selectedFindingMeta &&
-                    onRemindRemediationHint?.(selectedFindingMeta.remediationHint, selectedFindingMeta.finding)
-                  }
-                  disabled={!selectedFindingMeta}
-                >
-                  Remind Later
-                </button>
-                <button type="button" onClick={() => setSelectedFindingKey(null)} disabled={!selectedFindingMeta}>
-                  Clear Selection
-                </button>
-              </div>
-            </div>
           </section>
 
           {groupedFindings.map(([severity, severityFindings]) => (
@@ -387,9 +330,23 @@ export function CompliancePanel({
                       <p>
                         <strong>Remediation Hint:</strong> {remediationHint}
                       </p>
-                      <div className="rf-finding-actions" aria-label="Finding selection">
+                      <div className="rf-finding-actions" aria-label="Finding actions">
                         <button type="button" onClick={() => setSelectedFindingKey(findingKey)}>
                           {isSelected ? "Selected" : "Select Finding"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onApplyRemediationHint?.(remediationHint, finding)}
+                          disabled={!onApplyRemediationHint}
+                        >
+                          Apply Hint
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onRemindRemediationHint?.(remediationHint, finding)}
+                          disabled={!onRemindRemediationHint}
+                        >
+                          Remind Later
                         </button>
                       </div>
                       <p>

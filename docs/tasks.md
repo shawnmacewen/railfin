@@ -1,3 +1,17 @@
+## task-00201 — UI/UX — Create unsaved warning + compliance panel cleanup
+
+- Status: **Done**
+- Branch: `feat/ui/task-00201-create-unsaved-warning-compliance-cleanup`
+- Scope delivered:
+  - Added Create unsaved-content navigation warning on route changes away from `/app/create` (including left-nav/app-shell navigation).
+  - Added explicit user choice dialog: stay vs leave-without-saving.
+  - Implemented meaningful-change gating to prevent over-triggering when nothing substantive changed.
+  - Reduced compliance panel visual weight and removed supporting subtitle under Compliance Feedback.
+  - Made compliance API success line smaller/discreet.
+  - Removed Selected Finding Actions section and moved remediation actions to per-finding card controls.
+  - Removed sticky/pinned Run Compliance Check behavior so panel scrolls naturally.
+  - Updated docs and lane report; verified build success.
+
 ## task-00200 — UI — CRM Add New Lead modal flow
 
 - Status: **Done**

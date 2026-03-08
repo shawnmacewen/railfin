@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpenText, Goal, LifeBuoy, Pickaxe, Settings, Tickets, Users } from "lucide-react";
 
@@ -27,9 +27,12 @@ function isActive(pathname: string, href: string) {
 
 export function AppShell({ children, buildSha }: { children: ReactNode; buildSha?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const activeItem = NAV_ITEMS.find((item) => isActive(pathname, item.href));
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [hasCreateUnsavedChanges, setHasCreateUnsavedChanges] = useState(false);
+  const [pendingNavigationHref, setPendingNavigationHref] = useState<string | null>(null);
   const [isAutoMinimizeEnabled, setIsAutoMinimizeEnabled] = useState(true);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -97,6 +100,39 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
     setIsMobileNavOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const handleUnsavedState = (event: Event) => {
+      const customEvent = event as CustomEvent<{ hasUnsavedChanges?: boolean }>;
+      setHasCreateUnsavedChanges(Boolean(customEvent.detail?.hasUnsavedChanges));
+    };
+
+    window.addEventListener("rf:create-unsaved-state", handleUnsavedState as EventListener);
+    return () => window.removeEventListener("rf:create-unsaved-state", handleUnsavedState as EventListener);
+  }, []);
+
+  useEffect(() => {
+    if (!(pathname.startsWith("/app/create") && hasCreateUnsavedChanges)) {
+      return;
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasCreateUnsavedChanges, pathname]);
+
+  const onNavigateAttempt = useCallback((href: string) => {
+    if (!pathname.startsWith("/app/create") || !hasCreateUnsavedChanges || href.startsWith("/app/create")) {
+      return true;
+    }
+
+    setPendingNavigationHref(href);
+    return false;
+  }, [hasCreateUnsavedChanges, pathname]);
+
   return (
     <div className={`rf-shell ${isSidebarExpanded ? "" : "is-sidebar-collapsed"} ${isMobileNavOpen ? "is-mobile-nav-open" : ""}`}>
       {buildSha ? <div className="rf-build-sha-badge" aria-label="Build version">{buildSha}</div> : null}
@@ -108,7 +144,16 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
         onFocusCapture={registerActivity}
         onPointerDown={registerActivity}
       >
-        <Link href="/app/create" className="rf-brand" aria-label="Railfin home">
+        <Link
+          href="/app/create"
+          className="rf-brand"
+          aria-label="Railfin home"
+          onClick={(event) => {
+            if (!onNavigateAttempt("/app/create")) {
+              event.preventDefault();
+            }
+          }}
+        >
           <Image
             src="/brand/railfin-v1.png"
             alt="Railfin"
@@ -121,7 +166,15 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
         </Link>
         <nav className="rf-nav-list">
           {NAV_ITEMS.map((item) => (
-            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} iconClassName={item.iconClassName} active={isActive(pathname, item.href)} />
+            <NavItem
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              iconClassName={item.iconClassName}
+              active={isActive(pathname, item.href)}
+              onNavigateAttempt={onNavigateAttempt}
+            />
           ))}
         </nav>
         <div className="rf-sidebar-controls">
@@ -190,6 +243,34 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
 
         <main className="rf-content">{children}</main>
       </div>
+
+      {pendingNavigationHref ? (
+        <div className="rf-unsaved-warning" role="dialog" aria-modal="true" aria-labelledby="rf-unsaved-warning-title">
+          <div className="rf-unsaved-warning-card">
+            <h2 id="rf-unsaved-warning-title">Leave Create without saving?</h2>
+            <p>You have generated or edited content that is not saved. Leaving now will discard those changes.</p>
+            <div className="rf-unsaved-warning-actions">
+              <button type="button" onClick={() => setPendingNavigationHref(null)}>
+                Stay on Create
+              </button>
+              <button
+                type="button"
+                className="is-danger"
+                onClick={() => {
+                  const nextHref = pendingNavigationHref;
+                  setPendingNavigationHref(null);
+                  if (nextHref) {
+                    setHasCreateUnsavedChanges(false);
+                    router.push(nextHref);
+                  }
+                }}
+              >
+                Leave Without Saving
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

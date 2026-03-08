@@ -352,18 +352,20 @@ button:disabled {
   font-size: 0.9rem;
 }
 
+.rf-compliance-run-summary {
+  margin: 0.2rem 0 0.4rem;
+  font-size: 0.75rem;
+}
+
 .rf-compliance-panel {
   display: grid;
   gap: 0.65rem;
 }
 
 .rf-compliance-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-  background: #f8faff;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid #dbe4ff;
+  background: transparent;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #e7ecfb;
 }
 
 .rf-compliance-results {
@@ -407,26 +409,6 @@ button:disabled {
   color: #2f3a5f;
   font-size: 0.82rem;
   font-weight: 500;
-}
-
-.rf-selected-finding-panel {
-  position: sticky;
-  top: 0.6rem;
-  z-index: 2;
-  border: 1px solid #cfdafb;
-  border-radius: 2px;
-  background: #ffffff;
-  padding: 0.6rem;
-  box-shadow: 0 2px 12px rgba(26, 76, 255, 0.08);
-}
-
-.rf-selected-finding-panel h4 {
-  margin: 0 0 0.4rem;
-  font-size: 0.9rem;
-}
-
-.rf-selected-finding-panel p {
-  margin: 0.2rem 0;
 }
 
 .rf-finding-group {
@@ -985,12 +967,12 @@ button:disabled {
 }
 
 .rf-create-compliance-card {
-  border: 1px solid #dbe4ff;
+  border: 1px solid #e6ebfa;
   border-radius: 2px;
-  background: #f8faff;
-  padding: 0.75rem;
+  background: #fcfdff;
+  padding: 0.65rem;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .rf-create-compliance-card h3 {
@@ -1013,10 +995,8 @@ button:disabled {
   }
 
   .rf-create-compliance-card {
-    max-height: calc(100vh - 5rem);
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -1313,6 +1293,58 @@ button:disabled {
   color: #1b378a;
   padding: 0.3rem 0.45rem;
   font-size: 0.74rem;
+}
+
+.rf-unsaved-warning {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(12, 19, 41, 0.46);
+  padding: 1rem;
+}
+
+.rf-unsaved-warning-card {
+  width: min(30rem, 100%);
+  border: 1px solid #d8e0fb;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.22);
+  padding: 0.95rem;
+}
+
+.rf-unsaved-warning-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.rf-unsaved-warning-card p {
+  margin: 0.45rem 0 0;
+  color: #334266;
+  font-size: 0.9rem;
+}
+
+.rf-unsaved-warning-actions {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.rf-unsaved-warning-actions button {
+  margin: 0;
+  border: 1px solid #cbd5f4;
+  background: #eef2ff;
+  color: #1b378a;
+  font-size: 0.82rem;
+  padding: 0.38rem 0.62rem;
+}
+
+.rf-unsaved-warning-actions button.is-danger {
+  border-color: #f4c7c7;
+  background: #fff1f1;
+  color: #8e2020;
 }
 
 

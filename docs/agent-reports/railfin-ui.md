@@ -1,3 +1,11 @@
+## 2026-03-08 07:25 UTC — task-00201 Create unsaved warning + compliance cleanup
+- Added unsaved-navigation guard across app-shell route changes from Create: when meaningful unsaved generated/edited content exists, nav attempts open a clear two-choice modal (**Stay on Create** / **Leave Without Saving**).
+- Guard wiring implemented via Create unsaved-state event emission in `src/ui/editor-shell.tsx` and app-shell listener/interceptor in `src/ui/app-shell.tsx`; includes browser `beforeunload` prompt for refresh/close while dirty.
+- Unsaved-warning trigger is intentionally conservative to reduce noise: compares normalized current content against saved/opened baseline and requires meaningful-content threshold before warning.
+- Compliance panel cleanup in `src/ui/compliance-panel.tsx` + `src/app/globals.css`: reduced visual weight, removed sticky/pinned top behavior, made success status more discreet, and removed Selected Finding Actions summary section.
+- Preserved compliance run + findings rendering + remediation affordances by keeping per-finding selection/actions (`Select Finding`, `Apply Hint`, `Remind Later`).
+- Updated docs (`docs/UI_FOUNDATIONS.md`, `docs/tasks.md`, `docs/CHANGELOG.md`) and reran build.
+
 ## 2026-03-08 07:20 UTC — task-00200 CRM Add New Lead modal flow
 - Converted CRM create-lead interaction in `src/app/app/crm/page.tsx` from inline panel to modal dialog opened by toolbar **Add New Lead**.
 - Kept page body table-first/list-first so lead data remains primary visual focus.

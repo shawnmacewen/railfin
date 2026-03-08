@@ -36,15 +36,25 @@ export function NavItem({
   icon,
   active,
   iconClassName,
+  onNavigateAttempt,
 }: {
   href: string;
   label: string;
   icon: ReactNode;
   active?: boolean;
   iconClassName?: string;
+  onNavigateAttempt?: (href: string) => boolean;
 }) {
   return (
-    <Link href={href} className={cx("rf-nav-item", active ? "is-active" : undefined)}>
+    <Link
+      href={href}
+      className={cx("rf-nav-item", active ? "is-active" : undefined)}
+      onClick={(event) => {
+        if (onNavigateAttempt && !onNavigateAttempt(href)) {
+          event.preventDefault();
+        }
+      }}
+    >
       <span className={cx("rf-nav-item-icon", iconClassName)} aria-hidden="true">
         {icon}
       </span>

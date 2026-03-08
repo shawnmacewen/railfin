@@ -1,3 +1,12 @@
+## 2026-03-08 — Create unsaved-warning + compliance panel cleanup (task-00201)
+- Added Create-route unsaved-content guard for app-shell navigation: attempting to leave /app/create with meaningful unsaved generated/edited content now opens a clear stay-vs-leave warning dialog.
+- Guard now covers left-nav/app-shell route changes and browser/tab close refresh while Create has unsaved meaningful edits.
+- Tuned unsaved trigger to avoid noisy prompts: warning only appears when normalized content meaningfully differs from last saved/opened baseline.
+- Reduced Compliance visual weight in Create rail: lighter card framing and less heavy treatment around run/summary states.
+- Removed supporting compliance subtitle copy under Compliance Feedback and made successful API validation message more discreet.
+- Removed Selected Finding Actions summary block; findings keep per-card selection plus remediation actions.
+- Removed sticky/pinned behavior in compliance run area so controls and findings scroll naturally with panel content.
+
 ## 2026-03-08 — CRM Add New Lead moved to modal dialog (task-00200)
 - Updated CRM page so clicking **Add New Lead** opens the create form in a modal dialog instead of expanding inline.
 - Kept leads table/list as the primary in-page focus while create happens in an overlay.

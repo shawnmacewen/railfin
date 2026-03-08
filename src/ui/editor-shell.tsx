@@ -245,6 +245,14 @@ function plainTextToHtml(input: string): string {
   return plainTextToContractHtml(input);
 }
 
+function normalizeForUnsavedCheck(input: string) {
+  return input.replace(/\s+/g, " ").trim();
+}
+
+function hasMeaningfulContent(input: string) {
+  return normalizeForUnsavedCheck(input).length >= 20;
+}
+
 export function EditorShell() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId")?.trim() ?? "";
@@ -275,6 +283,7 @@ export function EditorShell() {
   const [remediationUndoState, setRemediationUndoState] = useState<RemediationUndoState | null>(null);
   const [generationHistory, setGenerationHistory] = useState<GenerationHistoryEntry[]>([]);
   const [isLexicalReady, setIsLexicalReady] = useState(false);
+  const [savedBaselineText, setSavedBaselineText] = useState("");
 
   const generationHistoryContextKey = draftId || "session-new";
 
@@ -313,6 +322,7 @@ export function EditorShell() {
   useEffect(() => {
     if (!draftId) {
       setLoadedDraftTitle(null);
+      setSavedBaselineText("");
       return;
     }
 
@@ -336,6 +346,7 @@ export function EditorShell() {
         const normalized = normalizeIncomingDraftBody(loadedBody);
         setContentHtml(normalized.html);
         setContentText(normalized.text);
+        setSavedBaselineText(normalized.text);
         setLoadedDraftTitle(payload.data.title || "Untitled Draft");
         setStatus("idle");
         setFeedback(`Opened draft: ${payload.data.title || "Untitled Draft"}`);
@@ -360,6 +371,33 @@ export function EditorShell() {
   }, [generationHistoryContextKey]);
 
   const canSave = isLexicalReady && contentText.trim().length > 0 && status !== "saving";
+
+  const hasUnsavedMeaningfulChanges = useMemo(() => {
+    const normalizedCurrent = normalizeForUnsavedCheck(contentText);
+    const normalizedBaseline = normalizeForUnsavedCheck(savedBaselineText);
+
+    if (normalizedCurrent === normalizedBaseline) {
+      return false;
+    }
+
+    return hasMeaningfulContent(normalizedCurrent) || hasMeaningfulContent(normalizedBaseline);
+  }, [contentText, savedBaselineText]);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("rf:create-unsaved-state", {
+        detail: { hasUnsavedChanges: hasUnsavedMeaningfulChanges },
+      }),
+    );
+
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("rf:create-unsaved-state", {
+          detail: { hasUnsavedChanges: false },
+        }),
+      );
+    };
+  }, [hasUnsavedMeaningfulChanges]);
 
   const generationPrompt = useMemo(() => {
     const trimmedPrompt = promptInput.trim();
@@ -671,6 +709,7 @@ export function EditorShell() {
       }
 
       setStatus("saved");
+      setSavedBaselineText(contentText);
       const savedTitle = payload.data.title?.trim() || resolvedTitle;
       const savedId = payload.data.id?.trim();
       const draftHint = [savedTitle ? `title: ${savedTitle}` : null, savedId ? `id: ${savedId}` : null]
@@ -1316,7 +1355,6 @@ export function EditorShell() {
           {!isComplianceCollapsed ? (
             <div className="rf-create-compliance-card">
               <h3>Compliance Feedback</h3>
-              <p className="rf-status rf-status-muted">Persistent review panel while you create.</p>
               <CompliancePanel
                 activePolicyContext={activePolicyContext}
                 content={contentText}

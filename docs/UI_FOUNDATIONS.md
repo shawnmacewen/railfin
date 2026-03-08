@@ -1,3 +1,12 @@
+## task-00201 — Create unsaved-navigation warning + compliance panel cleanup
+
+- `src/ui/editor-shell.tsx` now tracks a Create-session saved baseline and emits unsaved-state events only when content changed meaningfully (normalized-text diff + minimum content threshold) to avoid warning noise from trivial/no-op edits.
+- `src/ui/app-shell.tsx` listens for Create unsaved-state events and blocks left-nav/app-shell route changes away from `/app/create`, opening an explicit warning dialog with two choices: **Stay on Create** and **Leave Without Saving**.
+- Browser close/refresh while Create has meaningful unsaved changes now uses a native `beforeunload` prompt.
+- `src/ui/compliance-panel.tsx` compliance summary success line is now intentionally discreet (`.rf-compliance-run-summary`) and the standalone **Selected Finding Actions** panel has been removed.
+- Findings still preserve selection context and now expose remediation actions directly per finding card (`Apply Hint`, `Remind Later`) to keep remediation workflows intact.
+- `src/app/globals.css` removes sticky/pinned behavior from compliance toolbar and side summary treatment so compliance content scrolls naturally with the rest of the panel; compliance card styling was lightened to reduce visual weight.
+
 ## task-00200 — CRM Add New Lead modal conversion
 
 - Updated `src/app/app/crm/page.tsx` so **Add New Lead** opens a modal dialog instead of expanding an inline panel.
