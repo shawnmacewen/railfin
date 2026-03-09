@@ -1,9 +1,24 @@
+## 2026-03-09 — Campaigns builder UX polish v2 (task-00212)
+- Improved Campaign create modal sequence editor readability with clearer step grouping and labels for email/wait/condition steps.
+- Upgraded condition step UX with clearer rule logic wording (`if` all required vs `or` any match), better yes/no path field labels, and inline helper guidance.
+- Tightened social scheduler form layout and clarified datetime input expectations; improved status visibility with compact status chips in posts and timeline lists.
+- Refined targeting preview into a clearer summary card (matched/total + sample IDs) and cleaner explicit unavailable/empty states.
+- Applied responsive spacing/layout polish across campaigns builder and scheduler surfaces.
+
 ## 2026-03-09 — Campaigns + Contacts API security verification pass (task-00213)
 - Re-verified all new Campaigns internal API routes and the Contacts bridge endpoint enforce internal auth guard checks before business logic.
 - Re-verified sensitive response cache posture: reviewed endpoints return `Cache-Control: no-store` on success/error, and unauthorized responses inherit no-store from shared auth helper.
 - Re-verified fail-closed validation for Campaigns targeting preview, sequence/step CRUD payloads, and social post create/update payloads with deterministic `Validation failed` + `fieldErrors` responses.
 - Confirmed safe error-shape posture: validation errors expose field-level diagnostics only and do not echo raw request payloads.
 - Documented one operational caveat: temporary auth compat-mode remains a residual risk until strict server-authoritative auth rollout is complete and `INTERNAL_API_AUTH_COMPAT_MODE=off` is enforced.
+
+## 2026-03-09 — CRM contacts generalization + leads bridge hardening (task-00211)
+- Added contacts-first CRM persistence support with a new Supabase helper and explicit required SQL bootstrap metadata for `public.contacts`.
+- Added `GET /api/internal/crm/contacts` filtering (`search`, `stage`, `source`) and added write endpoints for contacts create/update with strict fail-closed validation.
+- Added contacts update route: `PATCH /api/internal/crm/contacts/[contactId]`.
+- Hardened lead compatibility path so existing `GET/POST /api/internal/crm/leads` flows read/write through contacts-first mapping when available, preserving current CRM UI lead fields.
+- Added manual idempotent migration/backfill SQL (`docs/crm_contacts_backfill_from_leads.sql`) with verification queries.
+- Build verification: `npm run build` passed.
 
 ## 2026-03-09 — Campaigns API engine v1 shipped (task-00209)
 - Replaced campaigns contract persistence from in-memory records to Supabase-backed table helpers in `src/lib/supabase/campaigns.ts`.

@@ -1,3 +1,54 @@
+## task-00211 — Contacts generalization pass (CRM leads -> contacts bridge hardening)
+
+Protected internal CRM routes now include:
+- `GET/POST /api/internal/crm/contacts`
+- `PATCH /api/internal/crm/contacts/[contactId]`
+- `GET/POST /api/internal/crm/leads` (compatibility bridge over contacts-first model when available)
+
+### Contacts-first normalization mapping
+
+Lead fields are normalized to contacts schema as:
+- `name -> fullName`
+- `email -> primaryEmail`
+- `phone -> primaryPhone`
+- `status -> lead.stage` (same enum: `new|contacted|qualified|closed`)
+- `source -> source`
+
+Compatibility behavior:
+- contacts list/read paths resolve from `public.contacts` first.
+- if `public.contacts` is not yet present, read falls back to `public.leads` mapping.
+- lead create writes to `public.contacts` first; if contacts persistence is unavailable, write falls back to `public.leads`.
+
+### Contacts list filters and validation posture
+
+`GET /api/internal/crm/contacts`
+- Optional query params:
+  - `search`: case-insensitive match over name/email/phone/source/stage
+  - `stage`: exact stage filter
+  - `source`: exact source filter
+
+`POST /api/internal/crm/contacts` and `PATCH /api/internal/crm/contacts/[contactId]`
+- Request body (strict allowlist):
+  - `fullName` (required)
+  - `primaryEmail` (required)
+  - `primaryPhone` (optional)
+  - `source` (optional)
+  - `stage` (required enum `new|contacted|qualified|closed`)
+- Fail-closed validation:
+  - strict JSON object body + strict key allowlist
+  - bounded lengths + email format checks
+  - safe `fieldErrors` only (no raw payload reflection)
+
+### Manual migration/backfill path (idempotent)
+
+If historical lead rows exist and contacts table is newly introduced, run manual SQL:
+- `docs/crm_contacts_backfill_from_leads.sql`
+
+The file includes:
+- idempotent contacts table/bootstrap DDL
+- idempotent upsert backfill from `public.leads` to `public.contacts`
+- verification queries (`count` checks + missing-id join check)
+
 ## task-00209 — Campaigns API engine v1 (internal)
 
 Protected internal routes (all auth-gated via `requireInternalApiAuth`) now include:
