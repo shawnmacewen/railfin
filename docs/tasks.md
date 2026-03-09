@@ -1,3 +1,25 @@
+## task-00210 — UI — Campaigns UI builder v1 (sequence editor + social scheduler surface)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00210-campaigns-ui-builder-v1`
+- Scope delivered:
+  - Upgraded `/app/campaigns` from scaffold to usable v1 builder experience.
+  - Added campaign create modal sequence builder with:
+    - add sequence
+    - add step per sequence
+    - step forms for `email` (subject/body), `wait` (minutes), and `condition` (`if/or`, JSON rules textarea, yes/no sequence IDs).
+  - Added campaign targeting preview UX improvements:
+    - loading/error/empty handling
+    - matched/total count chips
+    - sample ID display sourced from CRM contacts when available.
+  - Added social scheduler surface:
+    - schedule form (`platform`, `content`, `scheduled_for`)
+    - scheduled posts list panel
+    - calendar/timeline panel wired to calendar-items endpoint when available.
+  - Added explicit graceful unavailable handling for not-yet-shipped APIs (`not available yet`) with no broken UI states.
+  - Preserved app shell/nav stability and responsive non-overlap behavior with additive `rf-campaigns-*` styles.
+  - Updated docs and lane report; verified with `npm run build` (pass).
+
 ## task-00208 — UI — Campaigns UI foundation v1 (from PRD + schema)
 
 - Status: **Done**

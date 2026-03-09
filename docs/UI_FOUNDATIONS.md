@@ -1,3 +1,26 @@
+## task-00210 — Campaigns UI builder v1
+
+- `src/app/app/campaigns/page.tsx` now provides a usable v1 campaign builder flow instead of scaffold-only placeholders.
+- Campaign create modal now includes a sequence/step builder:
+  - sequence list with add/remove controls
+  - per-sequence step list with add-step
+  - step editor variants:
+    - email step (`subject`, `body`)
+    - wait step (`waitMinutes`)
+    - condition step (`operator if/or`, JSON rules textarea, yes/no sequence IDs)
+- Targeting preview UX expanded:
+  - explicit loading/error/empty states
+  - matched/total counts shown as chips
+  - sample contact IDs shown from CRM contacts endpoint when available
+- Social scheduling surface expanded:
+  - create scheduled social post form (`platform`, `content`, `scheduled_for`)
+  - scheduled posts list/status panel
+  - calendar/timeline panel bound to `/api/internal/campaigns/calendar-items` when endpoint exists
+- Missing endpoint behavior is fail-soft and explicit:
+  - 404s render `not available yet` state text
+  - no fake success banners and no broken-panel crashes
+- `src/app/globals.css` includes additive campaigns builder/scheduler classes (`rf-campaigns-create-modal`, `rf-campaigns-builder-stack`, `rf-campaigns-step-list`, `rf-campaigns-step-card`, `rf-campaigns-social-grid`) with responsive two-column behavior at desktop breakpoints.
+
 ## task-00208 — Campaigns UI foundation v1
 
 - `src/app/app/campaigns/page.tsx` moved from static placeholder copy to a client-backed Campaigns workspace with three phase-1 surfaces:

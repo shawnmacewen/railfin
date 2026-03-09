@@ -1,3 +1,21 @@
+## 2026-03-09 05:45 UTC — task-00210 Campaigns UI builder v1
+- Upgraded `src/app/app/campaigns/page.tsx` from phase-1 scaffold to a usable v1 builder flow.
+- Added campaign sequence builder in create modal:
+  - add sequence
+  - add step per sequence
+  - step editor forms for `email` (`subject/body`), `wait` (`minutes`), `condition` (`if/or`, rules JSON textarea, yes/no sequence IDs).
+- Improved targeting preview UX:
+  - loading/error/empty states
+  - matched vs total counts
+  - sample contact ID display (via contacts endpoint when available).
+- Added social schedule surface:
+  - scheduled social post create form (`platform/content/scheduled_for`)
+  - scheduled posts list with statuses
+  - calendar/timeline panel bound to calendar-items endpoint when available.
+- Added explicit graceful 404 handling for not-yet-shipped scheduling/calendar endpoints with clear `not available yet` states.
+- Added additive responsive styles in `src/app/globals.css` for builder and social schedule cards/grids.
+- Updated docs (`tasks/changelog/ui-foundations/lane-report`) and verified build passes.
+
 ## 2026-03-09 05:20 UTC — task-00208 Campaigns UI foundation v1
 - Replaced Campaigns placeholder with functional phase-1 page in `src/app/app/campaigns/page.tsx`.
 - Added Campaigns table IA (`name`, `status`, `objective`, `created`) with loading/error/empty handling and retry affordance.

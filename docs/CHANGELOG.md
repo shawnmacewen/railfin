@@ -1,3 +1,11 @@
+## 2026-03-09 — Campaigns UI builder v1 shipped (task-00210)
+- Upgraded Campaigns page from foundation scaffold to usable v1 builder surface.
+- Added sequence editor in campaign creation flow with add-sequence/add-step and step-type-specific forms for email, wait, and condition branches.
+- Added stronger targeting preview UX with loading/empty/error states, count summary, and sample contact ID display.
+- Added social scheduling surface with scheduled-post form, list panel, and calendar/timeline panel wiring to calendar-items endpoint when available.
+- Added explicit graceful handling for missing phase-2 APIs with clear “not available yet” messaging instead of broken/blank states.
+- Added responsive Campaigns layout/style updates to keep builder/scheduler surfaces stable on smaller screens.
+
 ## 2026-03-09 — Campaigns UI foundation v1 shipped (task-00208)
 - Replaced Campaigns placeholder page with functional phase-1 UX including live list table, create action, and resilient loading/empty/error states.
 - Added Create Campaign modal with required campaign fields plus phase-1 targeting stubs (segment selector placeholder and read-only contacts/lead-stage summary chips).

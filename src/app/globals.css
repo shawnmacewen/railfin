@@ -1784,6 +1784,41 @@ button:disabled {
   gap: 0.25rem;
 }
 
+.rf-campaigns-create-modal {
+  width: min(56rem, 100%);
+}
+
+.rf-campaigns-builder-stack {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.rf-campaigns-step-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.rf-campaigns-step-card {
+  border: 1px solid #d9e1f4;
+  border-radius: 2px;
+  background: #fff;
+  padding: 0.55rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.rf-campaigns-social-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 980px) {
+  .rf-campaigns-social-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .rf-crm-add-button {
   white-space: nowrap;
   padding: 0.3rem 0.58rem;
