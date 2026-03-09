@@ -1,3 +1,10 @@
+## 2026-03-09 — Campaigns UI foundation v1 shipped (task-00208)
+- Replaced Campaigns placeholder page with functional phase-1 UX including live list table, create action, and resilient loading/empty/error states.
+- Added Create Campaign modal with required campaign fields plus phase-1 targeting stubs (segment selector placeholder and read-only contacts/lead-stage summary chips).
+- Wired Campaigns UI to internal APIs from the prior foundation task (`GET/POST /api/internal/campaigns`, `POST /api/internal/campaigns/targeting/preview`).
+- Added campaign detail scaffolding (sequence cards with email/wait/condition placeholders) and explicit “coming next” marker for branching editor.
+- Added responsive scheduled social-post calendar scaffold panel (list/calendar placeholder, drag-drop intentionally deferred).
+
 ## 2026-03-09 — Campaigns phase-1 foundation + contacts-first targeting contracts (task-00207)
 - Added Campaigns module PRD at `docs/PRD_Campaigns_Module_v0.md` covering MVP/v2 scope, contacts-first targeting migration (`leads -> contacts + lead metadata`), branching logic rules (`if/or`), and event-trigger roadmap.
 - Added manual SQL bootstrap at `docs/campaigns_bootstrap.sql` for campaigns foundation tables: campaigns, sequences, steps, enrollments, social posts, calendar items, contacts, and segments.

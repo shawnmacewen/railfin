@@ -1,3 +1,26 @@
+## task-00208 — UI — Campaigns UI foundation v1 (from PRD + schema)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00208-campaigns-ui-foundation-v1`
+- Scope delivered:
+  - Replaced Campaigns placeholder with functional phase-1 UI in `/app/campaigns`:
+    - campaigns list table (`name`, `status`, `objective`, `created`)
+    - Create Campaign action
+    - loading, empty, and error states with retry path
+  - Added Create Campaign modal flow with required fields (`name`, `objective`, `status`) and targeting stubs:
+    - source-segment selector placeholder
+    - read-only contacts/lead-stage summary chips (via targeting preview)
+  - Wired to internal APIs from task-00207 where available:
+    - `GET /api/internal/campaigns`
+    - `POST /api/internal/campaigns`
+    - `POST /api/internal/campaigns/targeting/preview`
+  - Added campaign detail scaffold on-page:
+    - sequence cards
+    - step placeholders (`email`, `wait`, `condition`)
+    - explicit “coming next” marker for branching editor
+  - Added scheduled social-post calendar scaffold card (responsive placeholder, no drag/drop)
+  - Updated docs and lane report; verified with `npm run build` (pass).
+
 ## task-00207 — DEV — Campaigns module phase-1 foundation + PRD update (contacts-first targeting)
 
 - Status: **Done**

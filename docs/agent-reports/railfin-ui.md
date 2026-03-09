@@ -1,3 +1,16 @@
+## 2026-03-09 05:20 UTC — task-00208 Campaigns UI foundation v1
+- Replaced Campaigns placeholder with functional phase-1 page in `src/app/app/campaigns/page.tsx`.
+- Added Campaigns table IA (`name`, `status`, `objective`, `created`) with loading/error/empty handling and retry affordance.
+- Added **Create Campaign** modal with fields (`name`, `objective`, `status`) and targeting stubs (source segment placeholder + read-only contacts/lead-stage summary chips).
+- Wired existing internal APIs from task-00207:
+  - `GET /api/internal/campaigns`
+  - `POST /api/internal/campaigns`
+  - `POST /api/internal/campaigns/targeting/preview`
+- Added sequence scaffold in campaign detail (sequence cards + `email/wait/condition` placeholders + explicit branching-editor coming-next marker).
+- Added scheduled social-post calendar scaffold card (responsive placeholder, no drag-drop behavior).
+- Added additive campaigns styling in `src/app/globals.css` (`rf-campaigns-*`).
+- Updated docs (`tasks/changelog/ui-foundations/lane-report`) and verified build passes.
+
 ## 2026-03-08 08:20 UTC — task-00206 Fix Create compliance controls dropping when minimized
 - Updated `src/app/globals.css` collapsed Create layout so minimized compliance controls stay anchored near the top instead of dropping to page bottom.
 - Desktop fix (`@media (min-width: 960px)`): `.rf-create-layout.is-compliance-collapsed` now keeps a second auto column (`minmax(0, 1fr) auto`) and right-aligns compliance controls.
