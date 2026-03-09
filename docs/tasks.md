@@ -1,3 +1,14 @@
+## task-00220 — SEC — Event→campaign trigger flow security validation
+
+- Status: **Done**
+- Branch: `chore/sec/task-00220-events-campaign-trigger-security`
+- Scope delivered:
+  - Re-validated auth guard + no-store behavior on relevant trigger-adjacent internal endpoints (`/api/internal/events/registrations`, `/api/internal/campaigns/[campaignId]/enrollments`, `/api/internal/campaigns/enrollments/[enrollmentId]/transition`): all enforce `requireInternalApiAuth(request)` and return `INTERNAL_SENSITIVE_NO_STORE_HEADERS`.
+  - Verified validation/error posture remains fail-closed and non-reflective (`Validation failed` + bounded `fieldErrors`; no raw payload echo) across reviewed enrollment + registration contracts.
+  - Identified duplicate-enrollment guard gap: current enrollment create flow (`internalCampaignEnrollmentsCreate` → `createCampaignEnrollmentInTable`) does not enforce uniqueness for `(campaign_id, contact_id)` and bootstrap SQL currently lacks a unique index/constraint, so malformed or replayed payloads can still create duplicate enrollments if they pass basic schema checks.
+  - Documented security caveats and hardening follow-ups (add DB-level unique constraint + app-layer idempotency conflict mapping; tighten auth compat mode retirement path).
+  - Build verification: **SKIPPED** (docs-only security validation; no runtime code changes).
+
 ## task-00216 — UI — Campaigns calendar + execution visibility UI v1
 
 - Status: **Done**

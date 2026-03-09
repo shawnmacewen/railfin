@@ -1,3 +1,48 @@
+## task-00220 — SEC — Event→campaign trigger flow security validation
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `src/app/api/internal/events/registrations/route.ts`
+- `src/app/api/internal/campaigns/[campaignId]/enrollments/route.ts`
+- `src/app/api/internal/campaigns/enrollments/[enrollmentId]/transition/route.ts`
+- `src/api/internal/campaigns/contracts.ts`
+- `src/lib/supabase/campaigns.ts`
+- `docs/campaigns_bootstrap.sql`
+
+### Findings
+
+1. **Auth guard + no-store coverage on trigger-adjacent endpoints (PASS with known compat caveat):**
+   - Reviewed event registration + campaign enrollment/transition handlers all invoke `requireInternalApiAuth(request)` before business logic.
+   - Reviewed handlers return `INTERNAL_SENSITIVE_NO_STORE_HEADERS` on success and mapped errors; unauthorized path inherits no-store from shared auth helper.
+
+2. **Validation and safe error shape (PASS):**
+   - Reviewed enrollment create/transition and event registration contracts keep strict allowlist parsing, deterministic `Validation failed` + `fieldErrors`, and do not echo raw payload values.
+   - Unknown keys and malformed body shapes fail closed.
+
+3. **Duplicate enrollment anti-replay/anti-duplication control (FAIL / hardening required):**
+   - `internalCampaignEnrollmentsCreate` accepts normalized `{ contactId, startNow }` and writes directly via `createCampaignEnrollmentInTable`.
+   - Persistence layer currently inserts into `campaign_enrollments` without pre-check or conflict handling for existing `(campaign_id, contact_id)` enrollment.
+   - Bootstrap schema (`docs/campaigns_bootstrap.sql`) has indexes on `campaign_id` and `contact_id` but **no unique constraint** on the pair.
+   - Result: replayed or malformed-but-schema-valid requests can create duplicate enrollments for the same campaign/contact.
+
+### Caveats + recommended remediation
+
+- Add DB-level uniqueness guard on enrollment identity (recommended primary option):
+  - `create unique index if not exists campaign_enrollments_campaign_contact_unique on public.campaign_enrollments(campaign_id, contact_id);`
+- Update enrollment create path to map duplicate-key conflicts to deterministic safe response (e.g., `409 Conflict` with stable non-reflective message) or explicit idempotent success semantics.
+- Keep retiring auth compat fallback (`INTERNAL_API_AUTH_COMPAT_MODE=off`) as tracked in prior security tasks.
+
+### Gate decision (task-00220)
+
+- **Overall status:** **GO with required hardening follow-up**
+- Blocking caveat for production trigger runtime: duplicate enrollment guard must be enforced at DB/application boundary before high-volume event-trigger rollout.
+
+### Verification outcome (task-00220)
+
+- Outcome: **PASS with caveat logged**
+- Code changes: none (docs-only verification)
+- Build: skipped (docs-only task)
+
 ## task-00213 — SEC — Campaigns + Contacts API security/validation verification
 
 Review scope:
