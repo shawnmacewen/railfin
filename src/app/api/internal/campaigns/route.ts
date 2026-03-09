@@ -7,7 +7,9 @@ export async function GET(request: NextRequest) {
   const unauthorized = requireInternalApiAuth(request);
   if (unauthorized) return unauthorized;
 
-  return NextResponse.json(internalCampaignsList(), { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
+  const result = await internalCampaignsList();
+  const status = !result.ok && result.error !== "Validation failed" ? 500 : 200;
+  return NextResponse.json(result, { status, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }
 
 export async function POST(request: NextRequest) {
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
       }
     | null;
 
-  const result = internalCampaignsCreate({ body: body ?? undefined });
+  const result = await internalCampaignsCreate({ body: body ?? undefined });
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : 500;
     return NextResponse.json(result, { status, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
