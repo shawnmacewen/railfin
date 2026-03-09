@@ -1,3 +1,59 @@
+## task-00215 — Campaigns execution engine skeleton (enrollments + step progression)
+
+Protected internal Campaign execution routes now include:
+- `GET/POST /api/internal/campaigns/[campaignId]/enrollments`
+- `POST /api/internal/campaigns/enrollments/[enrollmentId]/transition`
+
+### Enrollment contracts (v1 skeleton)
+
+`POST /api/internal/campaigns/[campaignId]/enrollments`
+- Request body (strict allowlist):
+  - `contactId: string` (required)
+  - `startNow?: boolean` (default `true`)
+- Success:
+  - `{ ok: true, data: Enrollment }`
+
+`GET /api/internal/campaigns/[campaignId]/enrollments`
+- Success:
+  - `{ ok: true, data: { items: Enrollment[], total: number } }`
+
+`POST /api/internal/campaigns/enrollments/[enrollmentId]/transition`
+- Request body (strict allowlist):
+  - `actorType: "manual" | "engine" | "system"` (required)
+  - `contactContext?: Record<string, unknown>` (for deterministic condition evaluation)
+  - `forceStatus?: "pending" | "active" | "paused" | "completed" | "exited"`
+- Success:
+  - `{ ok: true, data: { enrollment: Enrollment, events: EnrollmentEvent[] } }`
+
+### Step progression behavior (deterministic skeleton)
+
+- `email` step:
+  - does not send through external provider yet.
+  - writes an `email_send_intent` transition detail event.
+- `wait` step:
+  - computes and persists `nextEligibleAt` from `waitMinutes`.
+- `condition` step:
+  - evaluates `condition_rules_json` deterministically with `if|or` operator against provided `contactContext`.
+  - selects yes/no branch sequence scaffold and records branch decision details.
+
+### Enrollment state + observability
+
+- Enrollment state transitions maintain consistency for:
+  - `enrollment_status`
+  - `active_sequence_id`
+  - `active_step_id`
+  - `next_eligible_at`
+- Transition events are persisted in `campaign_enrollment_events` with:
+  - `event_type`, `actor_type`, `details_json`, `created_at`
+
+### Manual SQL delta (required)
+
+For environments that already applied earlier campaign bootstrap SQL, run additive SQL:
+- add `next_eligible_at` to `campaign_enrollments`
+- add `campaign_enrollment_events` table + indexes
+
+(See `docs/campaigns_bootstrap.sql` for canonical idempotent DDL.)
+
 ## task-00211 — Contacts generalization pass (CRM leads -> contacts bridge hardening)
 
 Protected internal CRM routes now include:

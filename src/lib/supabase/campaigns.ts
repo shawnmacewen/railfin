@@ -7,6 +7,7 @@ export type CampaignStatus = "draft" | "active" | "paused" | "archived";
 export type CampaignStepType = "email" | "wait" | "condition";
 export type CampaignConditionOperator = "if" | "or";
 export type CampaignSocialPostStatus = "draft" | "scheduled" | "published" | "cancelled";
+export type CampaignEnrollmentStatus = "pending" | "active" | "paused" | "completed" | "exited";
 
 export type CampaignStepRecord =
   | { id: string; type: "email"; subject: string; body: string }
@@ -56,6 +57,28 @@ export type CampaignCalendarItemRecord = {
   endsAt: string | null;
   title: string;
   metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type CampaignEnrollmentRecord = {
+  id: string;
+  campaignId: string;
+  contactId: string;
+  enrollmentStatus: CampaignEnrollmentStatus;
+  activeSequenceId: string | null;
+  activeStepId: string | null;
+  nextEligibleAt: string | null;
+  enrolledAt: string;
+  lastTransitionAt: string;
+};
+
+export type CampaignEnrollmentEventRecord = {
+  id: string;
+  enrollmentId: string;
+  campaignId: string;
+  eventType: string;
+  actorType: "manual" | "engine" | "system";
+  details: Record<string, unknown>;
   createdAt: string;
 };
 
@@ -330,4 +353,148 @@ export async function listCampaignCalendarItemsFromTable(campaignId: string) {
   if (res.error) return { ok: false as const, blocked: blockedFromError(res.error) };
   const items = ((res.data ?? []) as any[]).map((row) => ({ id: row.id, campaignId: row.campaign_id, itemType: row.item_type, startsAt: row.starts_at, endsAt: row.ends_at, title: row.title, metadata: typeof row.metadata_json === "object" && row.metadata_json ? row.metadata_json : {}, createdAt: row.created_at } as CampaignCalendarItemRecord));
   return { ok: true as const, items };
+}
+
+function mapEnrollment(row: any): CampaignEnrollmentRecord {
+  return {
+    id: row.id,
+    campaignId: row.campaign_id,
+    contactId: row.contact_id,
+    enrollmentStatus: row.enrollment_status,
+    activeSequenceId: row.active_sequence_id,
+    activeStepId: row.active_step_id,
+    nextEligibleAt: row.next_eligible_at ?? null,
+    enrolledAt: row.enrolled_at,
+    lastTransitionAt: row.last_transition_at,
+  };
+}
+
+function mapEnrollmentEvent(row: any): CampaignEnrollmentEventRecord {
+  return {
+    id: row.id,
+    enrollmentId: row.enrollment_id,
+    campaignId: row.campaign_id,
+    eventType: row.event_type,
+    actorType: row.actor_type,
+    details: typeof row.details_json === "object" && row.details_json ? row.details_json : {},
+    createdAt: row.created_at,
+  };
+}
+
+export async function createCampaignEnrollmentInTable(input: {
+  campaignId: string;
+  contactId: string;
+  enrollmentStatus: CampaignEnrollmentStatus;
+  activeSequenceId: string | null;
+  activeStepId: string | null;
+  nextEligibleAt: string | null;
+  event: { eventType: string; actorType: "manual" | "engine" | "system"; details: Record<string, unknown> };
+}) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
+  const now = new Date().toISOString();
+  const id = randomUUID();
+  const ins = await client.client.from("campaign_enrollments").insert({
+    id,
+    campaign_id: input.campaignId,
+    contact_id: input.contactId,
+    enrollment_status: input.enrollmentStatus,
+    active_sequence_id: input.activeSequenceId,
+    active_step_id: input.activeStepId,
+    next_eligible_at: input.nextEligibleAt,
+    enrolled_at: now,
+    last_transition_at: now,
+  });
+  if (ins.error) return { ok: false as const, blocked: blockedFromError(ins.error) };
+
+  const evIns = await client.client.from("campaign_enrollment_events").insert({
+    id: randomUUID(),
+    enrollment_id: id,
+    campaign_id: input.campaignId,
+    event_type: input.event.eventType,
+    actor_type: input.event.actorType,
+    details_json: input.event.details,
+    created_at: now,
+  });
+  if (evIns.error) return { ok: false as const, blocked: blockedFromError(evIns.error) };
+
+  return getCampaignEnrollmentByIdFromTable(id);
+}
+
+export async function getCampaignEnrollmentByIdFromTable(enrollmentId: string) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
+  const row = await client.client
+    .from("campaign_enrollments")
+    .select("id, campaign_id, contact_id, enrollment_status, active_sequence_id, active_step_id, next_eligible_at, enrolled_at, last_transition_at")
+    .eq("id", enrollmentId)
+    .maybeSingle();
+  if (row.error) return { ok: false as const, blocked: blockedFromError(row.error) };
+  if (!row.data) return { ok: true as const, enrollment: null };
+  return { ok: true as const, enrollment: mapEnrollment(row.data) };
+}
+
+export async function listCampaignEnrollmentsFromTable(campaignId: string) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
+  const res = await client.client
+    .from("campaign_enrollments")
+    .select("id, campaign_id, contact_id, enrollment_status, active_sequence_id, active_step_id, next_eligible_at, enrolled_at, last_transition_at")
+    .eq("campaign_id", campaignId)
+    .order("enrolled_at", { ascending: false });
+  if (res.error) return { ok: false as const, blocked: blockedFromError(res.error) };
+  return { ok: true as const, enrollments: ((res.data ?? []) as any[]).map(mapEnrollment) };
+}
+
+export async function transitionCampaignEnrollmentInTable(input: {
+  enrollmentId: string;
+  enrollmentStatus: CampaignEnrollmentStatus;
+  activeSequenceId: string | null;
+  activeStepId: string | null;
+  nextEligibleAt: string | null;
+  event: { eventType: string; actorType: "manual" | "engine" | "system"; details: Record<string, unknown> };
+}) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
+  const now = new Date().toISOString();
+  const upd = await client.client
+    .from("campaign_enrollments")
+    .update({
+      enrollment_status: input.enrollmentStatus,
+      active_sequence_id: input.activeSequenceId,
+      active_step_id: input.activeStepId,
+      next_eligible_at: input.nextEligibleAt,
+      last_transition_at: now,
+    })
+    .eq("id", input.enrollmentId);
+  if (upd.error) return { ok: false as const, blocked: blockedFromError(upd.error) };
+
+  const check = await getCampaignEnrollmentByIdFromTable(input.enrollmentId);
+  if (!check.ok) return check;
+  if (!check.enrollment) return { ok: true as const, enrollment: null };
+
+  const evIns = await client.client.from("campaign_enrollment_events").insert({
+    id: randomUUID(),
+    enrollment_id: input.enrollmentId,
+    campaign_id: check.enrollment.campaignId,
+    event_type: input.event.eventType,
+    actor_type: input.event.actorType,
+    details_json: input.event.details,
+    created_at: now,
+  });
+  if (evIns.error) return { ok: false as const, blocked: blockedFromError(evIns.error) };
+
+  return { ok: true as const, enrollment: check.enrollment };
+}
+
+export async function listCampaignEnrollmentEventsFromTable(enrollmentId: string) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
+  const res = await client.client
+    .from("campaign_enrollment_events")
+    .select("id, enrollment_id, campaign_id, event_type, actor_type, details_json, created_at")
+    .eq("enrollment_id", enrollmentId)
+    .order("created_at", { ascending: true });
+  if (res.error) return { ok: false as const, blocked: blockedFromError(res.error) };
+  return { ok: true as const, events: ((res.data ?? []) as any[]).map(mapEnrollmentEvent) };
 }

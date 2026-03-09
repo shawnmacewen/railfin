@@ -1,3 +1,28 @@
+## task-00216 — UI — Campaigns calendar + execution visibility UI v1
+
+- Status: **Done**
+- Branch: `feat/ui/task-00216-campaigns-calendar-and-execution-ui`
+- Scope delivered:
+  - Added campaign execution visibility panel with enrollment list rendering (`status`, active sequence/step, last transition timestamp) and explicit unavailable messaging when execution endpoint is not ready.
+  - Added start/pause/resume control affordances per enrollment with backend-aware availability handling and safe error feedback when execution controls are unsupported.
+  - Upgraded campaign timeline to grouped upcoming activity with date-range filtering (`This week`, `Next 30 days`, `Custom`) and improved loading/empty/error UX states.
+  - Added timeline placeholder items from sequence steps (social/email/task-oriented placeholders) so upcoming workflow is visible even before full backend scheduling coverage.
+  - Added sequence progression hints in both sequence builder and sequence detail surfaces without removing/editing existing step editing UX from prior tasks.
+  - Added responsive stability tweaks to campaigns toolbars/control rows to reduce overlap and improve behavior at narrow widths.
+  - Updated docs (`tasks`, `CHANGELOG`, `UI_FOUNDATIONS`, `agent-reports/railfin-ui`) and verified with `npm run build` (pass).
+
+## task-00217 — SEC — Campaigns execution/enrollment endpoints security validation
+
+- Status: **Done**
+- Branch: `chore/sec/task-00217-campaigns-execution-security-pass`
+- Scope delivered:
+  - Reviewed internal campaigns API route surface for execution/enrollment coverage and verified all currently wired campaigns handlers enforce `requireInternalApiAuth(request)` and return `INTERNAL_SENSITIVE_NO_STORE_HEADERS`.
+  - Confirmed repository currently has **no shipped campaigns execution/enrollment transition endpoints** (no route handlers for enroll/transition/execute actions found under `src/app/api/internal`), so task scope was validated against currently implemented surface.
+  - Re-verified fail-closed validation + safe error posture on campaign write actions (strict allowlist keys, bounded field validation, deterministic `Validation failed` + `fieldErrors` responses).
+  - Re-verified no unsafe payload reflection in error responses across campaign contracts (no raw request payload echoing in API error bodies).
+  - Added security documentation notes and sec lane report update for traceability.
+  - Build verification: **SKIPPED** (docs-only security verification; no runtime code changes).
+
 ## task-00212 — UI — Campaigns builder UX polish v2
 
 - Status: **Done**
@@ -990,6 +1015,23 @@
   - Preserved manual-trigger-only remediation behavior and existing request contracts (backward compatible additive fields only).
 
 # Tasks
+
+## task-00215 — DEV — Campaigns execution engine skeleton (enrollments + step progression)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00215-campaigns-execution-engine-skeleton`
+- Scope delivered:
+  - Added campaign execution enrollment API surfaces:
+    - `GET/POST /api/internal/campaigns/[campaignId]/enrollments`
+    - `POST /api/internal/campaigns/enrollments/[enrollmentId]/transition`
+  - Added enrollment service contracts for create/start, list/status by campaign, and deterministic transition execution.
+  - Added deterministic step progression skeleton:
+    - `email` step => records send-intent transition event only (no external send)
+    - `wait` step => computes/persists `nextEligibleAt`
+    - `condition` step => deterministic `if|or` rule evaluation scaffold against `contactContext` and branch sequence selection
+  - Added enrollment state consistency and minimal audit/event trail persistence in Supabase helper layer (`campaign_enrollment_events`).
+  - Added strict fail-closed validation and safe `fieldErrors` for all new execution endpoints.
+  - Updated docs (`tasks`, `CHANGELOG`, `API_BOUNDARY`, `agent-reports/railfin-dev`) and ran `npm run build` (pass).
 
 ## task-00214 — DEV — Configure APIs catalog page (internal + external)
 

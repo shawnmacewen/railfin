@@ -1,3 +1,19 @@
+## 2026-03-09 — Campaigns execution/enrollment security validation pass (task-00217)
+- Re-validated campaigns internal API guard posture: all currently shipped campaign handlers enforce internal auth guard before business logic and return no-store response headers.
+- Re-validated fail-closed request validation and safe error mapping on campaign write/update surfaces (`Validation failed` + `fieldErrors`, strict allowlists, bounded values).
+- Re-confirmed no unsafe request payload reflection in campaign error responses.
+- Documented current scope caveat: repository does not yet contain dedicated campaigns execution/enrollment transition route handlers, so this pass records a pre-runtime baseline and expected controls for when those endpoints ship.
+- Build verification: skipped (docs-only security verification).
+
+## 2026-03-09 — Campaigns execution engine skeleton (task-00215)
+- Added campaign enrollment execution endpoints for create/start, per-campaign enrollment listing, and transition execution.
+- Added deterministic step progression scaffold for campaign enrollments:
+  - email steps now record send-intent events only (no provider delivery yet)
+  - wait steps now compute and persist next-eligible transition timestamps
+  - condition steps now evaluate rules deterministically (`if` / `or`) and choose yes/no branch scaffolds
+- Added enrollment transition observability with persisted audit events (`campaign_enrollment_events`) and stable status/active-sequence/active-step transition updates.
+- Added strict fail-closed validation + safe field-level errors for the new execution request contracts.
+
 ## 2026-03-09 — Configure APIs catalog page in Configure section (task-00214)
 - Added new Configure route `/app/configure/apis` and in-section nav entry **APIs**.
 - Added searchable API catalog with two operator-facing sections: **Internal APIs** and **External APIs**.

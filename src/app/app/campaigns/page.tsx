@@ -7,6 +7,7 @@ import { Card } from "../../../ui/primitives";
 type CampaignStatus = "draft" | "active" | "paused" | "archived";
 type CampaignStepType = "email" | "wait" | "condition";
 type CampaignConditionOperator = "if" | "or";
+type CalendarRange = "week" | "next30" | "custom";
 
 type CampaignRule = { field: string; comparator: string; value: string };
 
@@ -65,6 +66,22 @@ type SocialPostItem = {
 type SocialPostListResponse = { ok: true; data: { items: SocialPostItem[]; total: number } } | { ok: false; error?: string };
 type SocialPostCreateResponse = { ok: true; data: SocialPostItem } | { ok: false; error?: string; fieldErrors?: Array<{ message?: string }> };
 type CalendarItemsResponse = { ok: true; data: { items: Array<{ id: string; title?: string; starts_at?: string; platform?: string; status?: string }> } } | { ok: false; error?: string };
+type CampaignExecutionEnrollment = {
+  id: string;
+  contactId?: string;
+  status?: string;
+  activeSequenceName?: string;
+  activeStepLabel?: string;
+  activeSequenceId?: string;
+  activeStepId?: string;
+  activeStepIndex?: number;
+  lastTransitionAt?: string;
+  supportsControl?: { start?: boolean; pause?: boolean; resume?: boolean };
+};
+
+type CampaignExecutionResponse =
+  | { ok: true; data: { enrollments?: CampaignExecutionEnrollment[]; supportsControl?: { start?: boolean; pause?: boolean; resume?: boolean } } }
+  | { ok: false; error?: string };
 
 type DraftStep = {
   id: string;
@@ -83,6 +100,8 @@ type DraftSequence = {
   name: string;
   steps: DraftStep[];
 };
+
+type TimelineItem = { id: string; at: string; title: string; status: string; kind: "social" | "email" | "task" };
 
 const STATUS_OPTIONS: CampaignStatus[] = ["draft", "active", "paused", "archived"];
 const STEP_TYPE_OPTIONS: CampaignStepType[] = ["email", "wait", "condition"];
@@ -128,6 +147,29 @@ function parseRulesJson(raw: string): CampaignRule[] {
     .map((rule) => ({ field: rule.field.trim(), comparator: rule.comparator.trim(), value: rule.value.trim() }));
 }
 
+function describeNextStep(steps: DraftStep[], index: number): string {
+  const next = steps[index + 1];
+  if (!next) return "This is the final step in this sequence.";
+  if (next.type === "email") return "Executes next: email send.";
+  if (next.type === "wait") return `Executes next: wait ${next.waitMinutes || "0"} minutes.`;
+  return "Executes next: evaluate branch condition.";
+}
+
+function timelineKind(item: { title?: string; platform?: string }): "social" | "email" | "task" {
+  const source = `${item.title || ""} ${item.platform || ""}`.toLowerCase();
+  if (source.includes("email")) return "email";
+  if (item.platform || source.includes("linkedin") || source.includes("facebook") || source.includes("instagram") || source.includes(" x ")) return "social";
+  return "task";
+}
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function toDateInputValue(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 export default function CampaignsPage() {
   const [items, setItems] = useState<CampaignItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -160,6 +202,20 @@ export default function CampaignsPage() {
   const [isSocialSaving, setIsSocialSaving] = useState(false);
   const [socialSaveError, setSocialSaveError] = useState<string | null>(null);
 
+  const [calendarRange, setCalendarRange] = useState<CalendarRange>("week");
+  const [customStartDate, setCustomStartDate] = useState(() => toDateInputValue(startOfDay(new Date())));
+  const [customEndDate, setCustomEndDate] = useState(() => {
+    const next = startOfDay(new Date());
+    next.setDate(next.getDate() + 7);
+    return toDateInputValue(next);
+  });
+
+  const [executionEnrollments, setExecutionEnrollments] = useState<CampaignExecutionEnrollment[]>([]);
+  const [isExecutionLoading, setIsExecutionLoading] = useState(false);
+  const [executionError, setExecutionError] = useState<string | null>(null);
+  const [executionUnavailable, setExecutionUnavailable] = useState(false);
+  const [controlBusyKey, setControlBusyKey] = useState<string | null>(null);
+
   const selectedCampaign = useMemo(() => items.find((item) => item.id === selectedCampaignId) ?? items[0] ?? null, [items, selectedCampaignId]);
 
   const loadCampaigns = useCallback(async () => {
@@ -175,9 +231,7 @@ export default function CampaignsPage() {
       }
       const loaded = Array.isArray(payload.data.items) ? payload.data.items : [];
       setItems(loaded);
-      if (loaded.length > 0) {
-        setSelectedCampaignId((current) => current ?? loaded[0].id);
-      }
+      if (loaded.length > 0) setSelectedCampaignId((current) => current ?? loaded[0].id);
     } catch {
       setItems([]);
       setLoadError("Could not load campaigns right now.");
@@ -263,6 +317,36 @@ export default function CampaignsPage() {
     }
   }, []);
 
+  const loadExecution = useCallback(async () => {
+    if (!selectedCampaign?.id) {
+      setExecutionEnrollments([]);
+      return;
+    }
+    setIsExecutionLoading(true);
+    setExecutionError(null);
+    setExecutionUnavailable(false);
+    try {
+      const response = await fetch(`/api/internal/campaigns/${selectedCampaign.id}/executions`, { method: "GET", credentials: "include" });
+      const payload = (await response.json().catch(() => null)) as CampaignExecutionResponse | null;
+      if (response.status === 404 || response.status === 501) {
+        setExecutionEnrollments([]);
+        setExecutionUnavailable(true);
+        return;
+      }
+      if (!response.ok || !payload?.ok) {
+        setExecutionEnrollments([]);
+        setExecutionError(payload && "error" in payload && payload.error ? payload.error : "Could not load enrollments.");
+        return;
+      }
+      setExecutionEnrollments(Array.isArray(payload.data.enrollments) ? payload.data.enrollments : []);
+    } catch {
+      setExecutionEnrollments([]);
+      setExecutionError("Could not load enrollments.");
+    } finally {
+      setIsExecutionLoading(false);
+    }
+  }, [selectedCampaign?.id]);
+
   useEffect(() => {
     void loadCampaigns();
     void loadSocial();
@@ -273,22 +357,119 @@ export default function CampaignsPage() {
     void loadTargetingPreview();
   }, [isCreateOpen, loadTargetingPreview]);
 
+  useEffect(() => {
+    void loadExecution();
+  }, [loadExecution]);
+
+  const rangeWindow = useMemo(() => {
+    const now = startOfDay(new Date());
+    const start = new Date(now);
+    const end = new Date(now);
+
+    if (calendarRange === "week") {
+      end.setDate(end.getDate() + 7);
+      return { start, end };
+    }
+    if (calendarRange === "next30") {
+      end.setDate(end.getDate() + 30);
+      return { start, end };
+    }
+
+    const customStart = new Date(customStartDate);
+    const customEnd = new Date(customEndDate);
+    return {
+      start: Number.isNaN(customStart.getTime()) ? start : startOfDay(customStart),
+      end: Number.isNaN(customEnd.getTime()) ? end : startOfDay(customEnd),
+    };
+  }, [calendarRange, customStartDate, customEndDate]);
+
+  const filteredTimeline = useMemo(() => {
+    const itemsFromApi: TimelineItem[] = socialCalendarItems
+      .filter((item) => Boolean(item.starts_at))
+      .map((item) => ({
+        id: item.id,
+        at: item.starts_at || "",
+        title: item.title || item.platform || "Scheduled item",
+        status: item.status || "pending",
+        kind: timelineKind(item),
+      }));
+
+    const placeholderItems: TimelineItem[] = (selectedCampaign?.sequences || []).flatMap((sequence) =>
+      sequence.steps.reduce<TimelineItem[]>((acc, step, stepIndex) => {
+        if (step.type === "wait") return acc;
+        const dayOffset = stepIndex + 1;
+        const date = new Date();
+        date.setDate(date.getDate() + dayOffset);
+        acc.push({
+          id: `${sequence.id}-${step.id}`,
+          at: date.toISOString(),
+          title: `${sequence.name}: ${step.type === "email" ? "email touchpoint" : "task checkpoint"}`,
+          status: "planned",
+          kind: step.type === "email" ? "email" : "task",
+        });
+        return acc;
+      }, []),
+    );
+
+    return [...itemsFromApi, ...placeholderItems]
+      .filter((item) => {
+        const when = startOfDay(new Date(item.at));
+        return when >= rangeWindow.start && when <= rangeWindow.end;
+      })
+      .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  }, [rangeWindow.end, rangeWindow.start, selectedCampaign?.sequences, socialCalendarItems]);
+
+  const groupedTimeline = useMemo(() => {
+    const groups = new Map<string, TimelineItem[]>();
+    filteredTimeline.forEach((item) => {
+      const key = new Date(item.at).toDateString();
+      const list = groups.get(key) ?? [];
+      list.push(item);
+      groups.set(key, list);
+    });
+    return Array.from(groups.entries()).map(([key, timeline]) => ({ key, timeline }));
+  }, [filteredTimeline]);
+
+  const runExecutionControl = useCallback(
+    async (enrollmentId: string, action: "start" | "pause" | "resume") => {
+      if (!selectedCampaign?.id) return;
+      const busyKey = `${enrollmentId}:${action}`;
+      setControlBusyKey(busyKey);
+      setExecutionError(null);
+      try {
+        const response = await fetch(`/api/internal/campaigns/${selectedCampaign.id}/executions/${enrollmentId}/${action}`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (response.status === 404 || response.status === 501) {
+          setExecutionError("Execution controls are not available from this environment yet.");
+          return;
+        }
+        const payload = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+        if (!response.ok || !payload?.ok) {
+          setExecutionError(payload?.error || `Could not ${action} enrollment.`);
+          return;
+        }
+        await loadExecution();
+      } catch {
+        setExecutionError(`Could not ${action} enrollment.`);
+      } finally {
+        setControlBusyKey(null);
+      }
+    },
+    [loadExecution, selectedCampaign?.id],
+  );
+
   return (
     <div className="rf-campaigns-page">
       <Card>
         <div className="rf-events-hero">
           <div>
             <h2 className="rf-library-section-title">Campaigns</h2>
-            <p className="rf-status rf-status-muted">Campaign builder v2: clearer sequence editing, cleaner targeting preview, and tighter social scheduling.</p>
+            <p className="rf-status rf-status-muted">Campaign builder v3: execution visibility, timeline filtering, and stronger sequence progression hints.</p>
           </div>
-          <button
-            type="button"
-            className="rf-events-create-cta"
-            onClick={() => {
-              setIsCreateOpen(true);
-              setSaveError(null);
-            }}
-          >
+          <button type="button" className="rf-events-create-cta" onClick={() => { setIsCreateOpen(true); setSaveError(null); }}>
             Create Campaign
           </button>
         </div>
@@ -301,75 +482,49 @@ export default function CampaignsPage() {
               <h3 id="rf-campaign-create-title" className="rf-library-section-title">Create Campaign</h3>
               <button type="button" className="rf-crm-modal-close" aria-label="Close create campaign modal" onClick={() => setIsCreateOpen(false)}>×</button>
             </div>
-
-            <form
-              className="rf-events-form"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                setIsSaving(true);
-                setSaveError(null);
-
-                try {
-                  const sequencesPayload = draftSequences.map((sequence) => ({
-                    name: sequence.name.trim() || "Untitled sequence",
-                    steps: sequence.steps.map((step) => {
-                      if (step.type === "email") {
-                        return { type: "email" as const, subject: step.emailSubject.trim(), body: step.emailBody.trim() };
-                      }
-                      if (step.type === "wait") {
-                        return { type: "wait" as const, waitMinutes: Number(step.waitMinutes || "0") };
-                      }
-                      return {
-                        type: "condition" as const,
-                        operator: step.conditionOperator,
-                        rules: parseRulesJson(step.conditionRulesText),
-                        yesSequenceId: step.yesSequenceId.trim(),
-                        noSequenceId: step.noSequenceId.trim(),
-                      };
-                    }),
-                  }));
-
-                  const response = await fetch("/api/internal/campaigns", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      name,
-                      objective,
-                      status,
-                      targeting: { segmentIds: selectedSegment ? [selectedSegment] : [], contactIds: [], leadStages: [] },
-                      sequences: sequencesPayload,
-                    }),
-                  });
-
-                  const payload = (await response.json().catch(() => null)) as CampaignCreateResponse | null;
-                  if (!response.ok || !payload?.ok) {
-                    const validationMessage = payload && !payload.ok ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ") : "";
-                    const fallback = payload && !payload.ok ? payload.error : null;
-                    setSaveError(validationMessage || fallback || "Could not create campaign.");
-                    return;
-                  }
-
-                  setName("");
-                  setObjective("");
-                  setStatus("draft");
-                  setDraftSequences([defaultDraftSequence()]);
-                  setSelectedCampaignId(payload.data.id);
-                  setIsCreateOpen(false);
-                  await loadCampaigns();
-                } catch {
-                  setSaveError("Could not create campaign.");
-                } finally {
-                  setIsSaving(false);
+            <form className="rf-events-form" onSubmit={async (event) => {
+              event.preventDefault();
+              setIsSaving(true);
+              setSaveError(null);
+              try {
+                const sequencesPayload = draftSequences.map((sequence) => ({
+                  name: sequence.name.trim() || "Untitled sequence",
+                  steps: sequence.steps.map((step) => {
+                    if (step.type === "email") return { type: "email" as const, subject: step.emailSubject.trim(), body: step.emailBody.trim() };
+                    if (step.type === "wait") return { type: "wait" as const, waitMinutes: Number(step.waitMinutes || "0") };
+                    return { type: "condition" as const, operator: step.conditionOperator, rules: parseRulesJson(step.conditionRulesText), yesSequenceId: step.yesSequenceId.trim(), noSequenceId: step.noSequenceId.trim() };
+                  }),
+                }));
+                const response = await fetch("/api/internal/campaigns", {
+                  method: "POST",
+                  credentials: "include",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name, objective, status, targeting: { segmentIds: selectedSegment ? [selectedSegment] : [], contactIds: [], leadStages: [] }, sequences: sequencesPayload }),
+                });
+                const payload = (await response.json().catch(() => null)) as CampaignCreateResponse | null;
+                if (!response.ok || !payload?.ok) {
+                  const validationMessage = payload && !payload.ok ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ") : "";
+                  const fallback = payload && !payload.ok ? payload.error : null;
+                  setSaveError(validationMessage || fallback || "Could not create campaign.");
+                  return;
                 }
-              }}
-            >
+                setName("");
+                setObjective("");
+                setStatus("draft");
+                setDraftSequences([defaultDraftSequence()]);
+                setSelectedCampaignId(payload.data.id);
+                setIsCreateOpen(false);
+                await loadCampaigns();
+              } catch {
+                setSaveError("Could not create campaign.");
+              } finally {
+                setIsSaving(false);
+              }
+            }}>
               <label htmlFor="campaign-name">Name</label>
               <input id="campaign-name" value={name} onChange={(event) => setName(event.target.value)} required maxLength={140} />
-
               <label htmlFor="campaign-objective">Objective</label>
               <textarea id="campaign-objective" value={objective} onChange={(event) => setObjective(event.target.value)} maxLength={500} />
-
               <label htmlFor="campaign-status">Status</label>
               <select id="campaign-status" value={status} onChange={(event) => setStatus(event.target.value as CampaignStatus)}>
                 {STATUS_OPTIONS.map((value) => <option key={value} value={value}>{value}</option>)}
@@ -383,196 +538,50 @@ export default function CampaignsPage() {
                   <option value="recent-leads">Recent Leads</option>
                   <option value="qualified-followup">Qualified Follow-up</option>
                 </select>
-
                 {isTargetingLoading ? <p className="rf-status rf-status-muted">Loading targeting preview...</p> : null}
-                {!isTargetingLoading && !targetingError && targetingSummary ? (
-                  <div className="rf-campaigns-targeting-summary" aria-label="Contacts summary">
-                    <div><p className="rf-campaigns-helper">Matched contacts</p><strong>{targetingSummary.matched}</strong></div>
-                    <div><p className="rf-campaigns-helper">Total contacts</p><strong>{targetingSummary.total}</strong></div>
-                    <p className="rf-status rf-status-muted">Sample IDs: {targetingSamples.length > 0 ? targetingSamples.join(", ") : "No sample IDs available."}</p>
-                  </div>
-                ) : null}
+                {!isTargetingLoading && !targetingError && targetingSummary ? <div className="rf-campaigns-targeting-summary" aria-label="Contacts summary"><div><p className="rf-campaigns-helper">Matched contacts</p><strong>{targetingSummary.matched}</strong></div><div><p className="rf-campaigns-helper">Total contacts</p><strong>{targetingSummary.total}</strong></div><p className="rf-status rf-status-muted">Sample IDs: {targetingSamples.length > 0 ? targetingSamples.join(", ") : "No sample IDs available."}</p></div> : null}
                 {!isTargetingLoading && !targetingError && !targetingSummary ? <p className="rf-campaigns-empty-note">No targeting preview data yet.</p> : null}
                 {targetingError ? <p className="rf-campaigns-empty-note">{targetingError}</p> : null}
               </div>
 
               <div className="rf-campaigns-builder-stack">
-                <div className="rf-crm-table-toolbar">
+                <div className="rf-crm-table-toolbar rf-campaigns-wrap-toolbar">
                   <div>
                     <h4 className="rf-library-section-title">Sequence builder</h4>
-                    <p className="rf-campaigns-helper">Group steps by intent (email, wait, condition) for easier review.</p>
+                    <p className="rf-campaigns-helper">Existing step editing remains unchanged; progression hints show what executes next.</p>
                   </div>
-                  <button
-                    type="button"
-                    className="rf-crm-add-button"
-                    onClick={() => setDraftSequences((prev) => [...prev, defaultDraftSequence(`Sequence ${prev.length + 1}`)])}
-                  >
-                    Add Sequence
-                  </button>
+                  <button type="button" className="rf-crm-add-button" onClick={() => setDraftSequences((prev) => [...prev, defaultDraftSequence(`Sequence ${prev.length + 1}`)])}>Add Sequence</button>
                 </div>
 
                 {draftSequences.map((sequence, sequenceIndex) => (
                   <article key={sequence.id} className="rf-campaigns-sequence-card">
                     <label htmlFor={`sequence-name-${sequence.id}`}>Sequence name</label>
-                    <input
-                      id={`sequence-name-${sequence.id}`}
-                      value={sequence.name}
-                      onChange={(event) => {
-                        const next = event.target.value;
-                        setDraftSequences((prev) => prev.map((item) => (item.id === sequence.id ? { ...item, name: next } : item)));
-                      }}
-                      required
-                    />
-
-                    <div className="rf-crm-table-toolbar">
-                      <p className="rf-status rf-status-muted">Steps ({sequence.steps.length})</p>
-                      <button
-                        type="button"
-                        className="rf-crm-add-button"
-                        onClick={() => {
-                          setDraftSequences((prev) => prev.map((item) => {
-                            if (item.id !== sequence.id) return item;
-                            return { ...item, steps: [...item.steps, defaultDraftStep(STEP_TYPE_OPTIONS[item.steps.length % STEP_TYPE_OPTIONS.length])] };
-                          }));
-                        }}
-                      >
-                        Add Step
-                      </button>
-                    </div>
-
+                    <input id={`sequence-name-${sequence.id}`} value={sequence.name} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => (item.id === sequence.id ? { ...item, name: next } : item))); }} required />
+                    <div className="rf-crm-table-toolbar rf-campaigns-wrap-toolbar"><p className="rf-status rf-status-muted">Steps ({sequence.steps.length})</p><button type="button" className="rf-crm-add-button" onClick={() => setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: [...item.steps, defaultDraftStep(STEP_TYPE_OPTIONS[item.steps.length % STEP_TYPE_OPTIONS.length])] }))}>Add Step</button></div>
                     <div className="rf-campaigns-step-list">
-                      {sequence.steps.map((step) => (
+                      {sequence.steps.map((step, stepIndex) => (
                         <section key={step.id} className="rf-campaigns-step-card">
-                          <div className="rf-campaigns-step-head">
-                            <strong>{step.type === "email" ? "Email step" : step.type === "wait" ? "Wait step" : "Condition step"}</strong>
-                          </div>
+                          <div className="rf-campaigns-step-head"><strong>{step.type === "email" ? "Email step" : step.type === "wait" ? "Wait step" : "Condition step"}</strong></div>
                           <label htmlFor={`step-type-${step.id}`}>Step type</label>
-                          <select
-                            id={`step-type-${step.id}`}
-                            value={step.type}
-                            onChange={(event) => {
-                              const nextType = event.target.value as CampaignStepType;
-                              setDraftSequences((prev) => prev.map((item) => {
-                                if (item.id !== sequence.id) return item;
-                                return {
-                                  ...item,
-                                  steps: item.steps.map((candidate) => (candidate.id === step.id ? { ...candidate, type: nextType } : candidate)),
-                                };
-                              }));
-                            }}
-                          >
+                          <select id={`step-type-${step.id}`} value={step.type} onChange={(event) => { const nextType = event.target.value as CampaignStepType; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => (candidate.id === step.id ? { ...candidate, type: nextType } : candidate)) })); }}>
                             {STEP_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
                           </select>
+                          <p className="rf-campaigns-step-hint">{describeNextStep(sequence.steps, stepIndex)}</p>
 
-                          {step.type === "email" ? (
-                            <>
-                              <label htmlFor={`email-subject-${step.id}`}>Subject</label>
-                              <input
-                                id={`email-subject-${step.id}`}
-                                value={step.emailSubject}
-                                onChange={(event) => {
-                                  const next = event.target.value;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, emailSubject: next } : candidate) }));
-                                }}
-                                required
-                              />
-                              <label htmlFor={`email-body-${step.id}`}>Body</label>
-                              <textarea
-                                id={`email-body-${step.id}`}
-                                value={step.emailBody}
-                                onChange={(event) => {
-                                  const next = event.target.value;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, emailBody: next } : candidate) }));
-                                }}
-                                required
-                              />
-                            </>
-                          ) : null}
+                          {step.type === "email" ? <><label htmlFor={`email-subject-${step.id}`}>Subject</label><input id={`email-subject-${step.id}`} value={step.emailSubject} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, emailSubject: next } : candidate) })); }} required /><label htmlFor={`email-body-${step.id}`}>Body</label><textarea id={`email-body-${step.id}`} value={step.emailBody} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, emailBody: next } : candidate) })); }} required /></> : null}
 
-                          {step.type === "wait" ? (
-                            <>
-                              <label htmlFor={`wait-minutes-${step.id}`}>Wait minutes</label>
-                              <input
-                                id={`wait-minutes-${step.id}`}
-                                type="number"
-                                min={1}
-                                max={10080}
-                                value={step.waitMinutes}
-                                onChange={(event) => {
-                                  const next = event.target.value;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, waitMinutes: next } : candidate) }));
-                                }}
-                                required
-                              />
-                            </>
-                          ) : null}
+                          {step.type === "wait" ? <><label htmlFor={`wait-minutes-${step.id}`}>Wait minutes</label><input id={`wait-minutes-${step.id}`} type="number" min={1} max={10080} value={step.waitMinutes} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, waitMinutes: next } : candidate) })); }} required /></> : null}
 
-                          {step.type === "condition" ? (
-                            <>
-                              <p className="rf-campaigns-helper">Set logic and branch paths for yes/no outcomes.</p>
-                              <label htmlFor={`condition-operator-${step.id}`}>Rule logic</label>
-                              <select
-                                id={`condition-operator-${step.id}`}
-                                value={step.conditionOperator}
-                                onChange={(event) => {
-                                  const next = event.target.value as CampaignConditionOperator;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, conditionOperator: next } : candidate) }));
-                                }}
-                              >
-                                <option value="if">if (all required)</option>
-                                <option value="or">or (any match)</option>
-                              </select>
-                              <label htmlFor={`condition-rules-${step.id}`}>Rules JSON</label>
-                              <textarea
-                                id={`condition-rules-${step.id}`}
-                                value={step.conditionRulesText}
-                                onChange={(event) => {
-                                  const next = event.target.value;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, conditionRulesText: next } : candidate) }));
-                                }}
-                              />
-                              <label htmlFor={`condition-yes-${step.id}`}>Yes path sequence ID</label>
-                              <input
-                                id={`condition-yes-${step.id}`}
-                                value={step.yesSequenceId}
-                                onChange={(event) => {
-                                  const next = event.target.value;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, yesSequenceId: next } : candidate) }));
-                                }}
-                                required
-                              />
-                              <label htmlFor={`condition-no-${step.id}`}>No path sequence ID</label>
-                              <input
-                                id={`condition-no-${step.id}`}
-                                value={step.noSequenceId}
-                                onChange={(event) => {
-                                  const next = event.target.value;
-                                  setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, noSequenceId: next } : candidate) }));
-                                }}
-                                required
-                              />
-                            </>
-                          ) : null}
+                          {step.type === "condition" ? <><p className="rf-campaigns-helper">Set logic and branch paths for yes/no outcomes.</p><label htmlFor={`condition-operator-${step.id}`}>Rule logic</label><select id={`condition-operator-${step.id}`} value={step.conditionOperator} onChange={(event) => { const next = event.target.value as CampaignConditionOperator; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, conditionOperator: next } : candidate) })); }}><option value="if">if (all required)</option><option value="or">or (any match)</option></select><label htmlFor={`condition-rules-${step.id}`}>Rules JSON</label><textarea id={`condition-rules-${step.id}`} value={step.conditionRulesText} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, conditionRulesText: next } : candidate) })); }} /><label htmlFor={`condition-yes-${step.id}`}>Yes path sequence ID</label><input id={`condition-yes-${step.id}`} value={step.yesSequenceId} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, yesSequenceId: next } : candidate) })); }} required /><label htmlFor={`condition-no-${step.id}`}>No path sequence ID</label><input id={`condition-no-${step.id}`} value={step.noSequenceId} onChange={(event) => { const next = event.target.value; setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, noSequenceId: next } : candidate) })); }} required /></> : null}
                         </section>
                       ))}
                     </div>
-
-                    {sequenceIndex > 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => setDraftSequences((prev) => prev.filter((item) => item.id !== sequence.id))}
-                      >
-                        Remove Sequence
-                      </button>
-                    ) : null}
+                    {sequenceIndex > 0 ? <button type="button" onClick={() => setDraftSequences((prev) => prev.filter((item) => item.id !== sequence.id))}>Remove Sequence</button> : null}
                   </article>
                 ))}
               </div>
 
-              <div className="rf-crm-modal-actions">
-                <button type="button" onClick={() => setIsCreateOpen(false)}>Cancel</button>
-                <button type="submit" disabled={isSaving}>{isSaving ? "Creating..." : "Create Campaign"}</button>
-              </div>
+              <div className="rf-crm-modal-actions"><button type="button" onClick={() => setIsCreateOpen(false)}>Cancel</button><button type="submit" disabled={isSaving}>{isSaving ? "Creating..." : "Create Campaign"}</button></div>
             </form>
             {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
           </div>
@@ -581,26 +590,11 @@ export default function CampaignsPage() {
 
       <Card>
         <h3 className="rf-library-section-title">Campaign list</h3>
-        {isLoading ? (
-          <p className="rf-status rf-status-muted" role="status">Loading campaigns...</p>
-        ) : loadError ? (
-          <div className="rf-events-empty-state">
-            <p className="rf-status rf-status-error" role="alert">Unable to load campaigns: {loadError}</p>
-            <button type="button" onClick={() => void loadCampaigns()}>Retry</button>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="rf-events-empty-state"><p className="rf-status rf-status-muted">No campaigns yet. Create one to start building sequences.</p></div>
-        ) : (
+        {isLoading ? <p className="rf-status rf-status-muted" role="status">Loading campaigns...</p> : loadError ? <div className="rf-events-empty-state"><p className="rf-status rf-status-error" role="alert">Unable to load campaigns: {loadError}</p><button type="button" onClick={() => void loadCampaigns()}>Retry</button></div> : items.length === 0 ? <div className="rf-events-empty-state"><p className="rf-status rf-status-muted">No campaigns yet. Create one to start building sequences.</p></div> : (
           <div className="rf-campaigns-table-scroll">
             <table className="rf-crm-table">
               <thead><tr><th>Name</th><th>Status</th><th>Objective</th><th>Created</th></tr></thead>
-              <tbody>
-                {items.map((campaign) => (
-                  <tr key={campaign.id} className={campaign.id === selectedCampaign?.id ? "is-active" : undefined} onClick={() => setSelectedCampaignId(campaign.id)}>
-                    <td>{campaign.name}</td><td>{campaign.status}</td><td>{campaign.objective || "—"}</td><td>{formatDate(campaign.createdAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
+              <tbody>{items.map((campaign) => <tr key={campaign.id} className={campaign.id === selectedCampaign?.id ? "is-active" : undefined} onClick={() => setSelectedCampaignId(campaign.id)}><td>{campaign.name}</td><td>{campaign.status}</td><td>{campaign.objective || "—"}</td><td>{formatDate(campaign.createdAt)}</td></tr>)}</tbody>
             </table>
           </div>
         )}
@@ -614,76 +608,80 @@ export default function CampaignsPage() {
               {selectedCampaign.sequences.map((sequence) => (
                 <article key={sequence.id} className="rf-campaigns-sequence-card">
                   <h4>{sequence.name}</h4>
-                  <ul>
-                    {sequence.steps.map((step) => (
-                      <li key={step.id}>
-                        {step.type === "email" ? `Email: ${step.subject}` : null}
-                        {step.type === "wait" ? `Wait: ${step.waitMinutes} min` : null}
-                        {step.type === "condition" ? `Condition (${step.operator}) yes:${step.yesSequenceId || "—"} / no:${step.noSequenceId || "—"}` : null}
-                      </li>
-                    ))}
-                  </ul>
+                  <ul>{sequence.steps.map((step, index) => <li key={step.id}>{step.type === "email" ? `Email: ${step.subject}` : null}{step.type === "wait" ? `Wait: ${step.waitMinutes} min` : null}{step.type === "condition" ? `Condition (${step.operator}) yes:${step.yesSequenceId || "—"} / no:${step.noSequenceId || "—"}` : null}<span className="rf-campaigns-sequence-next"> · Next: {sequence.steps[index + 1] ? sequence.steps[index + 1].type : "end of sequence"}</span></li>)}</ul>
                 </article>
               ))}
             </div>
-          ) : (
-            <p className="rf-status rf-status-muted">Select a campaign to view sequence details.</p>
-          )}
+          ) : <p className="rf-status rf-status-muted">Select a campaign to view sequence details.</p>}
+        </Card>
+
+        <Card>
+          <h3 className="rf-library-section-title">Execution visibility</h3>
+          {!selectedCampaign ? <p className="rf-status rf-status-muted">Select a campaign to inspect enrollment execution.</p> : null}
+          {selectedCampaign && isExecutionLoading ? <p className="rf-status rf-status-muted">Loading enrollments...</p> : null}
+          {selectedCampaign && executionUnavailable ? <p className="rf-campaigns-empty-note">Execution endpoint is not ready yet for this environment. Start/pause/resume controls will appear automatically when available.</p> : null}
+          {selectedCampaign && executionError ? <p className="rf-status rf-status-error">{executionError}</p> : null}
+          {selectedCampaign && !isExecutionLoading && !executionError && !executionUnavailable && executionEnrollments.length === 0 ? <p className="rf-status rf-status-muted">No active enrollments yet.</p> : null}
+          {selectedCampaign && !isExecutionLoading && !executionUnavailable && executionEnrollments.length > 0 ? (
+            <div className="rf-campaigns-table-scroll">
+              <table className="rf-crm-table">
+                <thead><tr><th>Enrollment</th><th>Status</th><th>Active sequence/step</th><th>Last transition</th><th>Controls</th></tr></thead>
+                <tbody>
+                  {executionEnrollments.map((enrollment) => {
+                    const baseLabel = enrollment.contactId || enrollment.id;
+                    const activeLabel = `${enrollment.activeSequenceName || enrollment.activeSequenceId || "—"} / ${enrollment.activeStepLabel || enrollment.activeStepId || (typeof enrollment.activeStepIndex === "number" ? `step ${enrollment.activeStepIndex + 1}` : "—")}`;
+                    const canStart = enrollment.supportsControl?.start;
+                    const canPause = enrollment.supportsControl?.pause;
+                    const canResume = enrollment.supportsControl?.resume;
+                    return (
+                      <tr key={enrollment.id}>
+                        <td>{baseLabel}</td>
+                        <td><span className="rf-campaigns-status-chip">{enrollment.status || "unknown"}</span></td>
+                        <td>{activeLabel}</td>
+                        <td>{enrollment.lastTransitionAt ? formatDate(enrollment.lastTransitionAt) : "—"}</td>
+                        <td>
+                          <div className="rf-campaigns-control-row">
+                            <button type="button" disabled={!canStart || controlBusyKey !== null} onClick={() => void runExecutionControl(enrollment.id, "start")}>{controlBusyKey === `${enrollment.id}:start` ? "Starting..." : "Start"}</button>
+                            <button type="button" disabled={!canPause || controlBusyKey !== null} onClick={() => void runExecutionControl(enrollment.id, "pause")}>{controlBusyKey === `${enrollment.id}:pause` ? "Pausing..." : "Pause"}</button>
+                            <button type="button" disabled={!canResume || controlBusyKey !== null} onClick={() => void runExecutionControl(enrollment.id, "resume")}>{controlBusyKey === `${enrollment.id}:resume` ? "Resuming..." : "Resume"}</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
         </Card>
 
         <Card>
           <h3 className="rf-library-section-title">Scheduled social posts</h3>
-          <form
-            className="rf-events-form"
-            onSubmit={async (event) => {
-              event.preventDefault();
-              setIsSocialSaving(true);
-              setSocialSaveError(null);
-              try {
-                const response = await fetch("/api/internal/campaigns/social-posts", {
-                  method: "POST",
-                  credentials: "include",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ platform: socialPlatform, content: socialContent, scheduled_for: socialScheduledFor }),
-                });
-
-                const payload = (await response.json().catch(() => null)) as SocialPostCreateResponse | null;
-                if (response.status === 404) {
-                  setSocialSaveError("Social scheduling endpoint not available yet.");
-                  return;
-                }
-                if (!response.ok || !payload?.ok) {
-                  const validationMessage = payload && !payload.ok ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ") : "";
-                  const fallback = payload && !payload.ok ? payload.error : null;
-                  setSocialSaveError(validationMessage || fallback || "Could not schedule social post.");
-                  return;
-                }
-
-                setSocialContent("");
-                setSocialScheduledFor("");
-                await loadSocial();
-              } catch {
-                setSocialSaveError("Could not schedule social post.");
-              } finally {
-                setIsSocialSaving(false);
+          <form className="rf-events-form" onSubmit={async (event) => {
+            event.preventDefault();
+            setIsSocialSaving(true);
+            setSocialSaveError(null);
+            try {
+              const response = await fetch("/api/internal/campaigns/social-posts", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ platform: socialPlatform, content: socialContent, scheduled_for: socialScheduledFor }) });
+              const payload = (await response.json().catch(() => null)) as SocialPostCreateResponse | null;
+              if (response.status === 404) { setSocialSaveError("Social scheduling endpoint not available yet."); return; }
+              if (!response.ok || !payload?.ok) {
+                const validationMessage = payload && !payload.ok ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ") : "";
+                const fallback = payload && !payload.ok ? payload.error : null;
+                setSocialSaveError(validationMessage || fallback || "Could not schedule social post.");
+                return;
               }
-            }}
-          >
-            <div className="rf-campaigns-social-form-row">
-              <div>
-                <label htmlFor="social-platform">Platform</label>
-                <select id="social-platform" value={socialPlatform} onChange={(event) => setSocialPlatform(event.target.value)}>
-                  {SOCIAL_PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="social-scheduled-for">Scheduled for</label>
-                <input id="social-scheduled-for" type="datetime-local" value={socialScheduledFor} onChange={(event) => setSocialScheduledFor(event.target.value)} required />
-                <p className="rf-campaigns-helper">Date/time uses your local browser timezone.</p>
-              </div>
-            </div>
-            <label htmlFor="social-content">Content</label>
-            <textarea id="social-content" value={socialContent} onChange={(event) => setSocialContent(event.target.value)} required />
+              setSocialContent("");
+              setSocialScheduledFor("");
+              await loadSocial();
+            } catch {
+              setSocialSaveError("Could not schedule social post.");
+            } finally {
+              setIsSocialSaving(false);
+            }
+          }}>
+            <div className="rf-campaigns-social-form-row"><div><label htmlFor="social-platform">Platform</label><select id="social-platform" value={socialPlatform} onChange={(event) => setSocialPlatform(event.target.value)}>{SOCIAL_PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}</select></div><div><label htmlFor="social-scheduled-for">Scheduled for</label><input id="social-scheduled-for" type="datetime-local" value={socialScheduledFor} onChange={(event) => setSocialScheduledFor(event.target.value)} required /><p className="rf-campaigns-helper">Date/time uses your local browser timezone.</p></div></div>
+            <label htmlFor="social-content">Content</label><textarea id="social-content" value={socialContent} onChange={(event) => setSocialContent(event.target.value)} required />
             <div className="rf-crm-modal-actions"><button type="submit" disabled={isSocialSaving}>{isSocialSaving ? "Scheduling..." : "Schedule post"}</button></div>
             {socialSaveError ? <p className="rf-status rf-status-error">{socialSaveError}</p> : null}
           </form>
@@ -694,22 +692,19 @@ export default function CampaignsPage() {
               {isSocialLoading ? <p className="rf-status rf-status-muted">Loading social posts...</p> : null}
               {socialError ? <p className="rf-status rf-status-error">{socialError}</p> : null}
               {!isSocialLoading && !socialError && socialItems.length === 0 ? <p className="rf-status rf-status-muted">No scheduled social posts.</p> : null}
-              {!isSocialLoading && !socialError && socialItems.length > 0 ? (
-                <ul>
-                  {socialItems.map((post) => <li key={post.id}><strong>{post.platform}</strong> <span className="rf-campaigns-status-chip">{post.status}</span> {formatDate(post.scheduled_for)}</li>)}
-                </ul>
-              ) : null}
+              {!isSocialLoading && !socialError && socialItems.length > 0 ? <ul>{socialItems.map((post) => <li key={post.id}><strong>{post.platform}</strong> <span className="rf-campaigns-status-chip">{post.status}</span> {formatDate(post.scheduled_for)}</li>)}</ul> : null}
             </section>
 
             <section className="rf-campaigns-calendar-scaffold">
-              <h4>Calendar / timeline</h4>
-              {isSocialLoading ? <p className="rf-status rf-status-muted">Loading calendar items...</p> : null}
+              <div className="rf-crm-table-toolbar rf-campaigns-wrap-toolbar"><h4>Campaign timeline</h4><div className="rf-campaigns-filter-row"><label htmlFor="range-filter">Range</label><select id="range-filter" value={calendarRange} onChange={(event) => setCalendarRange(event.target.value as CalendarRange)}><option value="week">This week</option><option value="next30">Next 30 days</option><option value="custom">Custom</option></select></div></div>
+              {calendarRange === "custom" ? <div className="rf-campaigns-filter-row rf-campaigns-custom-range"><div><label htmlFor="custom-start">Start</label><input id="custom-start" type="date" value={customStartDate} onChange={(event) => setCustomStartDate(event.target.value)} /></div><div><label htmlFor="custom-end">End</label><input id="custom-end" type="date" value={customEndDate} onChange={(event) => setCustomEndDate(event.target.value)} /></div></div> : null}
+              {isSocialLoading ? <p className="rf-status rf-status-muted">Loading timeline items...</p> : null}
               {socialCalendarError ? <p className="rf-status rf-status-error">{socialCalendarError}</p> : null}
-              {!isSocialLoading && !socialCalendarError && socialCalendarItems.length === 0 ? <p className="rf-status rf-status-muted">No calendar items.</p> : null}
-              {!isSocialLoading && !socialCalendarError && socialCalendarItems.length > 0 ? (
-                <ul>
-                  {socialCalendarItems.map((item) => <li key={item.id}><strong>{item.title || item.platform || "Scheduled item"}</strong> <span className="rf-campaigns-status-chip">{item.status || "pending"}</span> {item.starts_at ? formatDate(item.starts_at) : "No start time"}</li>)}
-                </ul>
+              {!isSocialLoading && !socialCalendarError && groupedTimeline.length === 0 ? <p className="rf-status rf-status-muted">No upcoming timeline activity in this date range.</p> : null}
+              {!isSocialLoading && !socialCalendarError && groupedTimeline.length > 0 ? (
+                <div className="rf-campaigns-grouped-timeline">
+                  {groupedTimeline.map((group) => <div key={group.key} className="rf-campaigns-timeline-group"><p className="rf-campaigns-timeline-group-title">{group.key}</p><ul>{group.timeline.map((item) => <li key={item.id}><strong>{item.title}</strong> <span className="rf-campaigns-status-chip">{item.status}</span><span className="rf-campaigns-kind-chip">{item.kind}</span> {formatDate(item.at)}</li>)}</ul></div>)}
+                </div>
               ) : null}
             </section>
           </div>

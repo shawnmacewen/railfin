@@ -58,8 +58,19 @@ create table if not exists public.campaign_enrollments (
   enrollment_status text not null check (enrollment_status in ('pending', 'active', 'paused', 'completed', 'exited')),
   active_sequence_id text,
   active_step_id text,
+  next_eligible_at timestamptz,
   enrolled_at timestamptz not null default timezone('utc', now()),
   last_transition_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.campaign_enrollment_events (
+  id text primary key,
+  enrollment_id text not null references public.campaign_enrollments(id) on delete cascade,
+  campaign_id text not null references public.campaigns(id) on delete cascade,
+  event_type text not null,
+  actor_type text not null check (actor_type in ('manual', 'engine', 'system')),
+  details_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc', now())
 );
 
 create table if not exists public.campaign_social_posts (
@@ -113,6 +124,8 @@ create index if not exists campaign_sequences_campaign_id_idx on public.campaign
 create index if not exists campaign_steps_sequence_id_idx on public.campaign_steps(sequence_id, step_order);
 create index if not exists campaign_enrollments_campaign_id_idx on public.campaign_enrollments(campaign_id, enrollment_status);
 create index if not exists campaign_enrollments_contact_id_idx on public.campaign_enrollments(contact_id);
+create index if not exists campaign_enrollments_next_eligible_at_idx on public.campaign_enrollments(next_eligible_at);
+create index if not exists campaign_enrollment_events_enrollment_id_idx on public.campaign_enrollment_events(enrollment_id, created_at);
 create index if not exists campaign_social_posts_campaign_id_idx on public.campaign_social_posts(campaign_id, status);
 create index if not exists campaign_calendar_items_campaign_id_idx on public.campaign_calendar_items(campaign_id, starts_at);
 create index if not exists contacts_email_idx on public.contacts(lower(primary_email));
