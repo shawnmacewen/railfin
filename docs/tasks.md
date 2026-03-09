@@ -1,3 +1,14 @@
+## task-00213 — SEC — Campaigns + Contacts API security/validation verification
+
+- Status: **Done**
+- Branch: `chore/sec/task-00213-campaigns-api-security-validation`
+- Scope delivered:
+  - Verified auth-guard coverage and `Cache-Control: no-store` behavior across new Campaigns internal routes and Contacts bridge endpoint.
+  - Verified fail-closed request validation across Campaigns targeting preview, sequences, steps, social-post create/update, and calendar/list/detail surfaces.
+  - Verified validation/error response safety posture: deterministic `Validation failed` + `fieldErrors` mapping with no raw request payload echoing.
+  - Documented auth compat-mode caveat and exact remediation path (retire same-origin fallback by setting `INTERNAL_API_AUTH_COMPAT_MODE=off` after authoritative session checks are fully rolled out).
+  - Build verification: **SKIPPED** (docs-only security verification; no runtime code changes).
+
 ## task-00209 — DEV — Campaigns API engine v1 (sequences/steps/social/calendar/targeting)
 
 - Status: **Done**

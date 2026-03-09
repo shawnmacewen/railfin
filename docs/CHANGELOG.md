@@ -1,3 +1,10 @@
+## 2026-03-09 — Campaigns + Contacts API security verification pass (task-00213)
+- Re-verified all new Campaigns internal API routes and the Contacts bridge endpoint enforce internal auth guard checks before business logic.
+- Re-verified sensitive response cache posture: reviewed endpoints return `Cache-Control: no-store` on success/error, and unauthorized responses inherit no-store from shared auth helper.
+- Re-verified fail-closed validation for Campaigns targeting preview, sequence/step CRUD payloads, and social post create/update payloads with deterministic `Validation failed` + `fieldErrors` responses.
+- Confirmed safe error-shape posture: validation errors expose field-level diagnostics only and do not echo raw request payloads.
+- Documented one operational caveat: temporary auth compat-mode remains a residual risk until strict server-authoritative auth rollout is complete and `INTERNAL_API_AUTH_COMPAT_MODE=off` is enforced.
+
 ## 2026-03-09 — Campaigns API engine v1 shipped (task-00209)
 - Replaced campaigns contract persistence from in-memory records to Supabase-backed table helpers in `src/lib/supabase/campaigns.ts`.
 - Added campaigns detail + engine routes for sequences, steps, social post scheduling, and calendar timeline listing.

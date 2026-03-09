@@ -1,3 +1,48 @@
+## task-00213 — SEC — Campaigns + Contacts API security/validation verification
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `src/app/api/internal/campaigns/**/route.ts`
+- `src/app/api/internal/crm/contacts/route.ts`
+- `src/api/internal/campaigns/contracts.ts`
+- `src/api/internal/crm/contacts.ts`
+
+### Findings
+
+1. **Auth guard coverage (PASS with known compat caveat):**
+   - Reviewed Campaigns route set (`/api/internal/campaigns`, detail, sequences, steps, social-posts, calendar, targeting preview) and Contacts bridge (`/api/internal/crm/contacts`).
+   - All reviewed handlers invoke `requireInternalApiAuth(request)` before business logic.
+
+2. **Sensitive cache posture (PASS):**
+   - Reviewed Campaigns + Contacts handlers return responses with `INTERNAL_SENSITIVE_NO_STORE_HEADERS` (`Cache-Control: no-store`).
+   - Unauthorized responses inherit `no-store` from shared auth helper.
+
+3. **Fail-closed validation across Campaigns surfaces (PASS):**
+   - `internalCampaignTargetingPreview`: strict allowlist + type/enum checks for `contactIds`, `segmentIds`, `leadStages`.
+   - `internalCampaignSequencesCreate/Update`: strict body allowlist (`name`, `sequenceOrder`) and at-least-one-update checks.
+   - `internalCampaignStepsCreate/Update`: strict step shape allowlist with typed checks for `email`, `wait`, `condition` variants and bounded numeric validation.
+   - `internalCampaignSocialPostsCreate/Update`: strict allowlist + bounded platform/status/content/scheduledFor validation.
+   - Core create contract rejects unsupported keys and malformed nested targeting/sequence payloads.
+
+4. **Safe error response shape (PASS):**
+   - Validation failures are returned as deterministic `{ ok:false, error:"Validation failed", fieldErrors:[...] }` responses.
+   - No reviewed validation path echoes raw request payloads, credentials, or stack traces in response bodies.
+
+### Caveat + remediation
+
+- **Residual caveat:** `INTERNAL_API_AUTH_COMPAT_MODE` same-origin fallback remains available by default in shared auth helper.
+- **Exact remediation:** after authoritative session-based guard rollout is fully validated on internal APIs, disable compat fallback in runtime (`INTERNAL_API_AUTH_COMPAT_MODE=off`) and retire fallback path.
+
+### Gate decision (task-00213)
+
+- **Campaigns + Contacts API security posture:** **GO (with compat-mode retirement follow-up)**
+
+### Verification outcome (task-00213)
+
+- Outcome: **PASS**
+- Code changes: none (docs-only verification)
+- Build: skipped (no runtime code changes)
+
 ## task-00186 — SEC — Events APIs guard/validation posture verification (auth + no-store + registration PII/error safety)
 
 Review scope:
