@@ -498,3 +498,26 @@ export async function listCampaignEnrollmentEventsFromTable(enrollmentId: string
   if (res.error) return { ok: false as const, blocked: blockedFromError(res.error) };
   return { ok: true as const, events: ((res.data ?? []) as any[]).map(mapEnrollmentEvent) };
 }
+
+export async function findCampaignEnrollmentEventByTriggerContext(input: {
+  campaignId: string;
+  contactId: string;
+  eventId: string;
+  triggerType: string;
+}) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
+
+  const res = await client.client
+    .from("campaign_enrollment_events")
+    .select("id, enrollment_id, campaign_id, event_type, actor_type, details_json, created_at")
+    .eq("campaign_id", input.campaignId)
+    .eq("event_type", "enrollment_trigger_received")
+    .contains("details_json", { triggerType: input.triggerType, eventId: input.eventId, contactId: input.contactId })
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (res.error) return { ok: false as const, blocked: blockedFromError(res.error) };
+  const row = ((res.data ?? []) as any[])[0] ?? null;
+  return { ok: true as const, event: row ? mapEnrollmentEvent(row) : null };
+}

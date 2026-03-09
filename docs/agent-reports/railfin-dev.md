@@ -1,3 +1,15 @@
+## 2026-03-09 06:35 UTC — task-00218 event-triggered campaign enrollment hooks
+- Added campaign trigger endpoint route: `src/app/api/internal/campaigns/triggers/events/route.ts`.
+- Extended campaign contracts with event-trigger ingestion service + strict payload validation + duplicate trigger guard:
+  - `internalCampaignEventTriggerProcess(...)`
+  - duplicate key guard: `campaignId + contactId + eventId + triggerType`
+- Extended enrollment create flow to support and persist trigger context in enrollment event `details_json` (`event_type: enrollment_trigger_received`).
+- Added Supabase helper for duplicate detection against persisted enrollment events:
+  - `findCampaignEnrollmentEventByTriggerContext(...)` in `src/lib/supabase/campaigns.ts`.
+- Wired Events registration submissions to trigger campaign enrollment processing (additive metadata in registration response under `data.campaignTrigger`).
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/API_BOUNDARY.md`, `docs/agent-reports/railfin-dev.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 06:15 UTC — task-00215 campaigns execution engine skeleton
 - Added campaign execution route handlers:
   - `src/app/api/internal/campaigns/[campaignId]/enrollments/route.ts`
