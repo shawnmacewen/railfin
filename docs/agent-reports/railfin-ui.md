@@ -1,3 +1,16 @@
+## 2026-03-09 06:58 UTC — task-00219 Campaign automation template packs UI
+- Added event-focused automation template packs to Campaign create flow in `src/app/app/campaigns/page.tsx`.
+- Added template selector with three starter packs:
+  - Pre-event nurture
+  - Registrant reminders (T-7 / T-1 / T-1h scaffold)
+  - Post-event follow-up
+- Added pre-apply template preview summary (label, description, and sequence/step scaffold summary).
+- Added `Apply template` flow that injects scaffolded sequence + step drafts into the existing builder so users can edit immediately before campaign creation.
+- Added overwrite safeguard: applying a template on non-default draft content now prompts explicit confirmation; no silent replacement.
+- Added apply progress/error handling (`Applying template...` and explicit failure message) while preserving current create modal behavior.
+- Added additive styles in `src/app/globals.css` for template section/preview blocks to keep layout clean and responsive.
+- Updated docs (`docs/tasks.md`, `docs/CHANGELOG.md`, `docs/UI_FOUNDATIONS.md`, `docs/agent-reports/railfin-ui.md`) and verified `npm run build` passes.
+
 ## 2026-03-09 06:40 UTC — task-00216 Campaigns calendar + execution visibility UI v1
 - Expanded `src/app/app/campaigns/page.tsx` with a dedicated **Execution visibility** panel tied to selected campaign context.
 - Added execution enrollment rendering for status, active sequence/step, and last transition timestamp.

@@ -18,6 +18,7 @@ import {
   listCampaignEnrollmentEventsFromTable,
   listCampaignEnrollmentsFromTable,
   transitionCampaignEnrollmentInTable,
+  findCampaignEnrollmentEventByTriggerContext,
   type CampaignConditionOperator,
   type CampaignSocialPostStatus,
   type CampaignStatus,
@@ -400,9 +401,10 @@ export async function internalCampaignEnrollmentsList(input: { campaignId: strin
 
 export async function internalCampaignEnrollmentsCreate(input: { campaignId: string; body?: Record<string, unknown> }) {
   const body = input.body;
-  if (!isPlainObject(body) || !hasOnlyKeys(body, ["contactId", "startNow"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["contactId", "startNow", "triggerContext"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
   const contactId = normalizeString(body.contactId);
   const startNow = body.startNow === undefined ? true : body.startNow === true;
+  const triggerContext = isPlainObject(body.triggerContext) ? body.triggerContext : null;
   const fieldErrors: ValidationError[] = [];
   if (!contactId) fieldErrors.push({ field: "contactId", message: "contactId is required." });
   if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
@@ -420,13 +422,118 @@ export async function internalCampaignEnrollmentsCreate(input: { campaignId: str
     activeStepId: startNow && firstStep ? firstStep.id : null,
     nextEligibleAt: null,
     event: {
-      eventType: startNow ? "enrollment_started" : "enrollment_created",
+      eventType: triggerContext ? "enrollment_trigger_received" : startNow ? "enrollment_started" : "enrollment_created",
       actorType: "system",
-      details: { startNow, sequenceId: firstSequence?.id ?? null, stepId: firstStep?.id ?? null },
+      details: { startNow, sequenceId: firstSequence?.id ?? null, stepId: firstStep?.id ?? null, ...(triggerContext ? triggerContext : {}) },
     },
   });
   if (!created.ok) return mapBlocked(created);
   return { ok: true as const, data: created.enrollment };
+}
+
+type EventTriggerType = "registration_submitted" | "registration_intent";
+
+type EventEnrollmentTriggerBody = {
+  eventId?: unknown;
+  contactId?: unknown;
+  email?: unknown;
+  triggerType?: unknown;
+  source?: unknown;
+};
+
+function isEventTriggerType(value: unknown): value is EventTriggerType {
+  return value === "registration_submitted" || value === "registration_intent";
+}
+
+function normalizeSourceMetadata(value: unknown): Record<string, unknown> {
+  if (!isPlainObject(value)) return {};
+  const safe: Record<string, unknown> = {};
+  for (const [key, raw] of Object.entries(value)) {
+    if (typeof key !== "string") continue;
+    if (typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean" || raw === null) safe[key] = raw;
+  }
+  return safe;
+}
+
+function campaignMatchesEventTrigger(campaign: any, contact: { id: string; stage: string }): boolean {
+  if (campaign.status !== "active") return false;
+  const targetContactIds = Array.isArray(campaign.targeting?.contactIds) ? campaign.targeting.contactIds : [];
+  const targetLeadStages = Array.isArray(campaign.targeting?.leadStages) ? campaign.targeting.leadStages : [];
+  if (targetContactIds.length > 0 && !targetContactIds.includes(contact.id)) return false;
+  if (targetLeadStages.length > 0 && !targetLeadStages.includes(contact.stage)) return false;
+  return true;
+}
+
+export async function internalCampaignEventTriggerProcess(input: { body?: EventEnrollmentTriggerBody }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["eventId", "contactId", "email", "triggerType", "source"])) {
+    return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  }
+
+  const eventId = normalizeString(body.eventId);
+  const contactId = normalizeString(body.contactId);
+  const email = normalizeString(body.email).toLowerCase();
+  const triggerType = body.triggerType;
+  const source = normalizeSourceMetadata(body.source);
+  const fieldErrors: ValidationError[] = [];
+
+  if (!eventId) fieldErrors.push({ field: "eventId", message: "eventId is required." });
+  if (!contactId && !email) fieldErrors.push({ field: "contactId", message: "contactId or email is required." });
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fieldErrors.push({ field: "email", message: "email must be a valid email address when provided." });
+  if (!isEventTriggerType(triggerType)) fieldErrors.push({ field: "triggerType", message: "triggerType must be registration_submitted or registration_intent." });
+  if (fieldErrors.length > 0) return { ok: false as const, error: "Validation failed", fieldErrors };
+
+  const contacts = await internalContactsList();
+  if (!contacts.ok) return { ok: false as const, error: contacts.error, blocked: contacts.blocked };
+  const contact = contacts.data.items.find((item) => item.id === contactId) ?? contacts.data.items.find((item) => email && item.primaryEmail.toLowerCase() === email);
+  if (!contact) return { ok: false as const, error: "Contact not found" as const };
+
+  const campaigns = await internalCampaignsList();
+  if (!campaigns.ok) return campaigns;
+  const eligibleCampaigns = campaigns.data.items.filter((campaign) => campaignMatchesEventTrigger(campaign, { id: contact.id, stage: contact.lead.stage }));
+
+  const processed: Array<{ campaignId: string; enrollmentId: string | null; duplicate: boolean }> = [];
+  for (const campaign of eligibleCampaigns) {
+    const existing = await findCampaignEnrollmentEventByTriggerContext({ campaignId: campaign.id, contactId: contact.id, eventId, triggerType: triggerType as EventTriggerType });
+    if (!existing.ok) return mapBlocked(existing);
+    if (existing.event) {
+      processed.push({ campaignId: campaign.id, enrollmentId: existing.event.enrollmentId, duplicate: true });
+      continue;
+    }
+
+    const created = await internalCampaignEnrollmentsCreate({
+      campaignId: campaign.id,
+      body: {
+        contactId: contact.id,
+        startNow: true,
+        triggerContext: {
+          triggerType,
+          eventId,
+          contactId: contact.id,
+          contactEmail: contact.primaryEmail,
+          source,
+        },
+      },
+    });
+    if (!created.ok) return created;
+    const createdEnrollmentId = created.data?.id;
+    if (!createdEnrollmentId) return { ok: false as const, error: "Enrollment create failed" };
+    processed.push({ campaignId: campaign.id, enrollmentId: createdEnrollmentId, duplicate: false });
+  }
+
+  return {
+    ok: true as const,
+    data: {
+      eventId,
+      contactId: contact.id,
+      contactEmail: contact.primaryEmail,
+      triggerType,
+      enrolled: processed.filter((p) => !p.duplicate).length,
+      duplicatesSkipped: processed.filter((p) => p.duplicate).length,
+      totalMatchedCampaigns: eligibleCampaigns.length,
+      processed,
+    },
+  };
 }
 
 export async function internalCampaignEnrollmentTransition(input: { enrollmentId: string; body?: Record<string, unknown> }) {

@@ -107,6 +107,77 @@ const STATUS_OPTIONS: CampaignStatus[] = ["draft", "active", "paused", "archived
 const STEP_TYPE_OPTIONS: CampaignStepType[] = ["email", "wait", "condition"];
 const SOCIAL_PLATFORMS = ["linkedin", "x", "facebook", "instagram"];
 
+type TemplatePackKey = "pre-event-nurture" | "registrant-reminders" | "post-event-follow-up";
+type TemplateDraft = { key: TemplatePackKey; label: string; summary: string; sequences: DraftSequence[] };
+
+function buildTemplateDrafts(): TemplateDraft[] {
+  return [
+    {
+      key: "pre-event-nurture",
+      label: "Pre-event nurture",
+      summary: "Warm-up flow that confirms value, shares logistics, and drives attendance confidence before your event.",
+      sequences: [
+        {
+          id: createId("sequence"),
+          name: "Pre-event nurture",
+          steps: [
+            { ...defaultDraftStep("email"), emailSubject: "You’re in! Here’s what to expect", emailBody: "Hi {{first_name}},\n\nYou’re registered for {{event_name}}. Over the next few days, we’ll share prep tips and key logistics so you can show up ready.\n\nReply with any questions and we’ll help." },
+            { ...defaultDraftStep("wait"), waitMinutes: "2880" },
+            { ...defaultDraftStep("email"), emailSubject: "Top 3 takeaways to plan for", emailBody: "Hi {{first_name}},\n\nQuick prep for {{event_name}}:\n1) What you’ll learn\n2) Who you’ll meet\n3) What to bring\n\nAdd the event to your calendar and invite teammates who should join." },
+            { ...defaultDraftStep("wait"), waitMinutes: "2880" },
+            { ...defaultDraftStep("email"), emailSubject: "Logistics + quick checklist", emailBody: "Hi {{first_name}},\n\nYour event checklist:\n- Confirm start time\n- Save access/location details\n- Bring questions for Q&A\n\nWe can’t wait to see you at {{event_name}}." },
+          ],
+        },
+      ],
+    },
+    {
+      key: "registrant-reminders",
+      label: "Registrant reminders",
+      summary: "Countdown reminders scaffolded for T-7d, T-1d, and T-1h so registrants show up on time.",
+      sequences: [
+        {
+          id: createId("sequence"),
+          name: "Registrant reminders",
+          steps: [
+            { ...defaultDraftStep("wait"), waitMinutes: "10080" },
+            { ...defaultDraftStep("email"), emailSubject: "T-7 days: Save your spot for {{event_name}}", emailBody: "Hi {{first_name}},\n\nWe’re one week out from {{event_name}}. Save this reminder and share with teammates who should attend with you." },
+            { ...defaultDraftStep("wait"), waitMinutes: "8640" },
+            { ...defaultDraftStep("email"), emailSubject: "T-1 day: Final prep for {{event_name}}", emailBody: "Hi {{first_name}},\n\nWe’re live tomorrow. Here are your access details and agenda highlights. Reply if you need help before kickoff." },
+            { ...defaultDraftStep("wait"), waitMinutes: "1380" },
+            { ...defaultDraftStep("email"), emailSubject: "T-1 hour: Starting soon", emailBody: "Hi {{first_name}},\n\n{{event_name}} starts in one hour. Join using your saved link and bring your top questions for the session." },
+          ],
+        },
+      ],
+    },
+    {
+      key: "post-event-follow-up",
+      label: "Post-event follow-up",
+      summary: "Post-event nurture with recap, resource share, and CTA to keep momentum after attendance.",
+      sequences: [
+        {
+          id: createId("sequence"),
+          name: "Post-event follow-up",
+          steps: [
+            { ...defaultDraftStep("email"), emailSubject: "Thanks for joining {{event_name}}", emailBody: "Hi {{first_name}},\n\nThanks for attending {{event_name}}. We’ve attached key resources and the session highlights for your team." },
+            { ...defaultDraftStep("wait"), waitMinutes: "1440" },
+            { ...defaultDraftStep("email"), emailSubject: "Resources + next steps", emailBody: "Hi {{first_name}},\n\nHere are the links and resources we promised. Reply to this email if you want help implementing what we covered." },
+            { ...defaultDraftStep("wait"), waitMinutes: "2880" },
+            { ...defaultDraftStep("email"), emailSubject: "Want a tailored walkthrough?", emailBody: "Hi {{first_name}},\n\nIf you’d like a deeper dive after {{event_name}}, book a follow-up with our team. We’ll tailor it to your goals." },
+          ],
+        },
+      ],
+    },
+  ];
+}
+
+function cloneTemplateSequences(sequences: DraftSequence[]): DraftSequence[] {
+  return sequences.map((sequence) => ({
+    ...sequence,
+    id: createId("sequence"),
+    steps: sequence.steps.map((step) => ({ ...step, id: createId("step") })),
+  }));
+}
+
 function formatDate(input: string): string {
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) return input;
@@ -182,6 +253,8 @@ export default function CampaignsPage() {
   const [status, setStatus] = useState<CampaignStatus>("draft");
   const [selectedSegment, setSelectedSegment] = useState("all-contacts");
   const [draftSequences, setDraftSequences] = useState<DraftSequence[]>([defaultDraftSequence()]);
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState<TemplatePackKey | "">("");
+  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -217,6 +290,11 @@ export default function CampaignsPage() {
   const [controlBusyKey, setControlBusyKey] = useState<string | null>(null);
 
   const selectedCampaign = useMemo(() => items.find((item) => item.id === selectedCampaignId) ?? items[0] ?? null, [items, selectedCampaignId]);
+  const templateDrafts = useMemo(() => buildTemplateDrafts(), []);
+  const selectedTemplate = useMemo(
+    () => templateDrafts.find((template) => template.key === selectedTemplateKey) ?? null,
+    [selectedTemplateKey, templateDrafts],
+  );
 
   const loadCampaigns = useCallback(async () => {
     setIsLoading(true);
@@ -461,6 +539,26 @@ export default function CampaignsPage() {
     [loadExecution, selectedCampaign?.id],
   );
 
+  const applyTemplatePack = useCallback(async () => {
+    if (!selectedTemplate) return;
+
+    const hasCustomBuilderState = draftSequences.length > 1 || draftSequences[0]?.name !== "Primary sequence" || draftSequences[0]?.steps.length !== 1;
+    if (hasCustomBuilderState) {
+      const confirmed = window.confirm("Applying this template replaces current draft sequences. Continue?");
+      if (!confirmed) return;
+    }
+
+    setIsApplyingTemplate(true);
+    setSaveError(null);
+    try {
+      setDraftSequences(cloneTemplateSequences(selectedTemplate.sequences));
+    } catch {
+      setSaveError("Could not apply template pack right now. Please try again.");
+    } finally {
+      setIsApplyingTemplate(false);
+    }
+  }, [draftSequences, selectedTemplate]);
+
   return (
     <div className="rf-campaigns-page">
       <Card>
@@ -469,7 +567,7 @@ export default function CampaignsPage() {
             <h2 className="rf-library-section-title">Campaigns</h2>
             <p className="rf-status rf-status-muted">Campaign builder v3: execution visibility, timeline filtering, and stronger sequence progression hints.</p>
           </div>
-          <button type="button" className="rf-events-create-cta" onClick={() => { setIsCreateOpen(true); setSaveError(null); }}>
+          <button type="button" className="rf-events-create-cta" onClick={() => { setIsCreateOpen(true); setSaveError(null); setSelectedTemplateKey(""); setIsApplyingTemplate(false); }}>
             Create Campaign
           </button>
         </div>
@@ -512,6 +610,7 @@ export default function CampaignsPage() {
                 setObjective("");
                 setStatus("draft");
                 setDraftSequences([defaultDraftSequence()]);
+                setSelectedTemplateKey("");
                 setSelectedCampaignId(payload.data.id);
                 setIsCreateOpen(false);
                 await loadCampaigns();
@@ -542,6 +641,36 @@ export default function CampaignsPage() {
                 {!isTargetingLoading && !targetingError && targetingSummary ? <div className="rf-campaigns-targeting-summary" aria-label="Contacts summary"><div><p className="rf-campaigns-helper">Matched contacts</p><strong>{targetingSummary.matched}</strong></div><div><p className="rf-campaigns-helper">Total contacts</p><strong>{targetingSummary.total}</strong></div><p className="rf-status rf-status-muted">Sample IDs: {targetingSamples.length > 0 ? targetingSamples.join(", ") : "No sample IDs available."}</p></div> : null}
                 {!isTargetingLoading && !targetingError && !targetingSummary ? <p className="rf-campaigns-empty-note">No targeting preview data yet.</p> : null}
                 {targetingError ? <p className="rf-campaigns-empty-note">{targetingError}</p> : null}
+              </div>
+
+              <div className="rf-campaigns-template-pack">
+                <div className="rf-crm-table-toolbar rf-campaigns-wrap-toolbar">
+                  <div>
+                    <h4 className="rf-library-section-title">Automation template packs</h4>
+                    <p className="rf-campaigns-helper">Load an event-focused starter flow, then edit every sequence and step before saving.</p>
+                  </div>
+                </div>
+                <label htmlFor="campaign-template-pack">Template pack</label>
+                <select id="campaign-template-pack" value={selectedTemplateKey} onChange={(event) => setSelectedTemplateKey(event.target.value as TemplatePackKey | "")}>
+                  <option value="">Select a starter pack</option>
+                  {templateDrafts.map((template) => <option key={template.key} value={template.key}>{template.label}</option>)}
+                </select>
+                {selectedTemplate ? (
+                  <div className="rf-campaigns-template-preview" role="status" aria-live="polite">
+                    <p><strong>{selectedTemplate.label}</strong></p>
+                    <p className="rf-campaigns-helper">{selectedTemplate.summary}</p>
+                    <ul>
+                      {selectedTemplate.sequences.map((sequence) => <li key={sequence.id}>{sequence.name} · {sequence.steps.length} steps</li>)}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="rf-campaigns-empty-note">Choose a template to preview the starter sequence scaffold.</p>
+                )}
+                <div className="rf-crm-modal-actions">
+                  <button type="button" disabled={!selectedTemplate || isApplyingTemplate} onClick={() => void applyTemplatePack()}>
+                    {isApplyingTemplate ? "Applying template..." : "Apply template"}
+                  </button>
+                </div>
               </div>
 
               <div className="rf-campaigns-builder-stack">

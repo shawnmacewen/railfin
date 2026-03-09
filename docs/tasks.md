@@ -1,3 +1,19 @@
+## task-00219 — UI — Campaign automation template packs (event-focused)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00219-campaign-automation-templates-ui`
+- Scope delivered:
+  - Added event-focused template pack selector in Campaign create flow with three starter packs:
+    - Pre-event nurture
+    - Registrant reminders (T-7 / T-1 / T-1h scaffold)
+    - Post-event follow-up
+  - Added template preview summary card prior to apply (pack description + sequence/step counts).
+  - Added **Apply template** action that scaffolds sequence + step drafts directly into the existing campaign builder for immediate user edits.
+  - Added overwrite safety: if builder contains non-default draft content, apply requires explicit confirmation (no silent replacement).
+  - Added apply progress/error UX states (`Applying template...` + safe fallback error message).
+  - Added responsive additive styles for template pack + preview blocks in `src/app/globals.css`.
+  - Updated docs (`tasks`, `CHANGELOG`, `UI_FOUNDATIONS`, `agent-reports/railfin-ui`) and verified with `npm run build` (pass).
+
 ## task-00220 — SEC — Event→campaign trigger flow security validation
 
 - Status: **Done**
@@ -8,6 +24,19 @@
   - Identified duplicate-enrollment guard gap: current enrollment create flow (`internalCampaignEnrollmentsCreate` → `createCampaignEnrollmentInTable`) does not enforce uniqueness for `(campaign_id, contact_id)` and bootstrap SQL currently lacks a unique index/constraint, so malformed or replayed payloads can still create duplicate enrollments if they pass basic schema checks.
   - Documented security caveats and hardening follow-ups (add DB-level unique constraint + app-layer idempotency conflict mapping; tighten auth compat mode retirement path).
   - Build verification: **SKIPPED** (docs-only security validation; no runtime code changes).
+
+## task-00218 — DEV — Event-triggered campaign enrollment hooks
+
+- Status: **Done**
+- Branch: `feat/dev/task-00218-events-campaign-enrollment-hooks`
+- Scope delivered:
+  - Added event-trigger enrollment processor contract in campaigns core and wired event registration submissions to invoke it.
+  - Added protected internal endpoint `POST /api/internal/campaigns/triggers/events` for explicit internal trigger ingestion.
+  - Added strict trigger payload validation (`eventId`, `contactId|email`, `triggerType`, optional source metadata) with fail-closed safe `fieldErrors`.
+  - Added deterministic duplicate guard for `contactId + campaignId + eventId + triggerType` using persisted enrollment trigger events.
+  - Persisted trigger context metadata into enrollment event `details_json` for auditability.
+  - Preserved existing events registration API behavior while augmenting response with additive `campaignTrigger` result details.
+  - Updated docs (`tasks`, `CHANGELOG`, `API_BOUNDARY`, `agent-reports/railfin-dev`) and verified `npm run build` (pass).
 
 ## task-00216 — UI — Campaigns calendar + execution visibility UI v1
 
