@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     | { eventId?: string; name?: string; email?: string; phone?: string; attendanceIntent?: "attending" | "not-attending" | "unsure" }
     | null;
 
-  const result = internalRegistrationSubmit({ body: body ?? undefined });
+  const result = await internalRegistrationSubmit({ body: body ?? undefined });
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : result.error === "Event not found" ? 404 : 500;
     return NextResponse.json(result, { status, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });

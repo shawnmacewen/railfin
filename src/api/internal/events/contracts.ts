@@ -1,3 +1,4 @@
+import { internalCampaignEventTriggerProcess } from "../campaigns/contracts";
 import { AttendanceIntent, EventStatus, createEventRecord, createRegistrationRecord, listEventRecords, readEventRecord } from "./store";
 
 type ValidationError = { field: string; message: string };
@@ -43,7 +44,7 @@ export function internalEventsCreate(input: { body?: EventCreateBody }) {
   return { ok: true as const, data: createEventRecord({ title, date, summary, location, status }) };
 }
 
-export function internalRegistrationSubmit(input: { body?: RegistrationCreateBody }) {
+export async function internalRegistrationSubmit(input: { body?: RegistrationCreateBody }) {
   const body = input.body;
   if (!isPlainObject(body)) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." } satisfies ValidationError] };
   if (!hasOnlyKeys(body, ["eventId", "name", "email", "phone", "attendanceIntent"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported fields in request body." } satisfies ValidationError] };
@@ -65,5 +66,24 @@ export function internalRegistrationSubmit(input: { body?: RegistrationCreateBod
   if (!readEventRecord(eventId)) return { ok: false as const, error: "Event not found" };
 
   const intent = attendanceIntent as AttendanceIntent;
-  return { ok: true as const, data: createRegistrationRecord({ eventId, name, email, phone: phone || null, attendanceIntent: intent }) };
+  const registration = createRegistrationRecord({ eventId, name, email, phone: phone || null, attendanceIntent: intent });
+
+  const triggerResult = await internalCampaignEventTriggerProcess({
+    body: {
+      eventId,
+      email,
+      triggerType: "registration_submitted",
+      source: { channel: "events.registration", registrationId: registration.id, attendanceIntent: intent },
+    },
+  });
+
+  return {
+    ok: true as const,
+    data: {
+      ...registration,
+      campaignTrigger: triggerResult.ok
+        ? triggerResult.data
+        : { ok: false, error: triggerResult.error, fieldErrors: "fieldErrors" in triggerResult ? triggerResult.fieldErrors : undefined },
+    },
+  };
 }

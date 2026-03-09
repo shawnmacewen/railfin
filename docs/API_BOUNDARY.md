@@ -1,3 +1,50 @@
+## task-00218 — Event-triggered campaign enrollment hooks
+
+Protected internal Campaign trigger route:
+- `POST /api/internal/campaigns/triggers/events`
+
+### Event trigger payload contract
+
+Request body (strict allowlist):
+- `eventId: string` (required)
+- `contactId?: string`
+- `email?: string` (required when `contactId` is omitted)
+- `triggerType: "registration_submitted" | "registration_intent"` (required)
+- `source?: Record<string, string | number | boolean | null>` (optional scalar-only metadata)
+
+Validation posture:
+- fail-closed strict object + key allowlist
+- `eventId` required
+- either `contactId` or valid `email` required
+- invalid triggerType rejected
+- deterministic safe `fieldErrors` payloads; no raw payload echo
+
+### Trigger processing behavior
+
+- Contacts are resolved deterministically by `contactId` first, then by lowercase email match.
+- Eligible campaigns are active campaigns that match contact targeting constraints.
+- Enrollment trigger creates campaign enrollments through the existing enrollment service path.
+
+### Duplicate guard
+
+Deterministic duplicate prevention key:
+- `campaignId + contactId + eventId + triggerType`
+
+Guard is enforced by checking existing `campaign_enrollment_events` entries with `event_type = "enrollment_trigger_received"` and matching trigger context in `details_json` before attempting enrollment creation.
+
+### Auditability
+
+On accepted trigger enrollments, trigger context is persisted in enrollment event `details_json`, including:
+- `eventId`
+- `contactId`
+- `contactEmail`
+- `triggerType`
+- `source` metadata
+
+### Events registration integration
+
+`POST /api/internal/events/registrations` now invokes the trigger processor after successful registration creation and returns additive trigger processing metadata under `data.campaignTrigger`.
+
 ## task-00215 — Campaigns execution engine skeleton (enrollments + step progression)
 
 Protected internal Campaign execution routes now include:
