@@ -1,3 +1,19 @@
+## task-00219 — Campaign automation template packs (event-focused)
+
+- `src/app/app/campaigns/page.tsx` campaign create flow now includes an **Automation template packs** section ahead of sequence editing.
+- Added starter pack selector with three event-focused templates:
+  - Pre-event nurture
+  - Registrant reminders (T-7 / T-1 / T-1h timing scaffold)
+  - Post-event follow-up
+- Added explicit template preview state before apply:
+  - pack label + summary
+  - scaffold summary list (`sequence name · step count`)
+  - empty note when no pack is selected
+- Added **Apply template** action that replaces draft sequence scaffolding with selected template content while preserving full manual editability afterward in existing step forms.
+- Added overwrite-confirmation protection for non-default draft state to prevent silent replacement of in-progress sequence edits.
+- Added template apply progress/error UX states and kept behavior fail-soft with explicit user-facing error feedback.
+- `src/app/globals.css` includes additive styling for template-pack sections (`rf-campaigns-template-pack`, `rf-campaigns-template-preview`) with responsive-safe layout continuity.
+
 ## task-00212 — Campaigns builder UX polish v2
 
 - `src/app/app/campaigns/page.tsx` sequence builder readability was upgraded:

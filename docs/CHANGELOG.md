@@ -1,9 +1,26 @@
+## 2026-03-09 — Campaign automation template packs UI (task-00219)
+- Added event-focused Campaign template packs in Create flow: **Pre-event nurture**, **Registrant reminders**, and **Post-event follow-up**.
+- Added template preview summary before apply (template description + sequence/step scaffold counts).
+- Added **Apply template** action that injects scaffolded sequences/steps directly into the existing sequence builder for operator edits.
+- Added overwrite guard: applying a template over modified draft sequences now prompts explicit confirmation (no silent replacement).
+- Added apply-state UX (`Applying template...`) and safe error messaging when template insertion fails.
+- Added responsive/additive styles for template-pack selector and preview cards in `src/app/globals.css`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 — Event→campaign trigger flow security validation (task-00220)
 - Re-validated auth/no-store protections on event-registration and campaign-enrollment trigger-adjacent routes.
 - Re-validated fail-closed validation and safe error-shape posture (no raw request payload reflection).
 - Logged critical caveat: duplicate enrollment prevention is not currently enforced at DB or contract layer (`campaign_id + contact_id` can be duplicated), so replay/malformed-but-valid requests can create multiple enrollments.
 - Recommended hardening follow-up: add DB uniqueness (`campaign_enrollments(campaign_id, contact_id)`), handle conflict as deterministic safe response, and treat enrollment create paths as idempotent.
 - Build verification: skipped (docs-only security verification).
+
+## 2026-03-09 — Event-triggered campaign enrollment hooks (task-00218)
+- Added an internal event-trigger enrollment path for campaigns and wired Events registration submissions to invoke it automatically.
+- Added new protected endpoint: `POST /api/internal/campaigns/triggers/events` for internal trigger ingestion.
+- Trigger ingestion now validates strict payload contract (`eventId`, `contactId` or `email`, `triggerType`, optional source metadata) and fails closed with safe field-level errors.
+- Added deterministic duplicate guard so the same `contact + campaign + event + triggerType` context does not create duplicate enrollments.
+- Enrollment trigger context is now persisted into enrollment event `details_json` for auditability.
+- Existing Events registration API contract remains working; response now includes additive `campaignTrigger` processing summary metadata.
 
 ## 2026-03-09 — Campaigns execution/enrollment security validation pass (task-00217)
 - Re-validated campaigns internal API guard posture: all currently shipped campaign handlers enforce internal auth guard before business logic and return no-store response headers.
