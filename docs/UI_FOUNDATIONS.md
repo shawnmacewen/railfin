@@ -1,3 +1,25 @@
+## task-00208 — Campaigns UI foundation v1
+
+- `src/app/app/campaigns/page.tsx` moved from static placeholder copy to a client-backed Campaigns workspace with three phase-1 surfaces:
+  - **Campaign list IA**: table columns `Name / Status / Objective / Created`, plus loading, error(+retry), and empty states.
+  - **Create Campaign modal**: required fields (`name`, `objective`, `status`) and phase-1 targeting stubs.
+  - **Detail scaffolds**: sequence cards + scheduled social posts calendar placeholder.
+- API wiring (no fake-success writes):
+  - reads campaigns from `GET /api/internal/campaigns`
+  - creates campaigns via `POST /api/internal/campaigns`
+  - reads targeting counts via `POST /api/internal/campaigns/targeting/preview`
+- Targeting stubs in v1:
+  - source segment selector placeholder (`all-contacts`, `recent-leads`, `qualified-followup`)
+  - read-only chip row for contacts/lead-stage summary fed from targeting preview counts
+- Sequence scaffold behavior:
+  - renders campaign sequences as cards
+  - lists current step placeholders (`Email`, `Wait`, `Condition`)
+  - includes explicit “Coming next: branching editor” messaging to set operator expectations
+- Calendar scaffold behavior:
+  - renders a dedicated scheduled social-posts placeholder area with list/calendar mode notes
+  - responsive, clean, non-interactive scaffold (drag/drop intentionally deferred)
+- `src/app/globals.css` adds additive `rf-campaigns-*` classes for table selection state, sequence cards, targeting stub block, calendar scaffold, chip row, and responsive table/detail behavior.
+
 ## task-00206 — Create compliance controls anchoring when collapsed
 
 - `src/app/globals.css` now keeps minimized compliance controls anchored near the top of Create across breakpoints.

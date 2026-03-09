@@ -1699,6 +1699,91 @@ button:disabled {
   gap: 0.8rem;
 }
 
+.rf-campaigns-page {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.rf-campaigns-table-scroll {
+  overflow-x: auto;
+}
+
+.rf-campaigns-table-scroll .rf-crm-table tbody tr {
+  cursor: pointer;
+}
+
+.rf-campaigns-table-scroll .rf-crm-table tbody tr.is-active {
+  background: #f2f6ff;
+}
+
+.rf-campaigns-detail-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 980px) {
+  .rf-campaigns-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rf-campaigns-sequence-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.rf-campaigns-sequence-card {
+  border: 1px solid #e4e8f5;
+  border-radius: 2px;
+  background: #fafbff;
+  padding: 0.6rem;
+}
+
+.rf-campaigns-sequence-card h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+}
+
+.rf-campaigns-sequence-card ul {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.rf-campaigns-targeting-stub {
+  border: 1px solid #dbe4ff;
+  border-radius: 2px;
+  background: #f8faff;
+  padding: 0.6rem;
+}
+
+.rf-campaigns-targeting-stub h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.88rem;
+}
+
+.rf-campaigns-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rf-campaigns-calendar-scaffold {
+  border: 1px dashed #c7d5ff;
+  border-radius: 2px;
+  background: #f8faff;
+  padding: 0.7rem;
+}
+
+.rf-campaigns-calendar-scaffold ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
 .rf-crm-add-button {
   white-space: nowrap;
   padding: 0.3rem 0.58rem;
@@ -2058,6 +2143,14 @@ button:disabled {
     font-size: 0.86rem;
   }
 
+  .rf-campaigns-table-scroll .rf-crm-table {
+    min-width: 40rem;
+  }
+
+  .rf-campaigns-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
   .rf-help-grid {
     grid-template-columns: 1fr;
   }
@@ -2115,6 +2208,11 @@ button:disabled {
   }
 
   .rf-crm-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .rf-campaigns-chip-row {
     display: grid;
     grid-template-columns: 1fr;
   }
