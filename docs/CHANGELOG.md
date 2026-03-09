@@ -1,3 +1,10 @@
+## 2026-03-09 — Event→campaign trigger flow security validation (task-00220)
+- Re-validated auth/no-store protections on event-registration and campaign-enrollment trigger-adjacent routes.
+- Re-validated fail-closed validation and safe error-shape posture (no raw request payload reflection).
+- Logged critical caveat: duplicate enrollment prevention is not currently enforced at DB or contract layer (`campaign_id + contact_id` can be duplicated), so replay/malformed-but-valid requests can create multiple enrollments.
+- Recommended hardening follow-up: add DB uniqueness (`campaign_enrollments(campaign_id, contact_id)`), handle conflict as deterministic safe response, and treat enrollment create paths as idempotent.
+- Build verification: skipped (docs-only security verification).
+
 ## 2026-03-09 — Campaigns execution/enrollment security validation pass (task-00217)
 - Re-validated campaigns internal API guard posture: all currently shipped campaign handlers enforce internal auth guard before business logic and return no-store response headers.
 - Re-validated fail-closed request validation and safe error mapping on campaign write/update surfaces (`Validation failed` + `fieldErrors`, strict allowlists, bounded values).
