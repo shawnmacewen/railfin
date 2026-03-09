@@ -1,3 +1,22 @@
+## 2026-03-09 06:15 UTC — task-00215 campaigns execution engine skeleton
+- Added campaign execution route handlers:
+  - `src/app/api/internal/campaigns/[campaignId]/enrollments/route.ts`
+  - `src/app/api/internal/campaigns/enrollments/[enrollmentId]/transition/route.ts`
+- Extended campaign contracts with enrollment execution operations in `src/api/internal/campaigns/contracts.ts`:
+  - create/start enrollment
+  - list enrollment status by campaign
+  - transition enrollment with deterministic step progression (email/wait/condition)
+  - transition event retrieval
+- Extended Supabase campaign helper `src/lib/supabase/campaigns.ts` with:
+  - enrollment record mappings + status types
+  - enrollment create/list/get/transition persistence
+  - enrollment event persistence/listing (`campaign_enrollment_events`)
+- Updated campaigns SQL bootstrap (`docs/campaigns_bootstrap.sql`) with:
+  - `campaign_enrollments.next_eligible_at`
+  - new `campaign_enrollment_events` table + indexes
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/API_BOUNDARY.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 05:55 UTC — task-00214 configure APIs catalog page
 - Added new Configure route `src/app/app/configure/apis/page.tsx` and shortcut redirect `src/app/configure/apis/page.tsx`.
 - Added Configure subnav entry in `src/ui/configure-subnav.tsx` for `/app/configure/apis`.

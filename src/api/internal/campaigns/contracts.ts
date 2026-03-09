@@ -13,9 +13,15 @@ import {
   updateCampaignSocialPostInTable,
   updateSequenceInTable,
   updateStepInTable,
+  createCampaignEnrollmentInTable,
+  getCampaignEnrollmentByIdFromTable,
+  listCampaignEnrollmentEventsFromTable,
+  listCampaignEnrollmentsFromTable,
+  transitionCampaignEnrollmentInTable,
   type CampaignConditionOperator,
   type CampaignSocialPostStatus,
   type CampaignStatus,
+  type CampaignEnrollmentStatus,
 } from "../../../lib/supabase/campaigns";
 
 type ValidationError = { field: string; message: string };
@@ -25,6 +31,8 @@ const ALLOWED_OPERATORS: CampaignConditionOperator[] = ["if", "or"];
 const ALLOWED_SOCIAL_POST_STATUSES: CampaignSocialPostStatus[] = ["draft", "scheduled", "published", "cancelled"];
 const ALLOWED_SOCIAL_PLATFORMS = ["linkedin", "x", "facebook", "instagram"] as const;
 const ALLOWED_LEAD_STAGES = ["new", "contacted", "qualified", "closed"] as const;
+const ALLOWED_ENROLLMENT_STATUSES: CampaignEnrollmentStatus[] = ["pending", "active", "paused", "completed", "exited"];
+const ALLOWED_TRANSITION_ACTORS = ["manual", "engine", "system"] as const;
 
 function isPlainObject(value: unknown): value is Record<string, unknown> { return Boolean(value) && typeof value === "object" && !Array.isArray(value); }
 function hasOnlyKeys(value: Record<string, unknown>, allowed: string[]): boolean { return Object.keys(value).every((key) => allowed.includes(key)); }
@@ -34,6 +42,9 @@ function dedupeStrings(values: string[]): string[] { return Array.from(new Set(v
 function isCampaignStatus(value: unknown): value is CampaignStatus { return typeof value === "string" && ALLOWED_STATUSES.includes(value as CampaignStatus); }
 function isConditionOperator(value: unknown): value is CampaignConditionOperator { return typeof value === "string" && ALLOWED_OPERATORS.includes(value as CampaignConditionOperator); }
 function isLeadStage(value: string): boolean { return (ALLOWED_LEAD_STAGES as readonly string[]).includes(value); }
+function isEnrollmentStatus(value: unknown): value is CampaignEnrollmentStatus { return typeof value === "string" && ALLOWED_ENROLLMENT_STATUSES.includes(value as CampaignEnrollmentStatus); }
+function isTransitionActorType(value: unknown): value is "manual" | "engine" | "system" { return typeof value === "string" && (ALLOWED_TRANSITION_ACTORS as readonly string[]).includes(value); }
+function toIsoUtc(value: unknown): string | null { if (typeof value !== "string") return null; const date = new Date(value); return Number.isNaN(date.getTime()) ? null : date.toISOString(); }
 
 function mapBlocked(result: { blocked: { error: string; kind: "BLOCKED"; requiredSql?: string; missingEnv?: string[] } }) {
   return { ok: false as const, error: result.blocked.error, blocked: result.blocked };
@@ -363,4 +374,129 @@ export async function internalCampaignStepsUpdate(input: { sequenceId: string; s
   if (!updated.ok) return mapBlocked(updated);
   if (!updated.step) return { ok: false as const, error: "Not found" as const };
   return { ok: true as const, data: updated.step };
+}
+
+function evaluateConditionRules(operator: CampaignConditionOperator, rules: Array<{ field: string; comparator: string; value: string }>, contactContext: Record<string, unknown>) {
+  const evaluateRule = (rule: { field: string; comparator: string; value: string }): boolean => {
+    const leftRaw = contactContext[rule.field];
+    const left = leftRaw === undefined || leftRaw === null ? "" : String(leftRaw).toLowerCase();
+    const right = rule.value.toLowerCase();
+    if (rule.comparator === "eq") return left === right;
+    if (rule.comparator === "neq") return left !== right;
+    if (rule.comparator === "contains") return left.includes(right);
+    if (rule.comparator === "startsWith") return left.startsWith(right);
+    return false;
+  };
+  const hits = rules.map(evaluateRule);
+  const matched = operator === "or" ? hits.some(Boolean) : hits.every(Boolean);
+  return { matched, ruleResults: hits };
+}
+
+export async function internalCampaignEnrollmentsList(input: { campaignId: string }) {
+  const result = await listCampaignEnrollmentsFromTable(input.campaignId);
+  if (!result.ok) return mapBlocked(result);
+  return { ok: true as const, data: { items: result.enrollments, total: result.enrollments.length } };
+}
+
+export async function internalCampaignEnrollmentsCreate(input: { campaignId: string; body?: Record<string, unknown> }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["contactId", "startNow"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  const contactId = normalizeString(body.contactId);
+  const startNow = body.startNow === undefined ? true : body.startNow === true;
+  const fieldErrors: ValidationError[] = [];
+  if (!contactId) fieldErrors.push({ field: "contactId", message: "contactId is required." });
+  if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
+
+  const campaign = await internalCampaignsDetail({ campaignId: input.campaignId });
+  if (!campaign.ok) return campaign;
+  const firstSequence = campaign.data.sequences.slice().sort((a, b) => a.sequenceOrder - b.sequenceOrder)[0];
+  const firstStep = firstSequence?.steps[0];
+
+  const created = await createCampaignEnrollmentInTable({
+    campaignId: input.campaignId,
+    contactId,
+    enrollmentStatus: startNow ? "active" : "pending",
+    activeSequenceId: startNow && firstSequence ? firstSequence.id : null,
+    activeStepId: startNow && firstStep ? firstStep.id : null,
+    nextEligibleAt: null,
+    event: {
+      eventType: startNow ? "enrollment_started" : "enrollment_created",
+      actorType: "system",
+      details: { startNow, sequenceId: firstSequence?.id ?? null, stepId: firstStep?.id ?? null },
+    },
+  });
+  if (!created.ok) return mapBlocked(created);
+  return { ok: true as const, data: created.enrollment };
+}
+
+export async function internalCampaignEnrollmentTransition(input: { enrollmentId: string; body?: Record<string, unknown> }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["actorType", "contactContext", "forceStatus"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  const actorType = body.actorType;
+  const contactContext = isPlainObject(body.contactContext) ? body.contactContext : {};
+  const forceStatus = body.forceStatus;
+  const fieldErrors: ValidationError[] = [];
+  if (!isTransitionActorType(actorType)) fieldErrors.push({ field: "actorType", message: "actorType must be manual, engine, or system." });
+  if (forceStatus !== undefined && !isEnrollmentStatus(forceStatus)) fieldErrors.push({ field: "forceStatus", message: "forceStatus must be pending, active, paused, completed, or exited." });
+  if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
+  const validatedActorType = actorType as "manual" | "engine" | "system";
+
+  const current = await getCampaignEnrollmentByIdFromTable(input.enrollmentId);
+  if (!current.ok) return mapBlocked(current);
+  if (!current.enrollment) return { ok: false as const, error: "Not found" as const };
+
+  const campaign = await internalCampaignsDetail({ campaignId: current.enrollment.campaignId });
+  if (!campaign.ok) return campaign;
+
+  const sequences = campaign.data.sequences.slice().sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+  const activeSequence = sequences.find((s) => s.id === current.enrollment.activeSequenceId) ?? sequences[0] ?? null;
+  const activeStep = activeSequence?.steps.find((s) => s.id === current.enrollment.activeStepId) ?? activeSequence?.steps[0] ?? null;
+
+  let nextSequenceId: string | null = activeSequence?.id ?? null;
+  let nextStepId: string | null = activeStep?.id ?? null;
+  let nextStatus: CampaignEnrollmentStatus = (forceStatus as CampaignEnrollmentStatus | undefined) ?? current.enrollment.enrollmentStatus;
+  let nextEligibleAt: string | null = null;
+  const details: Record<string, unknown> = { fromStatus: current.enrollment.enrollmentStatus, stepType: activeStep?.type ?? null };
+
+  if (nextStatus === "active" && activeStep) {
+    if (activeStep.type === "email") {
+      details.event = "email_send_intent";
+      const nextIndex = (activeSequence?.steps.findIndex((s) => s.id === activeStep.id) ?? -1) + 1;
+      const nextStep = activeSequence?.steps[nextIndex] ?? null;
+      nextStepId = nextStep?.id ?? null;
+      if (!nextStep) nextStatus = "completed";
+    } else if (activeStep.type === "wait") {
+      const at = new Date(Date.now() + activeStep.waitMinutes * 60000).toISOString();
+      nextEligibleAt = at;
+      details.event = "wait_scheduled";
+      details.nextEligibleAt = at;
+    } else if (activeStep.type === "condition") {
+      const evalResult = evaluateConditionRules(activeStep.operator, activeStep.rules, contactContext);
+      const branchSequenceId = evalResult.matched ? activeStep.yesSequenceId : activeStep.noSequenceId;
+      const branchSequence = sequences.find((s) => s.id === branchSequenceId) ?? null;
+      nextSequenceId = branchSequence?.id ?? null;
+      nextStepId = branchSequence?.steps[0]?.id ?? null;
+      details.event = "condition_evaluated";
+      details.conditionMatched = evalResult.matched;
+      details.ruleResults = evalResult.ruleResults;
+      details.branchSequenceId = branchSequenceId;
+      if (!branchSequence || !nextStepId) nextStatus = "completed";
+    }
+  }
+
+  const updated = await transitionCampaignEnrollmentInTable({
+    enrollmentId: input.enrollmentId,
+    enrollmentStatus: nextStatus,
+    activeSequenceId: nextSequenceId,
+    activeStepId: nextStepId,
+    nextEligibleAt,
+    event: { eventType: "enrollment_transition", actorType: validatedActorType, details },
+  });
+  if (!updated.ok) return mapBlocked(updated);
+  if (!updated.enrollment) return { ok: false as const, error: "Not found" as const };
+
+  const events = await listCampaignEnrollmentEventsFromTable(updated.enrollment.id);
+  if (!events.ok) return mapBlocked(events);
+
+  return { ok: true as const, data: { enrollment: updated.enrollment, events: events.events } };
 }
