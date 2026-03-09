@@ -1,3 +1,14 @@
+## 2026-03-09 06:40 UTC — task-00216 Campaigns calendar + execution visibility UI v1
+- Expanded `src/app/app/campaigns/page.tsx` with a dedicated **Execution visibility** panel tied to selected campaign context.
+- Added execution enrollment rendering for status, active sequence/step, and last transition timestamp.
+- Added enrollment control buttons (**Start / Pause / Resume**) with backend capability gating and clear fallback error messaging when control endpoints are unavailable.
+- Added explicit execution endpoint unavailable state for not-yet-ready backend environments.
+- Upgraded timeline UX with grouped upcoming activity, range filtering (`This week`, `Next 30 days`, `Custom`), and improved loading/empty/error handling.
+- Added sequence-derived placeholder timeline items (`email`/`task`) to preserve calendar planning visibility when data is sparse.
+- Added progression hints in sequence builder and sequence detail views to surface what executes next while preserving prior step editing flow.
+- Added campaigns-specific responsive stability styles in `src/app/globals.css` to prevent overlap in toolbar/action rows at smaller widths.
+- Updated docs (`docs/tasks.md`, `docs/CHANGELOG.md`, `docs/UI_FOUNDATIONS.md`, `docs/agent-reports/railfin-ui.md`) and verified `npm run build` pass.
+
 ## 2026-03-09 06:25 UTC — task-00212 Campaigns builder UX polish v2
 - Polished `src/app/app/campaigns/page.tsx` campaign-builder UX for sequence editing readability and reduced confusion in step configuration.
 - Added clearer step structure/labels + helper copy:
