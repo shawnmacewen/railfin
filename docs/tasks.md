@@ -1,3 +1,18 @@
+## task-00207 — DEV — Campaigns module phase-1 foundation + PRD update (contacts-first targeting)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00207-campaigns-prd-foundation-phase1`
+- Scope delivered:
+  - Added Campaigns module PRD (`docs/PRD_Campaigns_Module_v0.md`) with MVP/v2 rollout, contacts-first targeting posture, branching rules, and event-trigger roadmap.
+  - Added campaigns schema bootstrap SQL (`docs/campaigns_bootstrap.sql`) covering campaigns/sequences/steps/enrollments/social-posts/calendar-items/contacts/segments.
+  - Added protected internal API foundation routes:
+    - `GET/POST /api/internal/campaigns`
+    - `POST /api/internal/campaigns/targeting/preview`
+    - `GET /api/internal/crm/contacts`
+  - Added fail-closed contracts/validation for campaign sequence+step definitions and targeting preview inputs with safe error payloads.
+  - Updated Campaigns page placeholder copy to expose phase-1 foundation entrypoints without breaking existing app flows.
+  - Updated API boundary/changelog/dev report docs and verified with `npm run build` (pass).
+
 ## task-00206 — UI — Fix Create compliance controls position when panel is minimized
 
 - Status: **Done**

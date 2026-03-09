@@ -1,3 +1,67 @@
+## task-00207 — Campaigns module phase-1 foundation (internal)
+
+Protected internal routes added for campaign foundation and contacts-first targeting:
+- `GET/POST /api/internal/campaigns`
+- `POST /api/internal/campaigns/targeting/preview`
+- `GET /api/internal/crm/contacts`
+
+### Campaign create/list contract
+
+`GET /api/internal/campaigns`
+- Success: `{ ok: true, data: { items: Campaign[], total: number } }`
+
+`POST /api/internal/campaigns`
+- Request body (strict allowlist):
+  - `name: string` (required)
+  - `objective?: string`
+  - `status?: "draft" | "active" | "paused" | "archived"` (default `draft`)
+  - `targeting: { segmentIds?: string[], contactIds?: string[], leadStages?: ("new"|"contacted"|"qualified"|"closed")[] }`
+  - `sequences: Array<{ name: string, steps: CampaignStep[] }>` (at least one sequence)
+
+`CampaignStep` variants:
+- `email`: `{ type: "email", subject: string, body: string }`
+- `wait`: `{ type: "wait", waitMinutes: integer (1..10080) }`
+- `condition`: `{ type: "condition", operator: "if"|"or", rules: [{ field, comparator, value }...], yesSequenceId: string, noSequenceId: string }`
+
+Validation posture:
+- fail-closed strict object/field allowlists
+- bounded string lengths and required fields per step variant
+- no fake success on invalid payloads (`400` + `{ ok:false, error:"Validation failed", fieldErrors[] }`)
+
+Current persistence mode:
+- Phase-1 uses in-memory campaign contract store (compile-safe foundation).
+- DB schema bootstrap is documented and manually applied for persistence readiness.
+
+### Campaign targeting preview contract
+
+`POST /api/internal/campaigns/targeting/preview`
+- Request body (strict allowlist):
+  - `contactIds?: string[]`
+  - `segmentIds?: string[]`
+  - `leadStages?: ("new"|"contacted"|"qualified"|"closed")[]`
+- Success:
+  - `{ ok: true, data: { segmentIds, applied: { contactIds, leadStages }, counts: { matchedContacts, totalContacts }, note } }`
+- Phase-1 behavior:
+  - resolves against contacts-first read model
+  - accepts `segmentIds` as references; dynamic segment-rule execution deferred to v2
+
+### Contacts-first CRM bridge contract
+
+`GET /api/internal/crm/contacts`
+- Returns contacts-first shape mapped from current CRM lead persistence:
+  - `{ id, fullName, primaryEmail, primaryPhone, source, lead: { stage, isConverted }, createdAt }`
+- Success:
+  - `{ ok: true, data: { items: Contact[], total: number } }`
+- BLOCKED/runtime errors:
+  - returns explicit blocked payload from persistence layer with safe diagnostics
+
+### Campaigns SQL bootstrap (manual apply)
+
+No migration runner is configured in repository scripts for campaigns foundation tables.
+Apply manually in Supabase SQL editor/psql:
+
+- `docs/campaigns_bootstrap.sql`
+
 ## task-00187 — CRM leads phase 1 contracts (internal)
 
 - Added protected internal CRM leads routes: `GET/POST /api/internal/crm/leads`.

@@ -1,3 +1,14 @@
+## 2026-03-09 — Campaigns phase-1 foundation + contacts-first targeting contracts (task-00207)
+- Added Campaigns module PRD at `docs/PRD_Campaigns_Module_v0.md` covering MVP/v2 scope, contacts-first targeting migration (`leads -> contacts + lead metadata`), branching logic rules (`if/or`), and event-trigger roadmap.
+- Added manual SQL bootstrap at `docs/campaigns_bootstrap.sql` for campaigns foundation tables: campaigns, sequences, steps, enrollments, social posts, calendar items, contacts, and segments.
+- Added protected internal campaign APIs:
+  - `GET/POST /api/internal/campaigns`
+  - `POST /api/internal/campaigns/targeting/preview`
+- Added protected contacts-first CRM bridge endpoint:
+  - `GET /api/internal/crm/contacts`
+- Added strict fail-closed validation contracts for campaign creation and targeting preview to avoid unsafe/fake success responses.
+- Updated `/app/campaigns` foundation page copy to surface active phase-1 API entrypoints while keeping scope intentionally lean.
+
 ## 2026-03-08 — Create collapsed compliance controls stay top-anchored (task-00206)
 - Fixed Create minimized compliance controls so reopen/run controls no longer fall to the bottom of the page when the panel is collapsed.
 - Desktop collapsed layout now keeps a narrow right-side controls column, so controls remain top-aligned beside Create content.

@@ -1,3 +1,19 @@
+## 2026-03-09 04:45 UTC — task-00207 campaigns phase-1 foundation + PRD update
+- Added campaigns internal contracts + in-memory phase-1 store:
+  - `src/api/internal/campaigns/contracts.ts`
+  - `src/api/internal/campaigns/store.ts`
+- Added protected internal API routes:
+  - `src/app/api/internal/campaigns/route.ts`
+  - `src/app/api/internal/campaigns/targeting/preview/route.ts`
+- Added contacts-first CRM bridge contract + route:
+  - `src/api/internal/crm/contacts.ts`
+  - `src/app/api/internal/crm/contacts/route.ts`
+- Added campaigns schema bootstrap SQL: `docs/campaigns_bootstrap.sql`.
+- Added Campaigns PRD: `docs/PRD_Campaigns_Module_v0.md`.
+- Updated docs: `docs/API_BOUNDARY.md`, `docs/tasks.md`, `docs/CHANGELOG.md`.
+- Updated `/app/campaigns` page placeholder with phase-1 API foundation details.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-08 08:05 UTC — task-00202 compliance location mapping + unknown fallback cleanup
 - Updated `src/app/api/internal/compliance/check/route.ts` location normalization to extract meaningful labels from flexible provider payloads (`location` string/object and top-level `source/file/section/line/column`).
 - Added additive compliance finding response field `locationLabel` (nullable) and preserved compatibility `location` field.
