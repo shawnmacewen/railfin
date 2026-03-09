@@ -206,9 +206,9 @@ export async function createCampaignInTable(input: {
     for (let j = 0; j < sequence.steps.length; j++) {
       const step = sequence.steps[j];
       const row: Record<string, unknown> = { id: randomUUID(), sequence_id: sequenceId, step_order: j, step_type: step.type };
-      if (step.type === "email") { row.email_subject = step.subject; row.email_body = step.body; }
-      else if (step.type === "wait") row.wait_minutes = step.waitMinutes;
-      else { row.condition_operator = step.operator; row.condition_rules_json = step.rules; row.yes_sequence_id = step.yesSequenceId; row.no_sequence_id = step.noSequenceId; }
+      if (step.type === "email") { row.email_subject = (step as any).subject; row.email_body = (step as any).body; }
+      else if (step.type === "wait") { row.wait_minutes = (step as any).waitMinutes; }
+      else { row.condition_operator = (step as any).operator; row.condition_rules_json = (step as any).rules; row.yes_sequence_id = (step as any).yesSequenceId; row.no_sequence_id = (step as any).noSequenceId; }
       const stepIns = await client.client.from("campaign_steps").insert(row);
       if (stepIns.error) return { ok: false as const, blocked: blockedFromError(stepIns.error) };
     }
@@ -264,9 +264,9 @@ export async function createStepInTable(input: { sequenceId: string; stepOrder?:
   const existing = await client.client.from("campaign_steps").select("id").eq("sequence_id", input.sequenceId);
   if (existing.error) return { ok: false as const, blocked: blockedFromError(existing.error) };
   const row: Record<string, unknown> = { id: randomUUID(), sequence_id: input.sequenceId, step_order: input.stepOrder ?? (existing.data?.length ?? 0), step_type: input.step.type };
-  if (input.step.type === "email") { row.email_subject = input.step.subject; row.email_body = input.step.body; }
-  else if (input.step.type === "wait") row.wait_minutes = input.step.waitMinutes;
-  else { row.condition_operator = input.step.operator; row.condition_rules_json = input.step.rules; row.yes_sequence_id = input.step.yesSequenceId; row.no_sequence_id = input.step.noSequenceId; }
+  if (input.step.type === "email") { row.email_subject = (input.step as any).subject; row.email_body = (input.step as any).body; }
+  else if (input.step.type === "wait") row.wait_minutes = (input.step as any).waitMinutes;
+  else { row.condition_operator = (input.step as any).operator; row.condition_rules_json = (input.step as any).rules; row.yes_sequence_id = (input.step as any).yesSequenceId; row.no_sequence_id = (input.step as any).noSequenceId; }
   const ins = await client.client.from("campaign_steps").insert(row);
   if (ins.error) return { ok: false as const, blocked: blockedFromError(ins.error) };
   return { ok: true as const, step: { ...(input.step as any), id: row.id } as CampaignStepRecord };
@@ -277,9 +277,9 @@ export async function updateStepInTable(input: { sequenceId: string; stepId: str
   const row: Record<string, unknown> = { sequence_id: input.sequenceId, step_type: input.step.type };
   if (input.stepOrder !== undefined) row.step_order = input.stepOrder;
   row.email_subject = null; row.email_body = null; row.wait_minutes = null; row.condition_operator = null; row.condition_rules_json = null; row.yes_sequence_id = null; row.no_sequence_id = null;
-  if (input.step.type === "email") { row.email_subject = input.step.subject; row.email_body = input.step.body; }
-  else if (input.step.type === "wait") row.wait_minutes = input.step.waitMinutes;
-  else { row.condition_operator = input.step.operator; row.condition_rules_json = input.step.rules; row.yes_sequence_id = input.step.yesSequenceId; row.no_sequence_id = input.step.noSequenceId; }
+  if (input.step.type === "email") { row.email_subject = (input.step as any).subject; row.email_body = (input.step as any).body; }
+  else if (input.step.type === "wait") row.wait_minutes = (input.step as any).waitMinutes;
+  else { row.condition_operator = (input.step as any).operator; row.condition_rules_json = (input.step as any).rules; row.yes_sequence_id = (input.step as any).yesSequenceId; row.no_sequence_id = (input.step as any).noSequenceId; }
   const upd = await client.client.from("campaign_steps").update(row).eq("id", input.stepId).eq("sequence_id", input.sequenceId);
   if (upd.error) return { ok: false as const, blocked: blockedFromError(upd.error) };
   const check = await client.client.from("campaign_steps").select("id").eq("id", input.stepId).eq("sequence_id", input.sequenceId).maybeSingle();

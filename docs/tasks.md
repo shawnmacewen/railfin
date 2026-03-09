@@ -1,3 +1,23 @@
+## task-00209 — DEV — Campaigns API engine v1 (sequences/steps/social/calendar/targeting)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00209-campaigns-api-engine-v1`
+- Scope delivered:
+  - Replaced campaigns in-memory persistence with Supabase-backed store helpers in `src/lib/supabase/campaigns.ts` using phase-1 bootstrap tables.
+  - Added campaign detail endpoint support and expanded protected internal API surface:
+    - `GET /api/internal/campaigns/[campaignId]`
+    - `GET/POST /api/internal/campaigns/[campaignId]/sequences`
+    - `PATCH /api/internal/campaigns/[campaignId]/sequences/[sequenceId]`
+    - `GET/POST /api/internal/campaigns/sequences/[sequenceId]/steps`
+    - `PATCH /api/internal/campaigns/sequences/[sequenceId]/steps/[stepId]`
+    - `GET/POST /api/internal/campaigns/[campaignId]/social-posts`
+    - `PATCH /api/internal/campaigns/[campaignId]/social-posts/[postId]`
+    - `GET /api/internal/campaigns/[campaignId]/calendar`
+  - Kept existing `GET/POST /api/internal/campaigns` and targeting preview route compatibility for shipped UI flows.
+  - Added deterministic targeting preview sample IDs (`sampleContactIds`) plus strict fail-closed field validation semantics.
+  - Preserved condition-step contract (`if/or` + rules + yes/no sequence IDs) with validation-heavy safe `fieldErrors` responses.
+  - Verified with `npm run build` (pass).
+
 ## task-00210 — UI — Campaigns UI builder v1 (sequence editor + social scheduler surface)
 
 - Status: **Done**

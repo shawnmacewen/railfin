@@ -1,3 +1,43 @@
+## task-00209 — Campaigns API engine v1 (internal)
+
+Protected internal routes (all auth-gated via `requireInternalApiAuth`) now include:
+- `GET/POST /api/internal/campaigns`
+- `GET /api/internal/campaigns/[campaignId]`
+- `GET/POST /api/internal/campaigns/[campaignId]/sequences`
+- `PATCH /api/internal/campaigns/[campaignId]/sequences/[sequenceId]`
+- `GET/POST /api/internal/campaigns/sequences/[sequenceId]/steps`
+- `PATCH /api/internal/campaigns/sequences/[sequenceId]/steps/[stepId]`
+- `GET/POST /api/internal/campaigns/[campaignId]/social-posts`
+- `PATCH /api/internal/campaigns/[campaignId]/social-posts/[postId]`
+- `GET /api/internal/campaigns/[campaignId]/calendar`
+- `POST /api/internal/campaigns/targeting/preview`
+
+### Persistence posture
+
+Campaign engine endpoints now persist against Supabase phase-1 bootstrap tables through:
+- `src/lib/supabase/campaigns.ts`
+
+No in-memory writes are used for campaigns create/sequence/step/social operations.
+
+### Targeting preview contract (deterministic)
+
+`POST /api/internal/campaigns/targeting/preview` success payload includes:
+- `counts: { matchedContacts, totalContacts }`
+- `sampleContactIds: string[]` (deterministic stable ordering, up to 10 IDs)
+- `segmentIds`, `applied`, and compatibility note field
+
+Validation posture remains fail-closed with strict key allowlists and safe `fieldErrors` for unsupported or malformed payloads.
+
+### Condition step contract (if/or branching)
+
+Condition step shape used across create/update flows:
+- `{ type:"condition", operator:"if"|"or", rules:[{field, comparator, value}], yesSequenceId:string, noSequenceId:string }`
+
+Validation requirements:
+- operator required and bounded to `if|or`
+- at least one rule; each rule strictly requires `field`, `comparator`, `value`
+- both `yesSequenceId` and `noSequenceId` required
+
 ## task-00207 — Campaigns module phase-1 foundation (internal)
 
 Protected internal routes added for campaign foundation and contacts-first targeting:
