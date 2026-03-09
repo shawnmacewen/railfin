@@ -991,6 +991,21 @@
 
 # Tasks
 
+## task-00214 — DEV — Configure APIs catalog page (internal + external)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00214-config-apis-catalog-page`
+- Scope delivered:
+  - Added new Configure subpage route `/app/configure/apis` with shortcut redirect `/configure/apis`.
+  - Added Configure subnav entry **APIs** between Features and Change Log.
+  - Built operator-facing API catalog UI with searchable table sections:
+    - **Internal APIs**: sourced from current `src/app/api/internal/*` routes + `docs/API_BOUNDARY.md`.
+    - **External APIs**: includes currently implemented login contract endpoint and explicit planned placeholders (OpenAI runtime, email provider).
+  - Internal catalog rows include endpoint path, methods, concise description, key params/body fields, and auth expectation.
+  - Added deterministic source references per row (route file/docs location) to avoid fabricated contract surfaces.
+  - Updated docs (`tasks`, `CHANGELOG`, `API_BOUNDARY`, `UI_FOUNDATIONS`, `agent-reports/railfin-dev`).
+  - Build verification: `npm run build` (pass).
+
 ## task-00211 — DEV — Contacts generalization pass (CRM leads -> contacts bridge hardening)
 
 - Status: **Done**

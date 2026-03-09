@@ -1,3 +1,10 @@
+## 2026-03-09 — Configure APIs catalog page in Configure section (task-00214)
+- Added new Configure route `/app/configure/apis` and in-section nav entry **APIs**.
+- Added searchable API catalog with two operator-facing sections: **Internal APIs** and **External APIs**.
+- Internal catalog now shows endpoint path, methods, concise contract purpose, key params/body fields, and internal auth/session expectation.
+- External catalog includes current login contract plus explicit planned placeholders for OpenAI runtime and email-provider integrations.
+- Added deterministic source references for each catalog row so operators can trace contracts to route files/docs.
+
 ## 2026-03-09 — Campaigns builder UX polish v2 (task-00212)
 - Improved Campaign create modal sequence editor readability with clearer step grouping and labels for email/wait/condition steps.
 - Upgraded condition step UX with clearer rule logic wording (`if` all required vs `or` any match), better yes/no path field labels, and inline helper guidance.

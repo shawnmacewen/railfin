@@ -1,3 +1,15 @@
+## 2026-03-09 05:55 UTC — task-00214 configure APIs catalog page
+- Added new Configure route `src/app/app/configure/apis/page.tsx` and shortcut redirect `src/app/configure/apis/page.tsx`.
+- Added Configure subnav entry in `src/ui/configure-subnav.tsx` for `/app/configure/apis`.
+- Added client API catalog component `src/ui/configure-apis-catalog.tsx` with deterministic contract dataset and in-page search.
+- Catalog sections delivered:
+  - Internal APIs: sourced from current `src/app/api/internal/*` handlers + API boundary docs.
+  - External APIs: current login contract plus planned OpenAI/email-provider placeholders.
+- Internal rows include endpoint path, methods, concise description, key params/body fields, and auth expectation.
+- Added Configure landing cross-link to APIs in `src/app/app/configure/page.tsx`.
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/API_BOUNDARY.md`, `docs/UI_FOUNDATIONS.md`, `docs/agent-reports/railfin-dev.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 05:35 UTC — task-00211 contacts generalization pass
 - Added contacts-first persistence helper: `src/lib/supabase/contacts.ts` with blocked diagnostics and required SQL metadata.
 - Added normalization bridge: `src/api/internal/crm/normalization.ts` mapping lead fields (`name/email/phone/source/status`) to contacts schema (`fullName/primaryEmail/primaryPhone/source/stage`) and back for compatibility.

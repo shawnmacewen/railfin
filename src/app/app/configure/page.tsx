@@ -17,6 +17,13 @@ export default function ConfigurePage() {
         .
       </p>
       <p>
+        Need endpoint and contract visibility? Visit{" "}
+        <Link className="rf-inline-link" href="/app/configure/apis">
+          APIs
+        </Link>
+        .
+      </p>
+      <p>
         Need a quick product history update? Visit the{" "}
         <Link className="rf-inline-link" href="/app/configure/changelog">
           Change Log
