@@ -473,6 +473,16 @@
 
 # UI Foundations
 
+## task-00214 — Configure APIs catalog page (internal + external)
+
+- Added Configure subpage route `/app/configure/apis` and linked it in Configure subnav as **APIs**.
+- Added operator-facing API catalog surface with two sections:
+  - Internal APIs (from current internal route handlers/docs)
+  - External APIs (current + planned placeholders)
+- Catalog UX includes simple in-page search/filter and responsive table rendering using existing table primitives/styles.
+- Each catalog row shows: endpoint/surface, method(s), concise description, key params/body fields, auth expectation, and source reference.
+- Added `/configure/apis` shortcut redirect to `/app/configure/apis` for route consistency.
+
 ## task-00147 — Create single-content focus + prompt lock accordion + editor/compliance workspace upgrade
 
 - `src/ui/editor-shell.tsx` refactors Create generation UX to be **single-content focused only**:

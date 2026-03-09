@@ -531,7 +531,10 @@ The app shell is anchored under guarded `/app/*` routes:
 - `/app/create` → current editor flow host (`EditorShell`)
 - `/app/library` → library scaffold placeholder
 - `/app/campaigns` → campaigns scaffold placeholder
-- `/app/configure` → configure scaffold placeholder
+- `/app/configure` → configure policy surface
+- `/app/configure/features` → configure features catalog
+- `/app/configure/apis` → configure API contracts catalog (internal + external/planned)
+- `/app/configure/changelog` → configure release changelog
 
 Compatibility / convenience routes:
 
@@ -541,6 +544,16 @@ Compatibility / convenience routes:
 Guard compatibility note:
 
 - Middleware matcher remains `/app/:path*`; guard behavior is unchanged.
+
+## Configure APIs catalog source-of-truth note
+
+`/app/configure/apis` is an operator visibility surface, not a runtime endpoint.
+
+Catalog rows are intentionally deterministic and sourced from:
+- active internal route handlers under `src/app/api/internal/**/route.ts`
+- documented contracts in this file (`docs/API_BOUNDARY.md`)
+
+Planned external integrations are explicitly labeled as placeholders to avoid implying shipped contracts.
 
 ## Draft persistence contract (`POST/GET /api/internal/content/draft`)
 
