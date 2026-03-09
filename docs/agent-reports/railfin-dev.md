@@ -1,3 +1,19 @@
+## 2026-03-09 05:35 UTC — task-00211 contacts generalization pass
+- Added contacts-first persistence helper: `src/lib/supabase/contacts.ts` with blocked diagnostics and required SQL metadata.
+- Added normalization bridge: `src/api/internal/crm/normalization.ts` mapping lead fields (`name/email/phone/source/status`) to contacts schema (`fullName/primaryEmail/primaryPhone/source/stage`) and back for compatibility.
+- Updated contacts API module `src/api/internal/crm/contacts.ts`:
+  - contacts-table-first read
+  - legacy leads fallback when contacts table is missing
+  - list filters (`search`, `stage`, `source`)
+  - strict create/update validation with safe `fieldErrors`
+- Updated routes:
+  - `src/app/api/internal/crm/contacts/route.ts` (`GET` filters + `POST` create)
+  - `src/app/api/internal/crm/contacts/[contactId]/route.ts` (`PATCH` update)
+- Updated leads compatibility route logic in `src/api/internal/crm/leads.ts` to read via contacts normalization and write contacts-first with leads fallback.
+- Added manual deterministic/idempotent SQL migration path: `docs/crm_contacts_backfill_from_leads.sql`.
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/API_BOUNDARY.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 05:20 UTC — task-00209 campaigns API engine v1
 - Reworked campaigns backend persistence from in-memory store to Supabase-backed helpers in `src/lib/supabase/campaigns.ts`.
 - Expanded campaign internal contracts in `src/api/internal/campaigns/contracts.ts` to include:

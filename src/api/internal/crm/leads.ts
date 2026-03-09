@@ -1,4 +1,7 @@
+import { createContactInTable } from "../../../lib/supabase/contacts";
 import { createLeadInTable, listLeadsFromTable, type LeadStatus } from "../../../lib/supabase/leads";
+import { internalContactsList } from "./contacts";
+import { leadFromContactRecord } from "./normalization";
 
 type ValidationError = { field: string; message: string };
 
@@ -33,6 +36,12 @@ function isLeadStatus(value: unknown): value is LeadStatus {
 }
 
 export async function internalLeadsList() {
+  const contacts = await internalContactsList();
+  if (contacts.ok) {
+    const leads = contacts.data.items.map((item) => leadFromContactRecord(item));
+    return { ok: true as const, data: { items: leads, total: leads.length } };
+  }
+
   const listed = await listLeadsFromTable();
   if (!listed.ok) {
     return { ok: false as const, error: listed.blocked.error, blocked: listed.blocked };
@@ -70,6 +79,29 @@ export async function internalLeadsCreate(input: { body?: CreateLeadBody }) {
 
   if (fieldErrors.length > 0) {
     return { ok: false as const, error: "Validation failed", fieldErrors };
+  }
+
+  const contactCreated = await createContactInTable({
+    fullName: name,
+    primaryEmail: email,
+    primaryPhone: phone || null,
+    source: source || null,
+    stage: status as LeadStatus,
+  });
+
+  if (contactCreated.ok) {
+    return {
+      ok: true as const,
+      data: {
+        id: contactCreated.contact.id,
+        name: contactCreated.contact.fullName,
+        email: contactCreated.contact.primaryEmail,
+        phone: contactCreated.contact.primaryPhone,
+        source: contactCreated.contact.source,
+        status: contactCreated.contact.stage,
+        createdAt: contactCreated.contact.createdAt,
+      },
+    };
   }
 
   const created = await createLeadInTable({

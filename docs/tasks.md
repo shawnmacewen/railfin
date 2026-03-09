@@ -1,3 +1,16 @@
+## task-00212 — UI — Campaigns builder UX polish v2
+
+- Status: **Done**
+- Branch: `feat/ui/task-00212-campaigns-builder-ux-polish-v2`
+- Scope delivered:
+  - Refined Campaign create modal step editor with clearer step grouping/labels for email, wait, and condition step types.
+  - Improved condition-step readability with explicit rule-logic wording (`if` all required vs `or` any match), clearer yes/no path fields, and inline helper copy.
+  - Tightened social scheduler form layout with clearer date/time guidance and status-chip treatment in scheduled/timeline lists.
+  - Upgraded targeting preview into a clearer summary card for matched/total counts and sample IDs, with explicit but cleaner not-available states.
+  - Applied responsive spacing/layout cleanup across campaigns builder sections for better small-screen behavior.
+  - Updated campaign UI styles in `src/app/globals.css` with additive `rf-campaigns-*` helpers.
+  - Build verification: `npm run build` (pass).
+
 ## task-00213 — SEC — Campaigns + Contacts API security/validation verification
 
 - Status: **Done**
@@ -977,6 +990,22 @@
   - Preserved manual-trigger-only remediation behavior and existing request contracts (backward compatible additive fields only).
 
 # Tasks
+
+## task-00211 — DEV — Contacts generalization pass (CRM leads -> contacts bridge hardening)
+
+- Status: **Done**
+- Branch: `feat/dev/task-00211-contacts-generalization`
+- Scope delivered:
+  - Added contacts-first Supabase persistence helper (`src/lib/supabase/contacts.ts`) with required SQL bootstrap metadata and safe blocked diagnostics.
+  - Added CRM normalization bridge (`src/api/internal/crm/normalization.ts`) to map lead shape <-> contacts shape while preserving existing CRM lead UI contract fields.
+  - Updated contacts API core (`src/api/internal/crm/contacts.ts`) with contacts-table-first reads, leads fallback when contacts table is absent, new list filters (`search`, `stage`, `source`), and strict fail-closed create/update validation.
+  - Added contacts route write surfaces:
+    - `POST /api/internal/crm/contacts`
+    - `PATCH /api/internal/crm/contacts/[contactId]`
+  - Hardened leads API bridge (`src/api/internal/crm/leads.ts`) to read via contacts-first mapping and write to contacts first with fallback to legacy leads table.
+  - Added deterministic/manual idempotent SQL backfill file: `docs/crm_contacts_backfill_from_leads.sql` with verification queries.
+  - Updated API boundary, changelog, and dev lane report docs.
+  - Build verification: `npm run build` (pass).
 
 ## task-00127 — UI — review workbench tidy pass 1 (pre-UX cleanup)
 
