@@ -246,3 +246,121 @@ export async function internalCampaignCalendarList(input: { campaignId: string }
   if (!result.ok) return mapBlocked(result);
   return { ok: true as const, data: { items: result.items, total: result.items.length } };
 }
+
+function validateStepBody(path: string, body: Record<string, unknown>) {
+  const fieldErrors: ValidationError[] = [];
+  const type = normalizeString(body.type);
+  if (type === "email") {
+    const subject = normalizeString(body.subject);
+    const emailBody = normalizeString(body.body);
+    if (!subject) fieldErrors.push({ field: `${path}.subject`, message: "Email step subject is required." });
+    if (!emailBody) fieldErrors.push({ field: `${path}.body`, message: "Email step body is required." });
+    if (fieldErrors.length > 0) return { fieldErrors };
+    return { step: { type: "email" as const, subject, body: emailBody } };
+  }
+  if (type === "wait") {
+    const waitMinutes = typeof body.waitMinutes === "number" ? body.waitMinutes : NaN;
+    if (!Number.isInteger(waitMinutes) || waitMinutes < 1 || waitMinutes > 10080) fieldErrors.push({ field: `${path}.waitMinutes`, message: "waitMinutes must be an integer between 1 and 10080." });
+    if (fieldErrors.length > 0) return { fieldErrors };
+    return { step: { type: "wait" as const, waitMinutes } };
+  }
+  if (type === "condition") {
+    const operator = body.operator;
+    const rules = body.rules;
+    const yesSequenceId = normalizeString(body.yesSequenceId);
+    const noSequenceId = normalizeString(body.noSequenceId);
+    if (!isConditionOperator(operator)) fieldErrors.push({ field: `${path}.operator`, message: "Condition operator must be if or or." });
+    if (!Array.isArray(rules) || rules.length === 0) fieldErrors.push({ field: `${path}.rules`, message: "Condition rules must include at least one rule." });
+    const normalizedRules: Array<{ field: string; comparator: string; value: string }> = [];
+    if (Array.isArray(rules)) {
+      rules.forEach((rule, i) => {
+        if (!isPlainObject(rule) || !hasOnlyKeys(rule, ["field", "comparator", "value"])) {
+          fieldErrors.push({ field: `${path}.rules[${i}]`, message: "Rule must include field, comparator, value." });
+          return;
+        }
+        const field = normalizeString(rule.field);
+        const comparator = normalizeString(rule.comparator);
+        const value = normalizeString(rule.value);
+        if (!field) fieldErrors.push({ field: `${path}.rules[${i}].field`, message: "Rule field is required." });
+        if (!comparator) fieldErrors.push({ field: `${path}.rules[${i}].comparator`, message: "Rule comparator is required." });
+        if (!value) fieldErrors.push({ field: `${path}.rules[${i}].value`, message: "Rule value is required." });
+        normalizedRules.push({ field, comparator, value });
+      });
+    }
+    if (!yesSequenceId) fieldErrors.push({ field: `${path}.yesSequenceId`, message: "yesSequenceId is required." });
+    if (!noSequenceId) fieldErrors.push({ field: `${path}.noSequenceId`, message: "noSequenceId is required." });
+    if (fieldErrors.length > 0) return { fieldErrors };
+    return { step: { type: "condition" as const, operator: operator as CampaignConditionOperator, rules: normalizedRules, yesSequenceId, noSequenceId } };
+  }
+  return { fieldErrors: [{ field: `${path}.type`, message: "Step type must be email, wait, or condition." }] };
+}
+
+export async function internalCampaignSequencesList(input: { campaignId: string }) {
+  const result = await listSequencesFromTable(input.campaignId);
+  if (!result.ok) return mapBlocked(result);
+  if (result.sequences === null) return { ok: false as const, error: "Not found" as const };
+  return { ok: true as const, data: { items: result.sequences, total: result.sequences.length } };
+}
+
+export async function internalCampaignSequencesCreate(input: { campaignId: string; body?: Record<string, unknown> }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["name", "sequenceOrder"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  const name = normalizeString(body.name);
+  const sequenceOrder = body.sequenceOrder === undefined ? undefined : Number(body.sequenceOrder);
+  const fieldErrors: ValidationError[] = [];
+  if (!name) fieldErrors.push({ field: "name", message: "Sequence name is required." });
+  if (!Number.isInteger(sequenceOrder) && sequenceOrder !== undefined) fieldErrors.push({ field: "sequenceOrder", message: "sequenceOrder must be an integer when provided." });
+  if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
+  const created = await createSequenceInTable({ campaignId: input.campaignId, name, sequenceOrder });
+  if (!created.ok) return mapBlocked(created);
+  return { ok: true as const, data: created.sequence };
+}
+
+export async function internalCampaignSequencesUpdate(input: { campaignId: string; sequenceId: string; body?: Record<string, unknown> }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["name", "sequenceOrder"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  const name = body.name === undefined ? undefined : normalizeString(body.name);
+  const sequenceOrder = body.sequenceOrder === undefined ? undefined : Number(body.sequenceOrder);
+  const fieldErrors: ValidationError[] = [];
+  if (name !== undefined && !name) fieldErrors.push({ field: "name", message: "name cannot be empty when provided." });
+  if (sequenceOrder !== undefined && !Number.isInteger(sequenceOrder)) fieldErrors.push({ field: "sequenceOrder", message: "sequenceOrder must be an integer when provided." });
+  if (name === undefined && sequenceOrder === undefined) fieldErrors.push({ field: "body", message: "At least one updatable field is required." });
+  if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
+  const updated = await updateSequenceInTable({ campaignId: input.campaignId, sequenceId: input.sequenceId, name, sequenceOrder });
+  if (!updated.ok) return mapBlocked(updated);
+  if (!updated.sequence) return { ok: false as const, error: "Not found" as const };
+  return { ok: true as const, data: updated.sequence };
+}
+
+export async function internalCampaignStepsList(input: { sequenceId: string }) {
+  const result = await listStepsFromTable(input.sequenceId);
+  if (!result.ok) return mapBlocked(result);
+  return { ok: true as const, data: { items: result.steps, total: result.steps.length } };
+}
+
+export async function internalCampaignStepsCreate(input: { sequenceId: string; body?: Record<string, unknown> }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["stepOrder", "type", "subject", "body", "waitMinutes", "operator", "rules", "yesSequenceId", "noSequenceId"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  const stepOrder = body.stepOrder === undefined ? undefined : Number(body.stepOrder);
+  const parsed = validateStepBody("body", body);
+  const parsedFieldErrors = "fieldErrors" in parsed ? (parsed.fieldErrors ?? []) : [];
+  const fieldErrors = [...parsedFieldErrors, ...(stepOrder !== undefined && !Number.isInteger(stepOrder) ? [{ field: "stepOrder", message: "stepOrder must be an integer when provided." }] : [])];
+  if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
+  const created = await createStepInTable({ sequenceId: input.sequenceId, stepOrder, step: parsed.step! });
+  if (!created.ok) return mapBlocked(created);
+  return { ok: true as const, data: created.step };
+}
+
+export async function internalCampaignStepsUpdate(input: { sequenceId: string; stepId: string; body?: Record<string, unknown> }) {
+  const body = input.body;
+  if (!isPlainObject(body) || !hasOnlyKeys(body, ["stepOrder", "type", "subject", "body", "waitMinutes", "operator", "rules", "yesSequenceId", "noSequenceId"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported or invalid body." }] };
+  const stepOrder = body.stepOrder === undefined ? undefined : Number(body.stepOrder);
+  const parsed = validateStepBody("body", body);
+  const parsedFieldErrors = "fieldErrors" in parsed ? (parsed.fieldErrors ?? []) : [];
+  const fieldErrors = [...parsedFieldErrors, ...(stepOrder !== undefined && !Number.isInteger(stepOrder) ? [{ field: "stepOrder", message: "stepOrder must be an integer when provided." }] : [])];
+  if (fieldErrors.length) return { ok: false as const, error: "Validation failed", fieldErrors };
+  const updated = await updateStepInTable({ sequenceId: input.sequenceId, stepId: input.stepId, stepOrder, step: parsed.step! });
+  if (!updated.ok) return mapBlocked(updated);
+  if (!updated.step) return { ok: false as const, error: "Not found" as const };
+  return { ok: true as const, data: updated.step };
+}

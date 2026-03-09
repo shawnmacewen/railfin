@@ -1,3 +1,25 @@
+## 2026-03-09 05:20 UTC — task-00209 campaigns API engine v1
+- Reworked campaigns backend persistence from in-memory store to Supabase-backed helpers in `src/lib/supabase/campaigns.ts`.
+- Expanded campaign internal contracts in `src/api/internal/campaigns/contracts.ts` to include:
+  - campaign detail
+  - sequences CRUD (list/create/update order/name)
+  - steps CRUD for email/wait/condition types (validation-heavy)
+  - social posts scheduling create/list/update status/content/schedule
+  - campaign calendar item listing
+  - deterministic targeting preview sample IDs
+- Added protected API route handlers:
+  - `src/app/api/internal/campaigns/[campaignId]/route.ts`
+  - `src/app/api/internal/campaigns/[campaignId]/sequences/route.ts`
+  - `src/app/api/internal/campaigns/[campaignId]/sequences/[sequenceId]/route.ts`
+  - `src/app/api/internal/campaigns/sequences/[sequenceId]/steps/route.ts`
+  - `src/app/api/internal/campaigns/sequences/[sequenceId]/steps/[stepId]/route.ts`
+  - `src/app/api/internal/campaigns/[campaignId]/social-posts/route.ts`
+  - `src/app/api/internal/campaigns/[campaignId]/social-posts/[postId]/route.ts`
+  - `src/app/api/internal/campaigns/[campaignId]/calendar/route.ts`
+  - `src/app/api/internal/campaigns/[campaignId]/route.ts`
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/API_BOUNDARY.md`, `docs/agent-reports/railfin-dev.md`.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 04:45 UTC — task-00207 campaigns phase-1 foundation + PRD update
 - Added campaigns internal contracts + in-memory phase-1 store:
   - `src/api/internal/campaigns/contracts.ts`

@@ -1,3 +1,11 @@
+## 2026-03-09 — Campaigns API engine v1 shipped (task-00209)
+- Replaced campaigns contract persistence from in-memory records to Supabase-backed table helpers in `src/lib/supabase/campaigns.ts`.
+- Added campaigns detail + engine routes for sequences, steps, social post scheduling, and calendar timeline listing.
+- Added strict validation contracts for sequence/step CRUD and social post create/update payloads with safe fail-closed `fieldErrors`.
+- Added deterministic `sampleContactIds` in targeting preview response while keeping existing counts contract and compatibility for current Campaigns UI.
+- Kept existing `GET/POST /api/internal/campaigns` contracts compatible with task-00208 UI behavior.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-09 — Campaigns UI builder v1 shipped (task-00210)
 - Upgraded Campaigns page from foundation scaffold to usable v1 builder surface.
 - Added sequence editor in campaign creation flow with add-sequence/add-step and step-type-specific forms for email, wait, and condition branches.
