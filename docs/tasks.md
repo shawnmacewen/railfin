@@ -5,7 +5,7 @@
 - Scope delivered:
   - Refined Campaign create modal step editor with clearer step grouping/labels for email, wait, and condition step types.
   - Improved condition-step readability with explicit rule-logic wording (`if` all required vs `or` any match), clearer yes/no path fields, and inline helper copy.
-  - Tightened social scheduler form layout with clearer date/time guidance and status-chip treatment in scheduled/timeline lists.
+  - Tightened social scheduler form layout with clearer date/time guidance and refined status-chip treatment in scheduled/timeline lists.
   - Upgraded targeting preview into a clearer summary card for matched/total counts and sample IDs, with explicit but cleaner not-available states.
   - Applied responsive spacing/layout cleanup across campaigns builder sections for better small-screen behavior.
   - Updated campaign UI styles in `src/app/globals.css` with additive `rf-campaigns-*` helpers.

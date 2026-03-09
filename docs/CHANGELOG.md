@@ -1,7 +1,7 @@
 ## 2026-03-09 — Campaigns builder UX polish v2 (task-00212)
 - Improved Campaign create modal sequence editor readability with clearer step grouping and labels for email/wait/condition steps.
 - Upgraded condition step UX with clearer rule logic wording (`if` all required vs `or` any match), better yes/no path field labels, and inline helper guidance.
-- Tightened social scheduler form layout and clarified datetime input expectations; improved status visibility with compact status chips in posts and timeline lists.
+- Tightened social scheduler form layout and clarified datetime input expectations; improved status visibility with refined compact status chips in posts and timeline lists.
 - Refined targeting preview into a clearer summary card (matched/total + sample IDs) and cleaner explicit unavailable/empty states.
 - Applied responsive spacing/layout polish across campaigns builder and scheduler surfaces.
 

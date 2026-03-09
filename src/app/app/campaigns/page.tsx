@@ -279,7 +279,7 @@ export default function CampaignsPage() {
         <div className="rf-events-hero">
           <div>
             <h2 className="rf-library-section-title">Campaigns</h2>
-            <p className="rf-status rf-status-muted">Campaign builder v1: sequence editing, targeting preview, and social scheduler surface.</p>
+            <p className="rf-status rf-status-muted">Campaign builder v2: clearer sequence editing, cleaner targeting preview, and tighter social scheduling.</p>
           </div>
           <button
             type="button"
@@ -386,21 +386,22 @@ export default function CampaignsPage() {
 
                 {isTargetingLoading ? <p className="rf-status rf-status-muted">Loading targeting preview...</p> : null}
                 {!isTargetingLoading && !targetingError && targetingSummary ? (
-                  <>
-                    <div className="rf-campaigns-chip-row" aria-label="Contacts summary">
-                      <span className="rf-badge">Matched contacts: {targetingSummary.matched}</span>
-                      <span className="rf-badge">Total contacts: {targetingSummary.total}</span>
-                    </div>
+                  <div className="rf-campaigns-targeting-summary" aria-label="Contacts summary">
+                    <div><p className="rf-campaigns-helper">Matched contacts</p><strong>{targetingSummary.matched}</strong></div>
+                    <div><p className="rf-campaigns-helper">Total contacts</p><strong>{targetingSummary.total}</strong></div>
                     <p className="rf-status rf-status-muted">Sample IDs: {targetingSamples.length > 0 ? targetingSamples.join(", ") : "No sample IDs available."}</p>
-                  </>
+                  </div>
                 ) : null}
-                {!isTargetingLoading && !targetingError && !targetingSummary ? <p className="rf-status rf-status-muted">No targeting preview data yet.</p> : null}
-                {targetingError ? <p className="rf-status rf-status-error">{targetingError}</p> : null}
+                {!isTargetingLoading && !targetingError && !targetingSummary ? <p className="rf-campaigns-empty-note">No targeting preview data yet.</p> : null}
+                {targetingError ? <p className="rf-campaigns-empty-note">{targetingError}</p> : null}
               </div>
 
               <div className="rf-campaigns-builder-stack">
                 <div className="rf-crm-table-toolbar">
-                  <h4 className="rf-library-section-title">Sequence builder</h4>
+                  <div>
+                    <h4 className="rf-library-section-title">Sequence builder</h4>
+                    <p className="rf-campaigns-helper">Group steps by intent (email, wait, condition) for easier review.</p>
+                  </div>
                   <button
                     type="button"
                     className="rf-crm-add-button"
@@ -442,6 +443,9 @@ export default function CampaignsPage() {
                     <div className="rf-campaigns-step-list">
                       {sequence.steps.map((step) => (
                         <section key={step.id} className="rf-campaigns-step-card">
+                          <div className="rf-campaigns-step-head">
+                            <strong>{step.type === "email" ? "Email step" : step.type === "wait" ? "Wait step" : "Condition step"}</strong>
+                          </div>
                           <label htmlFor={`step-type-${step.id}`}>Step type</label>
                           <select
                             id={`step-type-${step.id}`}
@@ -505,7 +509,8 @@ export default function CampaignsPage() {
 
                           {step.type === "condition" ? (
                             <>
-                              <label htmlFor={`condition-operator-${step.id}`}>Operator</label>
+                              <p className="rf-campaigns-helper">Set logic and branch paths for yes/no outcomes.</p>
+                              <label htmlFor={`condition-operator-${step.id}`}>Rule logic</label>
                               <select
                                 id={`condition-operator-${step.id}`}
                                 value={step.conditionOperator}
@@ -514,8 +519,8 @@ export default function CampaignsPage() {
                                   setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, conditionOperator: next } : candidate) }));
                                 }}
                               >
-                                <option value="if">if</option>
-                                <option value="or">or</option>
+                                <option value="if">if (all required)</option>
+                                <option value="or">or (any match)</option>
                               </select>
                               <label htmlFor={`condition-rules-${step.id}`}>Rules JSON</label>
                               <textarea
@@ -526,7 +531,7 @@ export default function CampaignsPage() {
                                   setDraftSequences((prev) => prev.map((item) => item.id !== sequence.id ? item : { ...item, steps: item.steps.map((candidate) => candidate.id === step.id ? { ...candidate, conditionRulesText: next } : candidate) }));
                                 }}
                               />
-                              <label htmlFor={`condition-yes-${step.id}`}>Yes sequence ID</label>
+                              <label htmlFor={`condition-yes-${step.id}`}>Yes path sequence ID</label>
                               <input
                                 id={`condition-yes-${step.id}`}
                                 value={step.yesSequenceId}
@@ -536,7 +541,7 @@ export default function CampaignsPage() {
                                 }}
                                 required
                               />
-                              <label htmlFor={`condition-no-${step.id}`}>No sequence ID</label>
+                              <label htmlFor={`condition-no-${step.id}`}>No path sequence ID</label>
                               <input
                                 id={`condition-no-${step.id}`}
                                 value={step.noSequenceId}
@@ -664,14 +669,21 @@ export default function CampaignsPage() {
               }
             }}
           >
-            <label htmlFor="social-platform">Platform</label>
-            <select id="social-platform" value={socialPlatform} onChange={(event) => setSocialPlatform(event.target.value)}>
-              {SOCIAL_PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}
-            </select>
+            <div className="rf-campaigns-social-form-row">
+              <div>
+                <label htmlFor="social-platform">Platform</label>
+                <select id="social-platform" value={socialPlatform} onChange={(event) => setSocialPlatform(event.target.value)}>
+                  {SOCIAL_PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="social-scheduled-for">Scheduled for</label>
+                <input id="social-scheduled-for" type="datetime-local" value={socialScheduledFor} onChange={(event) => setSocialScheduledFor(event.target.value)} required />
+                <p className="rf-campaigns-helper">Date/time uses your local browser timezone.</p>
+              </div>
+            </div>
             <label htmlFor="social-content">Content</label>
             <textarea id="social-content" value={socialContent} onChange={(event) => setSocialContent(event.target.value)} required />
-            <label htmlFor="social-scheduled-for">Scheduled for</label>
-            <input id="social-scheduled-for" type="datetime-local" value={socialScheduledFor} onChange={(event) => setSocialScheduledFor(event.target.value)} required />
             <div className="rf-crm-modal-actions"><button type="submit" disabled={isSocialSaving}>{isSocialSaving ? "Scheduling..." : "Schedule post"}</button></div>
             {socialSaveError ? <p className="rf-status rf-status-error">{socialSaveError}</p> : null}
           </form>
@@ -684,7 +696,7 @@ export default function CampaignsPage() {
               {!isSocialLoading && !socialError && socialItems.length === 0 ? <p className="rf-status rf-status-muted">No scheduled social posts.</p> : null}
               {!isSocialLoading && !socialError && socialItems.length > 0 ? (
                 <ul>
-                  {socialItems.map((post) => <li key={post.id}><strong>{post.platform}</strong> • {post.status} • {formatDate(post.scheduled_for)}</li>)}
+                  {socialItems.map((post) => <li key={post.id}><strong>{post.platform}</strong> <span className="rf-campaigns-status-chip">{post.status}</span> {formatDate(post.scheduled_for)}</li>)}
                 </ul>
               ) : null}
             </section>
@@ -696,7 +708,7 @@ export default function CampaignsPage() {
               {!isSocialLoading && !socialCalendarError && socialCalendarItems.length === 0 ? <p className="rf-status rf-status-muted">No calendar items.</p> : null}
               {!isSocialLoading && !socialCalendarError && socialCalendarItems.length > 0 ? (
                 <ul>
-                  {socialCalendarItems.map((item) => <li key={item.id}>{item.title || item.platform || "Scheduled item"} • {item.starts_at ? formatDate(item.starts_at) : "No start time"} • {item.status || "pending"}</li>)}
+                  {socialCalendarItems.map((item) => <li key={item.id}><strong>{item.title || item.platform || "Scheduled item"}</strong> <span className="rf-campaigns-status-chip">{item.status || "pending"}</span> {item.starts_at ? formatDate(item.starts_at) : "No start time"}</li>)}
                 </ul>
               ) : null}
             </section>

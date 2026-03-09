@@ -1,3 +1,21 @@
+## 2026-03-09 06:25 UTC — task-00212 Campaigns builder UX polish v2
+- Polished `src/app/app/campaigns/page.tsx` campaign-builder UX for sequence editing readability and reduced confusion in step configuration.
+- Added clearer step structure/labels + helper copy:
+  - step header with type label and step index badge
+  - helper text for email composition, wait timing guidance, and condition branching intent.
+- Improved condition step readability:
+  - operator labels now read `if (all required)` / `or (any match)`
+  - grouped rule editor and explicit yes/no path fields in a cleaner responsive layout.
+- Refined targeting preview section:
+  - switched from loose chips to summary card with matched/total emphasis and sample IDs block
+  - cleaner explicit notes for empty/unavailable states.
+- Tightened social scheduler UX:
+  - grouped platform + datetime in a responsive row
+  - added local-time helper note
+  - introduced compact status chips in scheduled-post and timeline lists.
+- Added additive styles in `src/app/globals.css` for helper text, summary cards, condition/branch grids, social row, status chips, and spacing/responsiveness cleanup.
+- Updated docs (`docs/tasks.md`, `docs/CHANGELOG.md`, `docs/UI_FOUNDATIONS.md`, lane report) and verified build passes.
+
 ## 2026-03-09 05:45 UTC — task-00210 Campaigns UI builder v1
 - Upgraded `src/app/app/campaigns/page.tsx` from phase-1 scaffold to a usable v1 builder flow.
 - Added campaign sequence builder in create modal:
