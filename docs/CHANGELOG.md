@@ -1,3 +1,8 @@
+## 2026-03-11 — Tiny configure smoke note (task-00225)
+- Added subtle non-functional Configure footer note: **System status: operational** in `src/app/app/configure/page.tsx`.
+- Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/agent-reports/railfin-ui.md`.
+- Build in isolated UI worktree remains blocked by runtime permission issue (`next: Permission denied`).
+
 ## 2026-03-09 — Campaign automation template packs UI (task-00219)
 - Added event-focused Campaign template packs in Create flow: **Pre-event nurture**, **Registrant reminders**, and **Post-event follow-up**.
 - Added template preview summary before apply (template description + sequence/step scaffold counts).

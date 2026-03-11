@@ -30,6 +30,9 @@ export default function ConfigurePage() {
         </Link>
         .
       </p>
+      <p className="rf-status rf-status-muted" aria-live="polite">
+        System status: operational
+      </p>
     </Card>
   );
 }

@@ -1,3 +1,13 @@
+## task-00225 — UI — Tiny configure smoke change
+
+- Status: **Done**
+- Branch: `feat/ui/task-00225-ui-smoke-change`
+- Scope delivered:
+  - Added subtle non-functional footer note on Configure page: `System status: operational`.
+  - No contract/behavior changes; layout remains stable.
+  - Updated docs (`tasks`, `CHANGELOG`, `agent-reports/railfin-ui`).
+  - Build verification attempted in lane worktree; blocked by environment permission issue (`next: Permission denied`).
+
 ## task-00219 — UI — Campaign automation template packs (event-focused)
 
 - Status: **Done**
