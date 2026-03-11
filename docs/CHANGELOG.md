@@ -586,4 +586,3 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Documented SEC lane worktree isolation operational control in SECURITY_BASELINE to prevent branch drift and accidental cross-lane commits.
 - Recorded docs-only closeout in tasks/changelog/sec lane report.
 - Build skipped (docs-only).
-<<<<<<< HEAD
