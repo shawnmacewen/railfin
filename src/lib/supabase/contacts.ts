@@ -161,6 +161,35 @@ export async function updateContactInTable(input: {
   return { ok: true, contact: data ? mapContact(data as ContactRow) : null };
 }
 
+export async function getContactFromTable(id: string): Promise<{ ok: true; contact: Contact | null } | { ok: false; blocked: ContactPersistenceBlocked }> {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false, blocked: client.blocked };
+
+  const { data, error } = await client.client
+    .from("contacts")
+    .select("id, full_name, primary_email, primary_phone, source, stage, created_at, updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) return { ok: false, blocked: blockedFromError(error) };
+  return { ok: true, contact: data ? mapContact(data as ContactRow) : null };
+}
+
+export async function deleteContactFromTable(id: string): Promise<{ ok: true; deleted: boolean } | { ok: false; blocked: ContactPersistenceBlocked }> {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false, blocked: client.blocked };
+
+  const { data, error } = await client.client
+    .from("contacts")
+    .delete()
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) return { ok: false, blocked: blockedFromError(error) };
+  return { ok: true, deleted: Boolean(data?.id) };
+}
+
 export async function listContactsFromTable(): Promise<{ ok: true; contacts: Contact[] } | { ok: false; blocked: ContactPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };

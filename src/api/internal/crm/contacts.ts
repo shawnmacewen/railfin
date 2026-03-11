@@ -1,4 +1,4 @@
-import { createContactInTable, listContactsFromTable, updateContactInTable, type ContactStage } from "../../../lib/supabase/contacts";
+import { createContactInTable, deleteContactFromTable, getContactFromTable, listContactsFromTable, updateContactInTable, type ContactStage } from "../../../lib/supabase/contacts";
 import { listLeadsFromTable } from "../../../lib/supabase/leads";
 import { contactFromContactTable, contactFromLead, type ContactRecord } from "./normalization";
 
@@ -142,4 +142,41 @@ export async function internalContactsUpdate(input: { contactId: string; body?: 
   }
 
   return { ok: true as const, data: contactFromContactTable(updated.contact) };
+}
+
+
+export async function internalContactsGet(input: { contactId: string }) {
+  const contactId = normalizeString(input.contactId);
+  if (!contactId) {
+    return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
+  }
+
+  const found = await getContactFromTable(contactId);
+  if (!found.ok) {
+    return { ok: false as const, error: found.blocked.error, blocked: found.blocked };
+  }
+
+  if (!found.contact) {
+    return { ok: false as const, error: "Contact not found" };
+  }
+
+  return { ok: true as const, data: contactFromContactTable(found.contact) };
+}
+
+export async function internalContactsDelete(input: { contactId: string }) {
+  const contactId = normalizeString(input.contactId);
+  if (!contactId) {
+    return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
+  }
+
+  const deleted = await deleteContactFromTable(contactId);
+  if (!deleted.ok) {
+    return { ok: false as const, error: deleted.blocked.error, blocked: deleted.blocked };
+  }
+
+  if (!deleted.deleted) {
+    return { ok: false as const, error: "Contact not found" };
+  }
+
+  return { ok: true as const, data: { id: contactId, deleted: true } };
 }
