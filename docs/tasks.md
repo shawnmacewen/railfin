@@ -2248,3 +2248,12 @@
   - Added `GET`, `PUT/PATCH`, and `DELETE` handlers for `/api/internal/crm/contacts/[contactId]`.
   - Preserved fail-closed validation, safe errors, auth guard, and no-store headers.
   - Kept contacts persistence + leads compatibility bridge intact.
+
+## task-00229 — DEV — Events mutations API (serialized recovery)
+- Status: **Done**
+- Branch: `feat/dev/task-00229-events-mutations-api`
+- Scope delivered:
+  - Added event detail fetch for edit prefill: `GET /api/internal/events/[eventId]`.
+  - Added event update support: `PATCH/PUT /api/internal/events/[eventId]`.
+  - Added event delete support: `DELETE /api/internal/events/[eventId]`.
+  - Preserved auth guard, no-store headers, fail-closed validation, and safe errors.

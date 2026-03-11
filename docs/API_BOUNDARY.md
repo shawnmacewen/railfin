@@ -748,3 +748,11 @@ Library listing is wired to table-backed draft persistence (`public.drafts`) and
 - `event_registration_intents` is provisioned as defensive write-ahead/raw-intake storage for future ingestion hardening; phase-1 handlers do not yet persist to it.
 - Enum boundaries are enforced by DB `CHECK` constraints to mirror API allowlists (`status`, `attendance_intent`).
 - No DB migration runner is currently wired in repository scripts; operators must run bootstrap SQL manually in Supabase SQL Editor/psql for environment readiness.
+
+### Events detail/mutation (task-00229)
+- `GET /api/internal/events/[eventId]` → fetch single event for editor prefill.
+- `PATCH|PUT /api/internal/events/[eventId]` → update full event payload (`title`, `date`, `summary`, `location`, `status`).
+- `DELETE /api/internal/events/[eventId]` → delete event by id.
+- Auth: internal API auth required.
+- Cache: `Cache-Control: no-store` on success/error/unauthorized.
+- Validation: strict allowlist + bounded fields + safe `fieldErrors`.

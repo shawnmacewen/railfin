@@ -1,8 +1,9 @@
 import { internalCampaignEventTriggerProcess } from "../campaigns/contracts";
-import { AttendanceIntent, EventStatus, createEventRecord, createRegistrationRecord, listEventRecords, readEventRecord } from "./store";
+import { AttendanceIntent, EventStatus, createEventRecord, createRegistrationRecord, deleteEventRecord, listEventRecords, readEventRecord, updateEventRecord } from "./store";
 
 type ValidationError = { field: string; message: string };
 type EventCreateBody = { title?: unknown; date?: unknown; summary?: unknown; location?: unknown; status?: unknown };
+type EventUpdateBody = EventCreateBody;
 type RegistrationCreateBody = { eventId?: unknown; name?: unknown; email?: unknown; phone?: unknown; attendanceIntent?: unknown };
 
 const ALLOWED_EVENT_STATUSES: EventStatus[] = ["draft", "scheduled", "cancelled", "completed"];
@@ -16,16 +17,7 @@ function looksLikeIsoDate(value: string): boolean { const asDate = new Date(valu
 function isValidEmail(value: string): boolean { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value); }
 function normalizeString(value: unknown): string { return typeof value === "string" ? value.trim() : ""; }
 
-export function internalEventsList() {
-  const items = listEventRecords();
-  return { ok: true as const, data: { items, total: items.length } };
-}
-
-export function internalEventsCreate(input: { body?: EventCreateBody }) {
-  const body = input.body;
-  if (!isPlainObject(body)) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." } satisfies ValidationError] };
-  if (!hasOnlyKeys(body, ["title", "date", "summary", "location", "status"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported fields in request body." } satisfies ValidationError] };
-
+function validateEventBody(body: EventCreateBody | EventUpdateBody): { fieldErrors: ValidationError[]; parsed?: { title: string; date: string; summary: string; location: string; status: EventStatus } } {
   const title = normalizeString(body.title);
   const date = normalizeString(body.date);
   const summary = normalizeString(body.summary);
@@ -39,9 +31,55 @@ export function internalEventsCreate(input: { body?: EventCreateBody }) {
   if (!location) fieldErrors.push({ field: "location", message: "location is required." }); else if (location.length > 160) fieldErrors.push({ field: "location", message: "location must be 160 characters or fewer." });
   if (!isEventStatus(statusCandidate)) fieldErrors.push({ field: "status", message: "status must be one of draft, scheduled, cancelled, completed." });
 
-  if (fieldErrors.length > 0) return { ok: false as const, error: "Validation failed", fieldErrors };
-  const status = statusCandidate as EventStatus;
-  return { ok: true as const, data: createEventRecord({ title, date, summary, location, status }) };
+  if (fieldErrors.length > 0) return { fieldErrors };
+  return { fieldErrors, parsed: { title, date, summary, location, status: statusCandidate as EventStatus } };
+}
+
+export function internalEventsList() {
+  const items = listEventRecords();
+  return { ok: true as const, data: { items, total: items.length } };
+}
+
+export function internalEventsCreate(input: { body?: EventCreateBody }) {
+  const body = input.body;
+  if (!isPlainObject(body)) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." } satisfies ValidationError] };
+  if (!hasOnlyKeys(body, ["title", "date", "summary", "location", "status"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported fields in request body." } satisfies ValidationError] };
+
+  const { fieldErrors, parsed } = validateEventBody(body);
+  if (fieldErrors.length > 0 || !parsed) return { ok: false as const, error: "Validation failed", fieldErrors };
+  return { ok: true as const, data: createEventRecord(parsed) };
+}
+
+export function internalEventsGet(input: { eventId?: unknown }) {
+  const eventId = normalizeString(input.eventId);
+  if (!eventId) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "eventId", message: "eventId is required." } satisfies ValidationError] };
+  const event = readEventRecord(eventId);
+  if (!event) return { ok: false as const, error: "Event not found" };
+  return { ok: true as const, data: event };
+}
+
+export function internalEventsUpdate(input: { eventId?: unknown; body?: EventUpdateBody }) {
+  const eventId = normalizeString(input.eventId);
+  if (!eventId) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "eventId", message: "eventId is required." } satisfies ValidationError] };
+
+  const body = input.body;
+  if (!isPlainObject(body)) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." } satisfies ValidationError] };
+  if (!hasOnlyKeys(body, ["title", "date", "summary", "location", "status"])) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported fields in request body." } satisfies ValidationError] };
+
+  const { fieldErrors, parsed } = validateEventBody(body);
+  if (fieldErrors.length > 0 || !parsed) return { ok: false as const, error: "Validation failed", fieldErrors };
+
+  const updated = updateEventRecord({ eventId, ...parsed });
+  if (!updated) return { ok: false as const, error: "Event not found" };
+  return { ok: true as const, data: updated };
+}
+
+export function internalEventsDelete(input: { eventId?: unknown }) {
+  const eventId = normalizeString(input.eventId);
+  if (!eventId) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "eventId", message: "eventId is required." } satisfies ValidationError] };
+  const deleted = deleteEventRecord(eventId);
+  if (!deleted) return { ok: false as const, error: "Event not found" };
+  return { ok: true as const, data: { id: eventId, deleted: true } };
 }
 
 export async function internalRegistrationSubmit(input: { body?: RegistrationCreateBody }) {

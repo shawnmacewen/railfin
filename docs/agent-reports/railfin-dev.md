@@ -224,3 +224,8 @@
 - Added contact lookup/delete helpers and contact detail route mutations.
 - API now supports edit/update/delete flow needed by CRM UI.
 - Build verified pass.
+
+### task-00229 — Events mutations API
+- Implemented events detail/update/delete route support for UI edit/delete flows.
+- Added contract/store mutation helpers with fail-closed validation and safe errors.
+- Build verified pass.
