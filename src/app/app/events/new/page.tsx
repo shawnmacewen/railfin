@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { Card } from "../../../../ui/primitives";
 
@@ -11,6 +12,10 @@ type EventFormState = {
   summary: string;
   location: string;
 };
+
+type EventDetailResponse =
+  | { ok: true; data: { id: string; title: string; date: string; summary: string; location: string } }
+  | { ok: false; error?: string };
 
 type CommunicationTouchpoint = {
   offsetDays: string;
@@ -51,7 +56,11 @@ const INITIAL_TOUCHPOINTS: CommunicationTouchpoint[] = [
   },
 ];
 
-export default function NewEventPage() {
+function EventEditorPage() {
+  const searchParams = useSearchParams();
+  const eventId = (searchParams.get("eventId") || "").trim();
+  const isEditMode = Boolean(eventId);
+
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<EventFormState>(INITIAL_FORM);
   const [touchpointCount, setTouchpointCount] = useState<1 | 2 | 3>(1);
@@ -59,6 +68,44 @@ export default function NewEventPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingEvent, setIsLoadingEvent] = useState(false);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+    let active = true;
+
+    async function loadForEdit() {
+      setIsLoadingEvent(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/internal/events/${encodeURIComponent(eventId)}`, { credentials: "include" });
+        const payload = (await response.json().catch(() => null)) as EventDetailResponse | null;
+        if (!response.ok || !payload?.ok) {
+          if (!active) return;
+          setError(payload && !payload.ok && payload.error ? payload.error : "Could not load event for editing.");
+          return;
+        }
+
+        if (!active) return;
+        setForm({
+          title: payload.data.title || "",
+          date: payload.data.date ? payload.data.date.slice(0, 10) : "",
+          summary: payload.data.summary || "",
+          location: payload.data.location || "",
+        });
+      } catch {
+        if (!active) return;
+        setError("Could not load event for editing.");
+      } finally {
+        if (active) setIsLoadingEvent(false);
+      }
+    }
+
+    void loadForEdit();
+    return () => {
+      active = false;
+    };
+  }, [eventId, isEditMode]);
 
   const isStep1Complete = useMemo(
     () => Boolean(form.title.trim() && form.date && form.summary.trim() && form.location.trim()),
@@ -69,7 +116,7 @@ export default function NewEventPage() {
 
   return (
     <Card>
-      <h2 className="rf-library-section-title">Create Event · Step {step}</h2>
+      <h2 className="rf-library-section-title">{isEditMode ? "Edit Event" : "Create Event"} · Step {step}</h2>
       <p className="rf-status rf-status-muted">
         {step === 1
           ? "Capture event basics, then continue to communication planning."
@@ -79,6 +126,8 @@ export default function NewEventPage() {
       <p className="rf-status rf-status-muted" aria-live="polite">
         Wizard progress: Step {step} of 2
       </p>
+
+      {isLoadingEvent ? <p className="rf-status rf-status-muted">Loading event...</p> : null}
 
       {step === 1 ? (
         <form
@@ -96,44 +145,16 @@ export default function NewEventPage() {
           }}
         >
           <label htmlFor="event-title">Event title</label>
-          <input
-            id="event-title"
-            name="title"
-            value={form.title}
-            onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-            placeholder="Railfin Spring Launch Meetup"
-            required
-          />
+          <input id="event-title" name="title" value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} placeholder="Railfin Spring Launch Meetup" required />
 
           <label htmlFor="event-date">Event date</label>
-          <input
-            id="event-date"
-            name="date"
-            type="date"
-            value={form.date}
-            onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
-            required
-          />
+          <input id="event-date" name="date" type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} required />
 
           <label htmlFor="event-summary">Summary</label>
-          <textarea
-            id="event-summary"
-            name="summary"
-            value={form.summary}
-            onChange={(event) => setForm((current) => ({ ...current, summary: event.target.value }))}
-            placeholder="What this event is about"
-            required
-          />
+          <textarea id="event-summary" name="summary" value={form.summary} onChange={(event) => setForm((current) => ({ ...current, summary: event.target.value }))} placeholder="What this event is about" required />
 
           <label htmlFor="event-location">Location</label>
-          <input
-            id="event-location"
-            name="location"
-            value={form.location}
-            onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))}
-            placeholder="Downtown HQ · Austin, TX"
-            required
-          />
+          <input id="event-location" name="location" value={form.location} onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))} placeholder="Downtown HQ · Austin, TX" required />
 
           <button type="submit" disabled={!isStep1Complete}>
             Continue to Step 2
@@ -149,8 +170,11 @@ export default function NewEventPage() {
             setIsSubmitting(true);
 
             try {
-              const response = await fetch("/api/internal/events", {
-                method: "POST",
+              const url = isEditMode ? `/api/internal/events/${encodeURIComponent(eventId)}` : "/api/internal/events";
+              const method = isEditMode ? "PATCH" : "POST";
+
+              const response = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({
@@ -169,27 +193,24 @@ export default function NewEventPage() {
                     ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
                     : "";
                 const fallbackError = payload && !payload.ok ? payload.error : null;
-                setError(validationMessage || fallbackError || "Could not create event. Please try again.");
+                setError(validationMessage || fallbackError || `Could not ${isEditMode ? "update" : "create"} event. Please try again.`);
                 return;
               }
 
               setStatus(
-                `Event created and communication draft saved with ${touchpointCount} planned touchpoint${touchpointCount > 1 ? "s" : ""}.`,
+                isEditMode
+                  ? `Event updated. Communication draft retained with ${touchpointCount} planned touchpoint${touchpointCount > 1 ? "s" : ""}.`
+                  : `Event created and communication draft saved with ${touchpointCount} planned touchpoint${touchpointCount > 1 ? "s" : ""}.`,
               );
             } catch {
-              setError("Could not create event. Please try again.");
+              setError(`Could not ${isEditMode ? "update" : "create"} event. Please try again.`);
             } finally {
               setIsSubmitting(false);
             }
           }}
         >
           <label htmlFor="touchpoint-count">Number of pre-event touchpoints</label>
-          <select
-            id="touchpoint-count"
-            name="touchpointCount"
-            value={String(touchpointCount)}
-            onChange={(event) => setTouchpointCount(Number(event.target.value) as 1 | 2 | 3)}
-          >
+          <select id="touchpoint-count" name="touchpointCount" value={String(touchpointCount)} onChange={(event) => setTouchpointCount(Number(event.target.value) as 1 | 2 | 3)}>
             <option value="1">1 touchpoint</option>
             <option value="2">2 touchpoints</option>
             <option value="3">3 touchpoints</option>
@@ -198,95 +219,34 @@ export default function NewEventPage() {
           {visibleTouchpoints.map((touchpoint, index) => (
             <fieldset key={`touchpoint-${index}`}>
               <legend>Touchpoint {index + 1}</legend>
-
               <label htmlFor={`touchpoint-${index}-offset`}>Send before event (days)</label>
-              <input
-                id={`touchpoint-${index}-offset`}
-                type="number"
-                min={1}
-                max={90}
-                value={touchpoint.offsetDays}
-                onChange={(event) =>
-                  setTouchpoints((current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index ? { ...item, offsetDays: event.target.value } : item,
-                    ),
-                  )
-                }
-              />
-
+              <input id={`touchpoint-${index}-offset`} type="number" min={1} max={90} value={touchpoint.offsetDays} onChange={(event) => setTouchpoints((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, offsetDays: event.target.value } : item)))} />
               <label htmlFor={`touchpoint-${index}-time`}>Scheduled send time (local)</label>
-              <input
-                id={`touchpoint-${index}-time`}
-                type="time"
-                value={touchpoint.sendTime}
-                onChange={(event) =>
-                  setTouchpoints((current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index ? { ...item, sendTime: event.target.value } : item,
-                    ),
-                  )
-                }
-              />
-
+              <input id={`touchpoint-${index}-time`} type="time" value={touchpoint.sendTime} onChange={(event) => setTouchpoints((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, sendTime: event.target.value } : item)))} />
               <label htmlFor={`touchpoint-${index}-subject`}>Email subject placeholder</label>
-              <input
-                id={`touchpoint-${index}-subject`}
-                value={touchpoint.subject}
-                onChange={(event) =>
-                  setTouchpoints((current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index ? { ...item, subject: event.target.value } : item,
-                    ),
-                  )
-                }
-              />
-
+              <input id={`touchpoint-${index}-subject`} value={touchpoint.subject} onChange={(event) => setTouchpoints((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, subject: event.target.value } : item)))} />
               <label htmlFor={`touchpoint-${index}-body`}>Email body placeholder</label>
-              <textarea
-                id={`touchpoint-${index}-body`}
-                rows={4}
-                value={touchpoint.body}
-                onChange={(event) =>
-                  setTouchpoints((current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index ? { ...item, body: event.target.value } : item,
-                    ),
-                  )
-                }
-              />
+              <textarea id={`touchpoint-${index}-body`} rows={4} value={touchpoint.body} onChange={(event) => setTouchpoints((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, body: event.target.value } : item)))} />
             </fieldset>
           ))}
 
           <div>
-            <button
-              type="button"
-              onClick={() => {
-                setStep(1);
-                setError(null);
-                setStatus("Returned to Step 1. Event basics are still available.");
-              }}
-              disabled={isSubmitting}
-            >
+            <button type="button" onClick={() => { setStep(1); setError(null); setStatus("Returned to Step 1. Event basics are still available."); }} disabled={isSubmitting}>
               Back to Step 1
             </button>{" "}
             <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating event..." : "Create event and save communication plan"}
+              {isSubmitting ? (isEditMode ? "Saving event..." : "Creating event...") : isEditMode ? "Save event updates" : "Create event and save communication plan"}
             </button>
           </div>
         </form>
       )}
 
       {error ? (
-        <p className="rf-status rf-status-error" role="alert">
-          {error}
-        </p>
+        <p className="rf-status rf-status-error" role="alert">{error}</p>
       ) : null}
 
       {status ? (
-        <p className="rf-status rf-status-success" role="status">
-          {status}
-        </p>
+        <p className="rf-status rf-status-success" role="status">{status}</p>
       ) : null}
 
       {status && !error && step === 2 ? (
@@ -295,5 +255,13 @@ export default function NewEventPage() {
         </p>
       ) : null}
     </Card>
+  );
+}
+
+export default function NewEventPage() {
+  return (
+    <Suspense fallback={<Card><p className="rf-status rf-status-muted">Loading event editor...</p></Card>}>
+      <EventEditorPage />
+    </Suspense>
   );
 }

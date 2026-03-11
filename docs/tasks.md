@@ -2248,3 +2248,11 @@
   - Added `GET`, `PUT/PATCH`, and `DELETE` handlers for `/api/internal/crm/contacts/[contactId]`.
   - Preserved fail-closed validation, safe errors, auth guard, and no-store headers.
   - Kept contacts persistence + leads compatibility bridge intact.
+
+## task-0030 — UI — Events mutations UI (serialized recovery)
+- Status: **Done**
+- Branch: `feat/ui/task-0030-events-mutations-ui`
+- Scope delivered:
+  - Added Edit/Delete controls on Events list cards.
+  - Edit now routes to event editor with `eventId` query and prefilled data.
+  - Added delete confirmation flow and list refresh after successful delete.

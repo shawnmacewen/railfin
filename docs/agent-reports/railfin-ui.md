@@ -357,3 +357,8 @@
   - Build verification: `npm run build` passed.
 
 - 2026-03-06 04:34 UTC task-00191: shipped Lexical selection-target command hardening, inline toolbar link popover (no native prompt), list toggle/content-preservation fixes, and underline persistence contract fix; updated UI foundations/tasks/changelog/lane report; build passed.
+### task-0030 — Events mutations UI
+- Added events list edit/delete actions.
+- Added event editor prefill + update mode support.
+- Added delete confirmation + reload behavior.
+- Build verified pass.

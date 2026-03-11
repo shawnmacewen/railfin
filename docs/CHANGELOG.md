@@ -597,3 +597,8 @@ This change log is written for humans. It tracks major shipped milestones and pr
 ## 2026-03-11 — CRM contacts edit/delete API pass (task-00227)
 - Added internal contacts get/delete support and route-level `GET`/`PUT|PATCH`/`DELETE` at `/api/internal/crm/contacts/[contactId]`.
 - Preserved fail-closed validation + safe errors and existing auth/no-store posture.
+
+## 2026-03-11 — Events edit/delete UI flow (task-0030)
+- Added Edit/Delete controls to Events page.
+- Event editor now supports edit mode with prefilled data via `eventId` and save updates.
+- Added delete confirmation + reload behavior after delete.
