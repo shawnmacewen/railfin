@@ -1634,3 +1634,14 @@ Evidence source of truth: `docs/LAUNCH_EVIDENCE.md` (updated 2026-03-01 02:21 UT
 - **Decision: GO (MVP gate passed)**
 - Blocker class: **None for MVP-critical criteria** under current documented policy.
 - Follow-up (non-blocking): collect AI primary/fallback runtime evidence as post-MVP hardening artifact.
+
+## Operations control — lane worktree isolation
+
+To reduce branch drift and cross-lane commit risk during parallel agent execution, SEC lane tasks are executed from a dedicated worktree path (for example: `/home/node/worktrees/railfin-sec`) with an explicit task branch checkout per assignment.
+
+Control intent:
+- Isolate lane-local working state from other lane branches.
+- Prevent accidental commits from stale/default branches.
+- Improve auditability by mapping task id -> worktree path -> branch -> commit SHA.
+
+Operator reminder: before each task, confirm `pwd`, branch name, and `HEAD` SHA in the assigned worktree, then post STARTED/COMPLETED lifecycle updates with ACK policy v1.

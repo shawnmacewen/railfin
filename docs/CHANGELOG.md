@@ -573,3 +573,8 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added internal Events contracts and APIs for create/list events and submit registrations.
 - Enforced fail-closed validation (strict fields, enum allowlists, bounds) and safe non-leaky error responses.
 - Kept outbound email sending disabled for this phase.
+
+## 2026-03-11 — SEC worktree isolation operations note (task-00226)
+- Documented SEC lane worktree isolation operational control in SECURITY_BASELINE to prevent branch drift and accidental cross-lane commits.
+- Recorded docs-only closeout in tasks/changelog/sec lane report.
+- Build skipped (docs-only).

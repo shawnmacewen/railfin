@@ -2201,3 +2201,12 @@
   - Added protected internal APIs for event create/list and registration submit.
   - Added fail-closed validation and safe error payloads.
   - Updated API boundary/changelog/dev lane docs and ran `npm run build` (pass).
+
+## task-00226 — SEC — Worktree isolation ops note (smoke docs pass)
+
+- Status: **Done**
+- Branch: `feat/sec/task-00226-sec-smoke-doc-pass`
+- Scope delivered:
+  - Added operations note to SECURITY_BASELINE documenting lane worktree isolation usage to reduce branch drift/cross-lane contamination risk.
+  - Updated task/changelog/sec-report docs for traceability.
+  - Build step intentionally skipped (docs-only).
