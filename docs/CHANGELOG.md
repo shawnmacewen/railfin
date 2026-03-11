@@ -1,3 +1,10 @@
+## 2026-03-11 — CRM contact mutation UX (task-00228)
+- Updated CRM top action label to **Add Contact**.
+- Added contact Edit actions in both table and mobile card surfaces with prefilled modal edit flow.
+- Added contact Delete actions in both surfaces with explicit confirmation prompt.
+- Preserved responsive behavior and current create-contact flow.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-11 — Tiny configure smoke note (task-00225)
 - Added subtle non-functional Configure footer note: **System status: operational** in `src/app/app/configure/page.tsx`.
 - Updated docs: `docs/tasks.md`, `docs/CHANGELOG.md`, `docs/agent-reports/railfin-ui.md`.

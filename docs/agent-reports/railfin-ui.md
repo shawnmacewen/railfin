@@ -1,3 +1,11 @@
+## 2026-03-11 13:06 UTC — task-00228 CRM contacts mutations UI
+- Changed CRM toolbar primary button label from `Add New Lead` to `Add Contact` in `src/app/app/crm/page.tsx`.
+- Added row/card-level **Edit** and **Delete** actions for contacts.
+- Added shared modal flow for create/edit with prefilled values for edit mode.
+- Added explicit delete confirmation UI before delete mutation attempt.
+- Added minimal CRM action/confirm styles in `src/app/globals.css` (`rf-crm-row-actions`, `rf-crm-delete-confirm`).
+- Verified build passes with `npm run build`.
+
 ## 2026-03-11 05:20 UTC — task-00225 UI smoke change
 - Added a tiny non-functional Configure footer note in `src/app/app/configure/page.tsx`: `System status: operational`.
 - Kept style subtle by reusing existing muted status text treatment (`rf-status rf-status-muted`); no layout/flow contract changes.

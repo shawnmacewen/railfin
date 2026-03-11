@@ -1,3 +1,14 @@
+## task-00228 — UI — CRM contacts mutations UI (Add/Edit/Delete)
+
+- Status: **Done**
+- Branch: `feat/ui/task-00228-crm-contacts-mutations-ui`
+- Scope delivered:
+  - Renamed CRM primary action button from **Add New Lead** to **Add Contact**.
+  - Added Edit actions in table and card views with shared modal/form flow and prefilled contact values.
+  - Added Delete actions in table and card views with explicit confirmation UI.
+  - Preserved responsive table/card behavior and existing create flow semantics.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-00225 — UI — Tiny configure smoke change
 
 - Status: **Done**
