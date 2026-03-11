@@ -28,6 +28,7 @@ export default function EventsPage() {
   const [items, setItems] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
   const loadEvents = useCallback(async () => {
     setIsLoading(true);
@@ -58,6 +59,32 @@ export default function EventsPage() {
 
   const hasEvents = useMemo(() => items.length > 0, [items.length]);
 
+  async function onDelete(eventId: string, title: string) {
+    const confirmed = window.confirm(`Delete event \"${title}\"? This cannot be undone.`);
+    if (!confirmed) return;
+
+    setStatus(null);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/internal/events/${encodeURIComponent(eventId)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const payload = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+
+      if (!response.ok || !payload?.ok) {
+        setError(payload?.error || "Could not delete event right now.");
+        return;
+      }
+
+      setStatus("Event deleted.");
+      await loadEvents();
+    } catch {
+      setError("Could not delete event right now.");
+    }
+  }
+
   return (
     <div className="rf-events-page">
       <Card>
@@ -77,19 +104,22 @@ export default function EventsPage() {
       <Card>
         <h3 className="rf-library-section-title">Upcoming Events</h3>
 
+        {error ? (
+          <p className="rf-status rf-status-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {status ? (
+          <p className="rf-status rf-status-success" role="status">
+            {status}
+          </p>
+        ) : null}
+
         {isLoading ? (
           <p className="rf-status rf-status-muted" role="status" aria-live="polite">
             Loading events...
           </p>
-        ) : error ? (
-          <div className="rf-events-empty-state">
-            <p className="rf-status rf-status-error" role="alert">
-              Unable to load events: {error}
-            </p>
-            <button type="button" onClick={() => void loadEvents()}>
-              Retry
-            </button>
-          </div>
         ) : hasEvents ? (
           <ul className="rf-events-list">
             {items.map((event) => (
@@ -97,6 +127,14 @@ export default function EventsPage() {
                 <h4>{event.title}</h4>
                 <p className="rf-status rf-status-muted">{formatEventDate(event.date)}</p>
                 <p className="rf-status rf-status-muted">{event.location}</p>
+                <div className="rf-crm-card-actions">
+                  <Link href={`/app/events/new?eventId=${encodeURIComponent(event.id)}`} className="rf-inline-link">
+                    Edit
+                  </Link>
+                  <button type="button" className="rf-inline-delete" onClick={() => void onDelete(event.id, event.title)}>
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

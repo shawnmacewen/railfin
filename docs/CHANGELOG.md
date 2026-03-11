@@ -601,3 +601,8 @@ This change log is written for humans. It tracks major shipped milestones and pr
 ## 2026-03-11 — Events edit/delete API mutations (task-00229)
 - Added internal event detail, update, and delete endpoints at `/api/internal/events/[eventId]` for edit-prefill and mutation flows.
 - Added contract/store support for event get/update/delete while preserving existing validation and security posture.
+
+## 2026-03-11 — Events edit/delete UI flow (task-0030)
+- Added Edit/Delete controls to Events page.
+- Event editor now supports edit mode with prefilled data via `eventId` and save updates.
+- Added delete confirmation + reload behavior after delete.

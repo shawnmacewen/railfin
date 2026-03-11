@@ -2257,3 +2257,11 @@
   - Added event update support: `PATCH/PUT /api/internal/events/[eventId]`.
   - Added event delete support: `DELETE /api/internal/events/[eventId]`.
   - Preserved auth guard, no-store headers, fail-closed validation, and safe errors.
+
+## task-0030 — UI — Events mutations UI (serialized recovery)
+- Status: **Done**
+- Branch: `feat/ui/task-0030-events-mutations-ui`
+- Scope delivered:
+  - Added Edit/Delete controls on Events list cards.
+  - Edit now routes to event editor with `eventId` query and prefilled data.
+  - Added delete confirmation flow and list refresh after successful delete.

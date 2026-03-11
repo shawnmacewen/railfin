@@ -1001,3 +1001,8 @@ Rerun completed after hosted path repair, verifying current route/component cont
   - `/app/help/compliance-basics`
 - Added top-level shortcut route `src/app/help/page.tsx` redirecting to `/app/help`.
 - Added additive help styles in `src/app/globals.css` under `rf-help-*` classes (no shell redesign).
+
+## task-0030 — Events mutation controls
+- Events list now exposes Edit/Delete actions per item.
+- Edit flow reuses existing event wizard screen in edit mode.
+- Delete path requires explicit confirmation and refreshes list state.
