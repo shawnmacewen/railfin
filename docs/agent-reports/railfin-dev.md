@@ -216,3 +216,6 @@
 - Added `docs/events_bootstrap.sql` with idempotent DDL for `events`, `event_registrations`, and `event_registration_intents` (+ indexes and API-aligned checks/defaults).
 - Updated boundary/task/changelog docs with manual migration guidance because repository scripts do not include a DB migration runner.
 - Build verification: `npm run build` passed.
+
+## 2026-03-11 04:44 UTC — task-00224 lane smoke
+- lane smoke task 00224

@@ -573,3 +573,6 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added internal Events contracts and APIs for create/list events and submit registrations.
 - Enforced fail-closed validation (strict fields, enum allowlists, bounds) and safe non-leaky error responses.
 - Kept outbound email sending disabled for this phase.
+
+## 2026-03-11 — DEV lane smoke task-00224
+- Added a minimal docs-only smoke change to validate DEV lane commit/push flow.

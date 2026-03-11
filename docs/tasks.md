@@ -2201,3 +2201,11 @@
   - Added protected internal APIs for event create/list and registration submit.
   - Added fail-closed validation and safe error payloads.
   - Updated API boundary/changelog/dev lane docs and ran `npm run build` (pass).
+
+## task-00224 — DEV — lane smoke change
+- Status: **Done**
+- Branch: `feat/dev/task-00224-dev-smoke-change`
+- Scope delivered:
+  - Added lane smoke note to dev agent report.
+  - Added changelog smoke entry.
+  - Build smoke executed for lane validation.
