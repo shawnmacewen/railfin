@@ -20,7 +20,7 @@ type LeadsListResponse =
   | { ok: true; data: { items: Lead[]; total: number } }
   | { ok: false; error?: string };
 
-type LeadCreateResponse =
+type LeadMutationResponse =
   | { ok: true; data: Lead }
   | { ok: false; error?: string; fieldErrors?: Array<{ field?: string; message?: string }> };
 
@@ -48,6 +48,11 @@ export default function CrmPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,10 +67,12 @@ export default function CrmPage() {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
-  const closeCreateModal = useCallback(() => {
+  const closeAnyModal = useCallback(() => {
     setIsCreateOpen(false);
+    setIsEditOpen(false);
     setSaveError(null);
     setIsSaving(false);
+    setEditingLeadId(null);
   }, []);
 
   const loadLeads = useCallback(async () => {
@@ -78,14 +85,14 @@ export default function CrmPage() {
 
       if (!response.ok || !payload?.ok) {
         setItems([]);
-        setLoadError(payload && "error" in payload && payload.error ? payload.error : "Could not load leads right now.");
+        setLoadError(payload && "error" in payload && payload.error ? payload.error : "Could not load contacts right now.");
         return;
       }
 
       setItems(Array.isArray(payload.data.items) ? payload.data.items : []);
     } catch {
       setItems([]);
-      setLoadError("Could not load leads right now.");
+      setLoadError("Could not load contacts right now.");
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +103,7 @@ export default function CrmPage() {
   }, [loadLeads]);
 
   useEffect(() => {
-    if (!isCreateOpen) return;
+    if (!isCreateOpen && !isEditOpen) return;
 
     const focusTimer = window.setTimeout(() => {
       nameInputRef.current?.focus();
@@ -105,7 +112,7 @@ export default function CrmPage() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        closeCreateModal();
+        closeAnyModal();
         return;
       }
 
@@ -142,7 +149,7 @@ export default function CrmPage() {
       document.removeEventListener("keydown", onKeyDown);
       triggerRef.current?.focus();
     };
-  }, [closeCreateModal, isCreateOpen]);
+  }, [closeAnyModal, isCreateOpen, isEditOpen]);
 
   const filteredItems = useMemo(
     () => items.filter((lead) => matchesLeadSearch(lead, searchQuery)),
@@ -152,29 +159,131 @@ export default function CrmPage() {
   const hasLeads = items.length > 0;
   const hasFilteredLeads = filteredItems.length > 0;
 
+  const openCreateModal = () => {
+    setEditingLeadId(null);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setSource("");
+    setStatus("new");
+    setSaveError(null);
+    setSaveSuccess(null);
+    setIsCreateOpen(true);
+  };
+
+  const openEditModal = (lead: Lead) => {
+    setEditingLeadId(lead.id);
+    setName(lead.name);
+    setEmail(lead.email);
+    setPhone(lead.phone ?? "");
+    setSource(lead.source ?? "");
+    setStatus(lead.status);
+    setSaveError(null);
+    setSaveSuccess(null);
+    setIsEditOpen(true);
+  };
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSaveError(null);
+    setSaveSuccess(null);
+    setIsSaving(true);
+
+    const isEdit = Boolean(editingLeadId);
+
+    try {
+      const response = await fetch(
+        isEdit ? `/api/internal/crm/contacts/${encodeURIComponent(editingLeadId as string)}` : "/api/internal/crm/leads",
+        {
+          method: isEdit ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(
+            isEdit
+              ? {
+                  fullName: name,
+                  primaryEmail: email,
+                  primaryPhone: phone || undefined,
+                  source: source || undefined,
+                  stage: status,
+                }
+              : {
+                  name,
+                  email,
+                  phone: phone || undefined,
+                  source: source || undefined,
+                  status,
+                },
+          ),
+        },
+      );
+
+      const payload = (await response.json().catch(() => null)) as LeadMutationResponse | null;
+
+      if (!response.ok || !payload?.ok) {
+        const validationMessage = payload && !payload.ok
+          ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
+          : "";
+        const fallback = payload && !payload.ok ? payload.error : null;
+        setSaveError(validationMessage || fallback || `Could not ${isEdit ? "update" : "save"} contact.`);
+        return;
+      }
+
+      await loadLeads();
+      setSaveSuccess(isEdit ? "Contact updated." : "Contact created.");
+      closeAnyModal();
+    } catch {
+      setSaveError(`Could not ${isEdit ? "update" : "save"} contact.`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    setIsDeleting(true);
+    setSaveError(null);
+
+    try {
+      const response = await fetch(`/api/internal/crm/contacts/${encodeURIComponent(pendingDeleteId)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        setSaveError("Delete is not available yet in this environment.");
+        return;
+      }
+
+      setItems((prev) => prev.filter((lead) => lead.id !== pendingDeleteId));
+      setSaveSuccess("Contact deleted.");
+      setPendingDeleteId(null);
+    } catch {
+      setSaveError("Could not delete contact.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="rf-crm-page">
       <Card>
         <div className="rf-crm-table-toolbar">
-          <h2 className="rf-library-section-title">Leads</h2>
+          <h2 className="rf-library-section-title">Contacts</h2>
           <div className="rf-crm-toolbar-actions">
             <button
               ref={triggerRef}
               type="button"
               className="rf-crm-add-button"
-              onClick={() => {
-                setIsCreateOpen(true);
-                setSaveError(null);
-                setSaveSuccess(null);
-              }}
+              onClick={openCreateModal}
               aria-haspopup="dialog"
-              aria-expanded={isCreateOpen}
-              aria-controls="rf-crm-create-lead-modal"
+              aria-expanded={isCreateOpen || isEditOpen}
+              aria-controls="rf-crm-contact-modal"
             >
-              Add New Lead
+              Add Contact
             </button>
             <div className="rf-crm-search-wrap">
-              <label htmlFor="crm-lead-search" className="rf-sr-only">Search leads</label>
+              <label htmlFor="crm-lead-search" className="rf-sr-only">Search contacts</label>
               <input
                 id="crm-lead-search"
                 type="search"
@@ -187,75 +296,31 @@ export default function CrmPage() {
         </div>
 
         {saveSuccess ? <p className="rf-status rf-status-success" role="status">{saveSuccess}</p> : null}
+        {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
 
-        {isCreateOpen ? (
+        {isCreateOpen || isEditOpen ? (
           <div
             className="rf-crm-modal-backdrop"
             onClick={(event) => {
-              if (event.target === event.currentTarget) closeCreateModal();
+              if (event.target === event.currentTarget) closeAnyModal();
             }}
           >
             <div
-              id="rf-crm-create-lead-modal"
+              id="rf-crm-contact-modal"
               ref={modalRef}
               className="rf-crm-modal"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="rf-crm-create-lead-title"
+              aria-labelledby="rf-crm-contact-modal-title"
             >
               <div className="rf-crm-modal-header">
-                <h3 id="rf-crm-create-lead-title" className="rf-library-section-title">Create Lead</h3>
-                <button type="button" className="rf-crm-modal-close" aria-label="Close new lead modal" onClick={closeCreateModal}>×</button>
+                <h3 id="rf-crm-contact-modal-title" className="rf-library-section-title">
+                  {isEditOpen ? "Edit Contact" : "Create Contact"}
+                </h3>
+                <button type="button" className="rf-crm-modal-close" aria-label="Close contact modal" onClick={closeAnyModal}>×</button>
               </div>
 
-              <form
-                className="rf-events-form"
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  setSaveError(null);
-                  setSaveSuccess(null);
-                  setIsSaving(true);
-
-                  try {
-                    const response = await fetch("/api/internal/crm/leads", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      credentials: "include",
-                      body: JSON.stringify({
-                        name,
-                        email,
-                        phone: phone || undefined,
-                        source: source || undefined,
-                        status,
-                      }),
-                    });
-
-                    const payload = (await response.json().catch(() => null)) as LeadCreateResponse | null;
-
-                    if (!response.ok || !payload?.ok) {
-                      const validationMessage = payload && !payload.ok
-                        ? payload.fieldErrors?.map((item) => item.message).filter(Boolean).join(" ")
-                        : "";
-                      const fallback = payload && !payload.ok ? payload.error : null;
-                      setSaveError(validationMessage || fallback || "Could not save lead.");
-                      return;
-                    }
-
-                    setName("");
-                    setEmail("");
-                    setPhone("");
-                    setSource("");
-                    setStatus("new");
-                    await loadLeads();
-                    setSaveSuccess("Lead created.");
-                    closeCreateModal();
-                  } catch {
-                    setSaveError("Could not save lead.");
-                  } finally {
-                    setIsSaving(false);
-                  }
-                }}
-              >
+              <form className="rf-events-form" onSubmit={onSubmit}>
                 <label htmlFor="crm-name">Name</label>
                 <input id="crm-name" ref={nameInputRef} value={name} onChange={(event) => setName(event.target.value)} required />
 
@@ -276,21 +341,30 @@ export default function CrmPage() {
                 </select>
 
                 <div className="rf-crm-modal-actions">
-                  <button type="button" onClick={closeCreateModal}>Cancel</button>
-                  <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Create Lead"}</button>
+                  <button type="button" onClick={closeAnyModal}>Cancel</button>
+                  <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : isEditOpen ? "Save Contact" : "Create Contact"}</button>
                 </div>
               </form>
+            </div>
+          </div>
+        ) : null}
 
-              {saveError ? <p className="rf-status rf-status-error" role="alert">{saveError}</p> : null}
+        {pendingDeleteId ? (
+          <div className="rf-crm-delete-confirm" role="alertdialog" aria-modal="true" aria-labelledby="crm-delete-title">
+            <p id="crm-delete-title">Delete this contact?</p>
+            <p className="rf-status rf-status-muted">This action cannot be undone.</p>
+            <div className="rf-crm-modal-actions">
+              <button type="button" onClick={() => setPendingDeleteId(null)} disabled={isDeleting}>Cancel</button>
+              <button type="button" onClick={() => void confirmDelete()} disabled={isDeleting}>{isDeleting ? "Deleting..." : "Delete"}</button>
             </div>
           </div>
         ) : null}
 
         {isLoading ? (
-          <p className="rf-status rf-status-muted" role="status">Loading leads...</p>
+          <p className="rf-status rf-status-muted" role="status">Loading contacts...</p>
         ) : loadError ? (
           <div className="rf-events-empty-state">
-            <p className="rf-status rf-status-error" role="alert">Unable to load leads: {loadError}</p>
+            <p className="rf-status rf-status-error" role="alert">Unable to load contacts: {loadError}</p>
             <button type="button" onClick={() => void loadLeads()}>Retry</button>
           </div>
         ) : hasLeads ? (
@@ -306,6 +380,7 @@ export default function CrmPage() {
                       <th scope="col">Source</th>
                       <th scope="col">Status</th>
                       <th scope="col">Created</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -317,13 +392,19 @@ export default function CrmPage() {
                         <td>{lead.source ?? "—"}</td>
                         <td>{lead.status}</td>
                         <td>{formatDate(lead.createdAt)}</td>
+                        <td>
+                          <div className="rf-crm-row-actions">
+                            <button type="button" onClick={() => openEditModal(lead)}>Edit</button>
+                            <button type="button" onClick={() => setPendingDeleteId(lead.id)}>Delete</button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              <ul className="rf-crm-cards" aria-label="Leads list">
+              <ul className="rf-crm-cards" aria-label="Contacts list">
                 {filteredItems.map((lead) => (
                   <li key={`card-${lead.id}`} className="rf-crm-card">
                     <h4>{lead.name}</h4>
@@ -332,15 +413,19 @@ export default function CrmPage() {
                     <p><strong>Source:</strong> {lead.source ?? "—"}</p>
                     <p><strong>Status:</strong> {lead.status}</p>
                     <p><strong>Created:</strong> {formatDate(lead.createdAt)}</p>
+                    <div className="rf-crm-row-actions">
+                      <button type="button" onClick={() => openEditModal(lead)}>Edit</button>
+                      <button type="button" onClick={() => setPendingDeleteId(lead.id)}>Delete</button>
+                    </div>
                   </li>
                 ))}
               </ul>
             </>
           ) : (
-            <p className="rf-status rf-status-muted">No leads match “{searchQuery.trim()}”.</p>
+            <p className="rf-status rf-status-muted">No contacts match “{searchQuery.trim()}”.</p>
           )
         ) : (
-          <p className="rf-status rf-status-muted">No leads yet. Use Add New Lead to create your first record.</p>
+          <p className="rf-status rf-status-muted">No contacts yet. Use Add Contact to create your first record.</p>
         )}
       </Card>
     </div>

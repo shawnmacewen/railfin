@@ -2360,3 +2360,16 @@ button:disabled {
     display: none;
   }
 }
+
+.rf-crm-row-actions {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.rf-crm-delete-confirm {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  border-radius: 10px;
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+}
