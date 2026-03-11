@@ -2212,7 +2212,6 @@
   - Added fail-closed validation and safe error payloads.
   - Updated API boundary/changelog/dev lane docs and ran `npm run build` (pass).
 
-<<<<<<< HEAD
 ## task-00224 — DEV — lane smoke change
 - Status: **Done**
 - Branch: `feat/dev/task-00224-dev-smoke-change`
@@ -2220,7 +2219,7 @@
   - Added lane smoke note to dev agent report.
   - Added changelog smoke entry.
   - Build smoke executed for lane validation.
-=======
+
 ## task-00226 — SEC — Worktree isolation ops note (smoke docs pass)
 
 - Status: **Done**
@@ -2229,4 +2228,3 @@
   - Added operations note to SECURITY_BASELINE documenting lane worktree isolation usage to reduce branch drift/cross-lane contamination risk.
   - Updated task/changelog/sec-report docs for traceability.
   - Build step intentionally skipped (docs-only).
->>>>>>> origin/feat/sec/task-00226-sec-smoke-doc-pass
