@@ -2228,3 +2228,12 @@
   - Added operations note to SECURITY_BASELINE documenting lane worktree isolation usage to reduce branch drift/cross-lane contamination risk.
   - Updated task/changelog/sec-report docs for traceability.
   - Build step intentionally skipped (docs-only).
+
+## task-00227 — DEV — CRM contacts mutations API (small scope)
+- Status: **Done**
+- Branch: `feat/dev/task-00227-crm-contacts-mutations-api`
+- Scope delivered:
+  - Added contacts GET-by-id and DELETE support in internal CRM contacts layer.
+  - Added `GET`, `PUT/PATCH`, and `DELETE` handlers for `/api/internal/crm/contacts/[contactId]`.
+  - Preserved fail-closed validation, safe errors, auth guard, and no-store headers.
+  - Kept contacts persistence + leads compatibility bridge intact.

@@ -586,3 +586,7 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Documented SEC lane worktree isolation operational control in SECURITY_BASELINE to prevent branch drift and accidental cross-lane commits.
 - Recorded docs-only closeout in tasks/changelog/sec lane report.
 - Build skipped (docs-only).
+
+## 2026-03-11 — CRM contacts edit/delete API pass (task-00227)
+- Added internal contacts get/delete support and route-level `GET`/`PUT|PATCH`/`DELETE` at `/api/internal/crm/contacts/[contactId]`.
+- Preserved fail-closed validation + safe errors and existing auth/no-store posture.

@@ -219,3 +219,8 @@
 
 ## 2026-03-11 04:44 UTC — task-00224 lane smoke
 - lane smoke task 00224
+
+### task-00227 — CRM contacts mutations API (small scope)
+- Added contact lookup/delete helpers and contact detail route mutations.
+- API now supports edit/update/delete flow needed by CRM UI.
+- Build verified pass.
