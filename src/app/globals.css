@@ -1913,6 +1913,21 @@ button:disabled {
   gap: 0.5rem;
 }
 
+.rf-crm-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  border: 1px solid #d3dbf2;
+  background: #f3f6ff;
+  color: #4f5d89;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
 .rf-crm-search-wrap input {
   width: min(26rem, 62vw);
 }
@@ -1990,6 +2005,7 @@ button:disabled {
     flex-direction: column;
     align-items: flex-start;
   }
+
 
   .rf-crm-search-wrap input {
     width: min(100%, 30rem);
@@ -2241,6 +2257,7 @@ button:disabled {
     flex-direction: column;
     align-items: stretch;
   }
+
 
   .rf-crm-search-wrap input,
   .rf-crm-add-button {

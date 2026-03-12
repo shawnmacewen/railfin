@@ -156,6 +156,7 @@ export default function CrmPage() {
     [items, searchQuery],
   );
 
+  const totalContacts = items.length;
   const hasLeads = items.length > 0;
   const hasFilteredLeads = filteredItems.length > 0;
 
@@ -271,6 +272,9 @@ export default function CrmPage() {
         <div className="rf-crm-table-toolbar">
           <h2 className="rf-library-section-title">Contacts</h2>
           <div className="rf-crm-toolbar-actions">
+            <span className="rf-crm-count-badge" aria-label={`Total contacts: ${totalContacts}`}>
+              {totalContacts}
+            </span>
             <button
               ref={triggerRef}
               type="button"

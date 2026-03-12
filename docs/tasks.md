@@ -2284,3 +2284,9 @@
   - Re-verified auth guard and `no-store` headers on events mutation/detail route.
   - Re-ran production build; no regressions detected.
   - No additional API code changes required in this pass.
+
+## task-0033 — UI — CRM contacts count badge
+- Status: **Done**
+- Scope delivered:
+  - Added a compact contacts total badge in the CRM toolbar upper-right area.
+  - Kept existing CRM actions/layout behavior unchanged.

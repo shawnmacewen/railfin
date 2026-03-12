@@ -616,3 +616,6 @@ This change log is written for humans. It tracks major shipped milestones and pr
 ## 2026-03-12 — Events regression verification pass (task-0031)
 - Re-verified events detail/update/delete route behavior and security posture (`auth` + `no-store`).
 - Build verification passed; no additional code changes required.
+
+## 2026-03-12 — CRM toolbar contact-count badge (task-0033)
+- Added a small contacts count badge in the CRM top-right toolbar next to actions.
