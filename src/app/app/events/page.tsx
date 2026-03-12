@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Card } from "../../../ui/primitives";
@@ -25,6 +26,7 @@ function formatEventDate(input: string): string {
 }
 
 export default function EventsPage() {
+  const router = useRouter();
   const [items, setItems] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,9 +130,12 @@ export default function EventsPage() {
                 <p className="rf-status rf-status-muted">{formatEventDate(event.date)}</p>
                 <p className="rf-status rf-status-muted">{event.location}</p>
                 <div className="rf-crm-card-actions">
-                  <Link href={`/app/events/new?eventId=${encodeURIComponent(event.id)}`} className="rf-inline-link">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/app/events/new?eventId=${encodeURIComponent(event.id)}`)}
+                  >
                     Edit
-                  </Link>
+                  </button>
                   <button type="button" className="rf-inline-delete" onClick={() => void onDelete(event.id, event.title)}>
                     Delete
                   </button>
