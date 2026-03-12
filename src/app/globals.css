@@ -2373,3 +2373,19 @@ button:disabled {
   padding: 0.8rem;
   margin-bottom: 0.8rem;
 }
+
+.rf-crm-row-actions button {
+  border: 1px solid #d3dbf2;
+  background: #f7f9ff;
+  color: #1f2a44;
+  border-radius: 6px;
+  padding: 0.24rem 0.52rem;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.rf-crm-row-actions .rf-inline-delete {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+}

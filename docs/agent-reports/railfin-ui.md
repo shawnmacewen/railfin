@@ -1,3 +1,9 @@
+## 2026-03-12 02:03 UTC — task-0032 Events actions style pass
+- Updated `src/app/app/events/page.tsx` action-row class from `rf-crm-card-actions` to shared `rf-crm-row-actions`.
+- Added shared action button styles in `src/app/globals.css` under `rf-crm-row-actions` (base button + `.rf-inline-delete` destructive variant).
+- Scope is style-only to align Events Edit/Delete controls with CRM action controls; no behavior changes.
+- Verified with `npm run build` (pass).
+
 ## 2026-03-11 13:06 UTC — task-00228 CRM contacts mutations UI
 - Changed CRM toolbar primary button label from `Add New Lead` to `Add Contact` in `src/app/app/crm/page.tsx`.
 - Added row/card-level **Edit** and **Delete** actions for contacts.

@@ -1,3 +1,13 @@
+## task-0032 — UI — Events actions style pass (CRM parity)
+
+- Status: **Done**
+- Branch: `feat/ui/task-0032-events-actions-style-pass`
+- Scope delivered:
+  - Normalized Events action-row spacing/class usage to CRM action-row pattern.
+  - Applied shared button styling for action-row buttons so Events Edit/Delete visually match CRM action controls.
+  - No behavior or API contract changes.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-00228 — UI — CRM contacts mutations UI (Add/Edit/Delete)
 
 - Status: **Done**

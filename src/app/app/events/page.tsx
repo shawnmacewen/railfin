@@ -129,7 +129,7 @@ export default function EventsPage() {
                 <h4>{event.title}</h4>
                 <p className="rf-status rf-status-muted">{formatEventDate(event.date)}</p>
                 <p className="rf-status rf-status-muted">{event.location}</p>
-                <div className="rf-crm-card-actions">
+                <div className="rf-crm-row-actions">
                   <button
                     type="button"
                     onClick={() => router.push(`/app/events/new?eventId=${encodeURIComponent(event.id)}`)}

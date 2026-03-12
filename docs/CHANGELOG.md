@@ -1,3 +1,9 @@
+## 2026-03-12 — Events action-row style consistency pass (task-0032)
+- Updated Events list action row to use shared CRM action-row class (`rf-crm-row-actions`).
+- Added shared CRM/Events action button styles and delete variant styling for consistent spacing and visual treatment.
+- No behavior changes; style-only pass.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-11 — CRM contact mutation UX (task-00228)
 - Updated CRM top action label to **Add Contact**.
 - Added contact Edit actions in both table and mobile card surfaces with prefilled modal edit flow.
