@@ -229,3 +229,7 @@
 - Implemented events detail/update/delete route support for UI edit/delete flows.
 - Added contract/store mutation helpers with fail-closed validation and safe errors.
 - Build verified pass.
+
+### task-0031 — Events regression verify/fix
+- Verified events mutation/detail route contract and security controls remain intact.
+- Build pass confirmed; no code patch required in this follow-up.

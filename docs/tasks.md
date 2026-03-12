@@ -2265,3 +2265,12 @@
   - Added Edit/Delete controls on Events list cards.
   - Edit now routes to event editor with `eventId` query and prefilled data.
   - Added delete confirmation flow and list refresh after successful delete.
+
+## task-0031 — DEV — Events regression verify/fix
+- Status: **Done**
+- Branch: `feat/dev/task-0031-events-regression-verify-and-fix`
+- Scope delivered:
+  - Re-verified `/api/internal/events/[eventId]` route surface supports `GET/PATCH/PUT/DELETE`.
+  - Re-verified auth guard and `no-store` headers on events mutation/detail route.
+  - Re-ran production build; no regressions detected.
+  - No additional API code changes required in this pass.

@@ -606,3 +606,7 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added Edit/Delete controls to Events page.
 - Event editor now supports edit mode with prefilled data via `eventId` and save updates.
 - Added delete confirmation + reload behavior after delete.
+
+## 2026-03-12 — Events regression verification pass (task-0031)
+- Re-verified events detail/update/delete route behavior and security posture (`auth` + `no-store`).
+- Build verification passed; no additional code changes required.

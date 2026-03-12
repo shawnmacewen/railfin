@@ -756,3 +756,7 @@ Library listing is wired to table-backed draft persistence (`public.drafts`) and
 - Auth: internal API auth required.
 - Cache: `Cache-Control: no-store` on success/error/unauthorized.
 - Validation: strict allowlist + bounded fields + safe `fieldErrors`.
+
+### Events regression verification (task-0031)
+- Verified `GET|PATCH|PUT|DELETE /api/internal/events/[eventId]` remains active and contract-stable.
+- Verified internal-auth guard and `Cache-Control: no-store` remain enforced on this route.
