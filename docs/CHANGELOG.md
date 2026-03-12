@@ -1,3 +1,9 @@
+## 2026-03-12 — CRM search left-align toolbar pass (task-0034)
+- Repositioned CRM top search input to the left side of the toolbar alongside the Contacts heading.
+- Preserved contact count badge and Add Contact action on the toolbar action side.
+- No behavior/API changes (layout-only).
+- Build verification: `npm run build` passed.
+
 ## 2026-03-12 — Events action-row style consistency pass (task-0032)
 - Updated Events list action row to use shared CRM action-row class (`rf-crm-row-actions`).
 - Added shared CRM/Events action button styles and delete variant styling for consistent spacing and visual treatment.

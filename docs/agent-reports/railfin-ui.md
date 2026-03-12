@@ -1,3 +1,9 @@
+## 2026-03-12 04:05 UTC — task-0034 CRM search left align
+- Updated `src/app/app/crm/page.tsx` toolbar structure so search is rendered in a left-side `rf-crm-toolbar-left` group with the Contacts heading.
+- Preserved right-side action group containing contact count badge + Add Contact button.
+- Updated responsive toolbar behavior in `src/app/globals.css` for `rf-crm-toolbar-left` across existing breakpoints.
+- No behavior/API contract changes; build verified with `npm run build` (pass).
+
 ## 2026-03-12 02:03 UTC — task-0032 Events actions style pass
 - Updated `src/app/app/events/page.tsx` action-row class from `rf-crm-card-actions` to shared `rf-crm-row-actions`.
 - Added shared action button styles in `src/app/globals.css` under `rf-crm-row-actions` (base button + `.rf-inline-delete` destructive variant).

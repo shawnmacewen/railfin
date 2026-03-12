@@ -270,7 +270,19 @@ export default function CrmPage() {
     <div className="rf-crm-page">
       <Card>
         <div className="rf-crm-table-toolbar">
-          <h2 className="rf-library-section-title">Contacts</h2>
+          <div className="rf-crm-toolbar-left">
+            <h2 className="rf-library-section-title">Contacts</h2>
+            <div className="rf-crm-search-wrap">
+              <label htmlFor="crm-lead-search" className="rf-sr-only">Search contacts</label>
+              <input
+                id="crm-lead-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search name, email, source, or status"
+              />
+            </div>
+          </div>
           <div className="rf-crm-toolbar-actions">
             <span className="rf-crm-count-badge" aria-label={`Total contacts: ${totalContacts}`}>
               {totalContacts}
@@ -286,16 +298,6 @@ export default function CrmPage() {
             >
               Add Contact
             </button>
-            <div className="rf-crm-search-wrap">
-              <label htmlFor="crm-lead-search" className="rf-sr-only">Search contacts</label>
-              <input
-                id="crm-lead-search"
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search name, email, source, or status"
-              />
-            </div>
           </div>
         </div>
 

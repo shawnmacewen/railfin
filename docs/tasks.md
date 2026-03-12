@@ -1,3 +1,13 @@
+## task-0034 — UI — CRM search left align
+
+- Status: **Done**
+- Branch: `feat/ui/task-0034-crm-search-left-align`
+- Scope delivered:
+  - Moved CRM top search field to the left side of the toolbar container.
+  - Kept contact count badge and **Add Contact** button intact on the action side.
+  - No behavior or API changes.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-0032 — UI — Events actions style pass (CRM parity)
 
 - Status: **Done**
