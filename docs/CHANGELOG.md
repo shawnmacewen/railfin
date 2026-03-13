@@ -1,3 +1,9 @@
+## 2026-03-13 — Configure nav version label (task-00221)
+- Added a subtle `v<version>` label directly beneath the **Configure** item in the left navigation.
+- Version is now sourced from app/package version metadata (no hardcoded text).
+- Preserved existing nav icon sizing, spacing, collapse behavior, and responsive navigation behavior.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-12 — CRM search left-align toolbar pass (task-0034)
 - Repositioned CRM top search input to the left side of the toolbar alongside the Contacts heading.
 - Preserved contact count badge and Add Contact action on the toolbar action side.

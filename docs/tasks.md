@@ -1,3 +1,14 @@
+## task-00221 — UI — Configure nav version label
+
+- Status: **Done**
+- Branch: `feat/ui/task-00221-nav-config-version-label`
+- Scope delivered:
+  - Added a subtle app version label directly beneath the **Configure** nav item in the left sidebar.
+  - Wired version source from `package.json` via app layout prop into `AppShell` (no hardcoded version string).
+  - Kept nav icon sizes/row spacing/auto-collapse behavior stable by adding a lightweight secondary label style and matching collapsed label-hide transition behavior.
+  - Preserved responsive shell behavior for mobile/off-canvas navigation.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-0034 — UI — CRM search left align
 
 - Status: **Done**

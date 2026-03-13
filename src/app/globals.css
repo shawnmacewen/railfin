@@ -147,6 +147,26 @@ button:disabled {
   padding-bottom: 0.85rem;
 }
 
+.rf-nav-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.04rem;
+}
+
+.rf-nav-version-label {
+  margin-left: 2.42rem;
+  margin-top: -0.08rem;
+  font-size: 0.62rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #8b94ad;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0.9;
+  clip-path: inset(0 0 0 0);
+  transition: opacity 120ms ease, clip-path 180ms ease;
+}
+
 .rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-brand-text {
   opacity: 0;
   clip-path: inset(0 100% 0 0);
@@ -154,6 +174,12 @@ button:disabled {
 }
 
 .rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-item-label {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  pointer-events: none;
+}
+
+.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-version-label {
   opacity: 0;
   clip-path: inset(0 100% 0 0);
   pointer-events: none;
@@ -274,6 +300,10 @@ button:disabled {
 
   .rf-nav-icon-configure {
     color: #63b8d2;
+  }
+
+  .rf-nav-version-label {
+    color: #77809a;
   }
 }
 

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import packageJson from "../../../package.json";
+
 import { AppShell } from "../../ui/app-shell";
 
 function resolveBuildSha(): string {
@@ -21,5 +23,5 @@ function resolveBuildSha(): string {
 }
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  return <AppShell buildSha={resolveBuildSha()}>{children}</AppShell>;
+  return <AppShell buildSha={resolveBuildSha()} appVersion={packageJson.version}>{children}</AppShell>;
 }
