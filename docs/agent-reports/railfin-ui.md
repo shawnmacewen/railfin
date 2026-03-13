@@ -1,3 +1,10 @@
+## 2026-03-13 03:55 UTC — task-00221 Configure nav version label
+- Added a subtle version label under the Configure nav item in `src/ui/app-shell.tsx` using a new `rf-nav-entry` wrapper and `rf-nav-version-label` text node.
+- Wired app version from `package.json` via `src/app/app/layout.tsx` into `AppShell` as `appVersion` (no hardcoded value).
+- Added additive styles in `src/app/globals.css` with collapse-state label hiding parity to preserve nav jitter/spacing behavior.
+- Responsive/mobile nav behavior preserved; no icon size or nav row-height changes.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-12 04:05 UTC — task-0034 CRM search left align
 - Updated `src/app/app/crm/page.tsx` toolbar structure so search is rendered in a left-side `rf-crm-toolbar-left` group with the Contacts heading.
 - Preserved right-side action group containing contact count badge + Add Contact button.

@@ -25,7 +25,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppShell({ children, buildSha }: { children: ReactNode; buildSha?: string }) {
+export function AppShell({ children, buildSha, appVersion }: { children: ReactNode; buildSha?: string; appVersion?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const activeItem = NAV_ITEMS.find((item) => isActive(pathname, item.href));
@@ -166,15 +166,21 @@ export function AppShell({ children, buildSha }: { children: ReactNode; buildSha
         </Link>
         <nav className="rf-nav-list">
           {NAV_ITEMS.map((item) => (
-            <NavItem
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              icon={item.icon}
-              iconClassName={item.iconClassName}
-              active={isActive(pathname, item.href)}
-              onNavigateAttempt={onNavigateAttempt}
-            />
+            <div key={item.href} className="rf-nav-entry">
+              <NavItem
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                iconClassName={item.iconClassName}
+                active={isActive(pathname, item.href)}
+                onNavigateAttempt={onNavigateAttempt}
+              />
+              {item.label === "Configure" && appVersion ? (
+                <div className="rf-nav-version-label" aria-label={`Railfin version ${appVersion}`}>
+                  v{appVersion}
+                </div>
+              ) : null}
+            </div>
           ))}
         </nav>
         <div className="rf-sidebar-controls">

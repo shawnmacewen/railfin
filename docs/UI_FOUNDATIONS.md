@@ -489,6 +489,14 @@
 
 # UI Foundations
 
+## task-00221 — Configure nav version label
+
+- `src/ui/app-shell.tsx` now renders a subtle version label directly under the **Configure** nav item in the left sidebar (`.rf-nav-version-label`).
+- Version source is passed from `src/app/app/layout.tsx` using `package.json` version metadata (avoids hardcoded UI version strings).
+- Added additive nav-entry structure (`.rf-nav-entry`) without changing existing nav row/icon geometry.
+- Added collapsed-state transition parity for the version label so auto-collapse/hide behavior remains visually stable (`opacity + clip-path`, no layout jitter).
+- Responsive/off-canvas nav behavior remains unchanged.
+
 ## task-00214 — Configure APIs catalog page (internal + external)
 
 - Added Configure subpage route `/app/configure/apis` and linked it in Configure subnav as **APIs**.
