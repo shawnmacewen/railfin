@@ -1,3 +1,12 @@
+## 2026-03-13 04:46 UTC — task-00224 Create compliance toggle regression fix
+- Updated `src/ui/editor-shell.tsx` so collapsed/expanded behavior is driven by one derived flag (`isComplianceExpanded`) and used consistently for button label, `aria-expanded`, and compliance body visibility.
+- Kept the single stable top compliance toggle control location (`rf-create-compliance-toggle-row`) from task-00222.
+- Kept default initial compliance state collapsed.
+- Ensured collapse/expand targets the compliance body container directly with `hidden`/`aria-hidden` while keeping `CompliancePanel` mounted to preserve cached findings/results state.
+- Added a lightweight dev-only regression guard that warns if collapsed state and compliance body hidden attribute diverge.
+- Added CSS visibility guard in `src/app/globals.css`: `.rf-create-compliance-card[hidden] { display: none !important; }`.
+- Verified with `npm run build` (pass).
+
 ## 2026-03-13 04:42 UTC — task-00223 Create compliance default collapsed + header copy removal
 - Updated `src/ui/editor-shell.tsx` compliance card render to remove top `Compliance Feedback` heading text.
 - Kept Create compliance default state collapsed/minimized on initial load (`isComplianceCollapsed` remains true by default).

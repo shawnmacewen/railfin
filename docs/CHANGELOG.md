@@ -1,3 +1,12 @@
+## 2026-03-13 — Create compliance toggle regression fix (task-00224)
+- Fixed Create compliance collapsed/expanded binding so toggle label, `aria-expanded`, and body visibility stay in lockstep from a single derived state flag.
+- Kept one stable compliance toggle control location in the top compliance toggle row.
+- Preserved default initial collapsed behavior on first load.
+- Preserved compliance findings cache continuity by keeping `CompliancePanel` mounted while hiding/showing only the compliance card container.
+- Added explicit hidden-state CSS guard for compliance body container (`.rf-create-compliance-card[hidden] { display: none !important; }`) to prevent future visibility drift.
+- Added lightweight dev-only regression guard warning if state/DOM hidden attribute ever diverges.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-13 — Create compliance default collapsed + header copy removal (task-00223)
 - Preserved Create compliance rail default as collapsed/minimized on first load.
 - Removed top compliance card title text (`Compliance Feedback`) to simplify panel chrome.

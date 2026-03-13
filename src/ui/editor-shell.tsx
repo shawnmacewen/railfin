@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { ComplianceFinding, CompliancePanel, SelectedFindingContext } from "./compliance-panel";
@@ -316,6 +316,7 @@ export function EditorShell() {
   const [isPromptAccordionCollapsed, setIsPromptAccordionCollapsed] = useState(false);
   const [isCreateInputCollapsed, setIsCreateInputCollapsed] = useState(false);
   const [isComplianceCollapsed, setIsComplianceCollapsed] = useState(true);
+  const isComplianceExpanded = !isComplianceCollapsed;
   const [loadedDraftTitle, setLoadedDraftTitle] = useState<string | null>(null);
   const [policyUpdatedAt, setPolicyUpdatedAt] = useState<string | null>(null);
   const [remediationPreview, setRemediationPreview] = useState<RemediationPreview | null>(null);
@@ -329,8 +330,19 @@ export function EditorShell() {
   const [isPromptPayloadDrawerOpen, setIsPromptPayloadDrawerOpen] = useState(false);
   const [promptPayloadDebugState, setPromptPayloadDebugState] = useState<PromptPayloadDebugState | null>(null);
   const [promptPayloadCopyFeedback, setPromptPayloadCopyFeedback] = useState<string | null>(null);
+  const complianceBodyRef = useRef<HTMLDivElement | null>(null);
 
   const generationHistoryContextKey = draftId || "session-new";
+
+  useEffect(() => {
+    // Regression guard (task-00224): collapsed state and rendered visibility must stay in lockstep.
+    if (process.env.NODE_ENV !== "production") {
+      const bodyHidden = complianceBodyRef.current?.hidden;
+      if (typeof bodyHidden === "boolean" && bodyHidden !== isComplianceCollapsed) {
+        console.warn("[create/compliance] Toggle state does not match compliance body visibility.");
+      }
+    }
+  }, [isComplianceCollapsed]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1499,20 +1511,20 @@ export function EditorShell() {
 
         </div>
 
-        <aside className={`rf-create-compliance ${isComplianceCollapsed ? "is-collapsed" : ""}`} aria-label="Compliance feedback panel">
+        <aside className={`rf-create-compliance ${isComplianceCollapsed ? "is-collapsed" : ""}`} aria-label="Compliance feedback panel" data-expanded={isComplianceExpanded ? "true" : "false"}>
           <div className="rf-create-compliance-toggle-row">
             <button
               type="button"
               className="rf-create-compliance-toggle"
               onClick={() => setIsComplianceCollapsed((current) => !current)}
-              aria-label={isComplianceCollapsed ? "Open compliance panel" : "Minimize compliance panel"}
-              aria-expanded={!isComplianceCollapsed}
+              aria-label={isComplianceExpanded ? "Minimize compliance panel" : "Open compliance panel"}
+              aria-expanded={isComplianceExpanded}
             >
-              {isComplianceCollapsed ? "⇤ Open Compliance" : "⇥ Minimize Compliance"}
+              {isComplianceExpanded ? "⇥ Minimize Compliance" : "⇤ Open Compliance"}
             </button>
           </div>
 
-          <div className="rf-create-compliance-card" hidden={isComplianceCollapsed} aria-hidden={isComplianceCollapsed}>
+          <div ref={complianceBodyRef} className="rf-create-compliance-card" hidden={!isComplianceExpanded} aria-hidden={!isComplianceExpanded}>
             <CompliancePanel
               activePolicyContext={activePolicyContext}
               content={contentText}
