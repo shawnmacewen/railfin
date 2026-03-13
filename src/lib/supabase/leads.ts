@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { DataScope } from "./scope";
+
 export type LeadStatus = "new" | "contacted" | "qualified" | "closed";
 
 type LeadRow = {
@@ -36,6 +38,8 @@ const REQUIRED_ENV = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] a
 
 export const LEADS_REQUIRED_SQL = `create table if not exists public.leads (
   id text primary key,
+  owner_id text not null,
+  tenant_id text not null,
   name text not null,
   email text not null,
   phone text,
@@ -44,7 +48,8 @@ export const LEADS_REQUIRED_SQL = `create table if not exists public.leads (
   created_at timestamptz not null default timezone('utc', now())
 );
 
-create index if not exists leads_created_at_idx on public.leads(created_at desc);
+create index if not exists leads_owner_created_at_idx on public.leads(owner_id, created_at desc);
+create index if not exists leads_tenant_created_at_idx on public.leads(tenant_id, created_at desc);
 create index if not exists leads_email_idx on public.leads(lower(email));`;
 
 function getClientOrBlocked(): { ok: true; client: SupabaseClient } | { ok: false; blocked: LeadPersistenceBlocked } {
@@ -104,13 +109,23 @@ export async function createLeadInTable(input: {
   phone: string | null;
   source: string | null;
   status: LeadStatus;
+  scope: DataScope;
 }): Promise<{ ok: true; lead: Lead } | { ok: false; blocked: LeadPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
 
   const { data, error } = await client.client
     .from("leads")
-    .insert({ id: randomUUID(), ...input })
+    .insert({
+      id: randomUUID(),
+      owner_id: input.scope.ownerId,
+      tenant_id: input.scope.tenantId,
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      source: input.source,
+      status: input.status,
+    })
     .select("id, name, email, phone, source, status, created_at")
     .single();
 
@@ -118,13 +133,15 @@ export async function createLeadInTable(input: {
   return { ok: true, lead: mapLead(data as LeadRow) };
 }
 
-export async function listLeadsFromTable(): Promise<{ ok: true; leads: Lead[] } | { ok: false; blocked: LeadPersistenceBlocked }> {
+export async function listLeadsFromTable(scope: DataScope): Promise<{ ok: true; leads: Lead[] } | { ok: false; blocked: LeadPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
 
   const { data, error } = await client.client
     .from("leads")
     .select("id, name, email, phone, source, status, created_at")
+    .eq("owner_id", scope.ownerId)
+    .eq("tenant_id", scope.tenantId)
     .order("created_at", { ascending: false });
 
   if (error) return { ok: false, blocked: blockedFromError(error) };

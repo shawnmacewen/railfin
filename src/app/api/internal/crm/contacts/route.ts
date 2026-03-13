@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { internalContactsCreate, internalContactsList } from "../../../../../api/internal/crm/contacts";
-import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuth } from "../../_auth";
+import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuthContext } from "../../_auth";
 
 export async function GET(request: NextRequest) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) return unauthorized;
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const { searchParams } = new URL(request.url);
   const result = await internalContactsList({
     search: searchParams.get("search") ?? undefined,
     stage: searchParams.get("stage") ?? undefined,
     source: searchParams.get("source") ?? undefined,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
   });
 
   if (!result.ok) {
@@ -22,14 +23,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) return unauthorized;
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const body = (await request.json().catch(() => null)) as
     | { fullName?: unknown; primaryEmail?: unknown; primaryPhone?: unknown; source?: unknown; stage?: unknown }
     | null;
 
-  const result = await internalContactsCreate({ body: body ?? undefined });
+  const result = await internalContactsCreate({
+    body: body ?? undefined,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
+  });
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : 500;
     return NextResponse.json(result, { status, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });

@@ -760,3 +760,57 @@ Library listing is wired to table-backed draft persistence (`public.drafts`) and
 ### Events regression verification (task-0031)
 - Verified `GET|PATCH|PUT|DELETE /api/internal/events/[eventId]` remains active and contract-stable.
 - Verified internal-auth guard and `Cache-Control: no-store` remain enforced on this route.
+
+## task-00225 — Supabase auth + user/tenant scoping foundation (phase-1)
+
+### Auth identity resolution (server-authoritative first)
+
+Internal API auth now resolves identity in this order:
+1. **Supabase JWT** (authoritative): bearer token / `sb-access-token` cookie validated via `supabase.auth.getUser(...)`.
+2. **Compat mode** (temporary): same-origin + session cookie fallback when `INTERNAL_API_AUTH_COMPAT_MODE != off`.
+
+Auth context shape used by scoped internal handlers:
+- `userId`
+- `tenantId` (single-org-per-user in phase-1; defaults to `userId` unless `app_metadata.tenant_id` is present)
+- `source` (`supabase-jwt` | `compat`)
+
+### Scoped tables + API enforcement (phase-1 implemented)
+
+Phase-1 scoped table enforcement is active for:
+- `public.drafts`
+- `public.contacts`
+- `public.leads`
+
+Read/write queries for these tables now enforce:
+- `owner_id = auth.userId`
+- `tenant_id = auth.tenantId`
+
+Scoped internal routes:
+- `/api/internal/content/draft`
+- `/api/internal/content/list`
+- `/api/internal/crm/contacts`
+- `/api/internal/crm/contacts/[contactId]`
+- `/api/internal/crm/leads`
+- remediation audit append paths (`/api/internal/compliance/remediation/*`) when writing draft audit history
+
+### Migration/backfill (manual)
+
+Canonical SQL: `docs/auth_segmentation_phase1.sql`
+
+Includes:
+- idempotent `add column if not exists` for `owner_id`, `tenant_id`
+- deterministic backfill to `legacy-owner` / `legacy-tenant`
+- `set not null` after backfill
+- scoped indexes for owner/tenant queries
+- rollback notes
+
+### Cross-user isolation test matrix (API layer)
+
+| Scenario | Expected |
+|---|---|
+| User A creates draft/contact/lead | Success (201/200) |
+| User B reads User A draft/contact/lead id | Not found / empty list in B scope |
+| User A list endpoints | Returns only A-owned rows |
+| Missing JWT + compat off | 401 Unauthorized |
+| Same-origin compat mode request | Allowed with legacy scope until full cutover |
+

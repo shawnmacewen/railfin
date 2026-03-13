@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { internalContactsDelete, internalContactsGet, internalContactsUpdate } from "../../../../../../api/internal/crm/contacts";
-import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuth } from "../../../_auth";
+import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuthContext } from "../../../_auth";
 
 type ContactBody = { fullName?: unknown; primaryEmail?: unknown; primaryPhone?: unknown; source?: unknown; stage?: unknown };
 
@@ -14,11 +14,14 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ contactId: string }> },
 ) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) return unauthorized;
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const params = await context.params;
-  const result = await internalContactsGet({ contactId: params.contactId });
+  const result = await internalContactsGet({
+    contactId: params.contactId,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
+  });
 
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : result.error === "Contact not found" ? 404 : 500;
@@ -32,12 +35,16 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ contactId: string }> },
 ) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) return unauthorized;
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const params = await context.params;
   const body = await parseBody(request);
-  const result = await internalContactsUpdate({ contactId: params.contactId, body });
+  const result = await internalContactsUpdate({
+    contactId: params.contactId,
+    body,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
+  });
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : result.error === "Contact not found" ? 404 : 500;
     return NextResponse.json(result, { status, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
@@ -57,11 +64,14 @@ export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ contactId: string }> },
 ) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) return unauthorized;
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const params = await context.params;
-  const result = await internalContactsDelete({ contactId: params.contactId });
+  const result = await internalContactsDelete({
+    contactId: params.contactId,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
+  });
 
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : result.error === "Contact not found" ? 404 : 500;

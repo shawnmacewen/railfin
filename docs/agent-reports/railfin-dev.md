@@ -233,3 +233,10 @@
 ### task-0031 — Events regression verify/fix
 - Verified events mutation/detail route contract and security controls remain intact.
 - Build pass confirmed; no code patch required in this follow-up.
+
+## 2026-03-13 — task-00225 (auth-seg-001)
+- Implemented phase-1 Supabase-auth-backed identity/scoping foundation.
+- Added `InternalApiAuthContext` with server-authoritative JWT path + compat fallback.
+- Scoped persistence for drafts/contacts/leads by `owner_id` + `tenant_id`.
+- Added deterministic migration/backfill SQL (`docs/auth_segmentation_phase1.sql`) and documented manual execution/rollback notes.
+- Build verification: `npm run build` passed.

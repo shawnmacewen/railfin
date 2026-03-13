@@ -3,8 +3,12 @@ import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { DataScope } from "./scope";
+
 type DraftRow = {
   id: string;
+  owner_id: string;
+  tenant_id: string;
   title: string;
   body: string;
   created_at: string;
@@ -58,12 +62,17 @@ const REQUIRED_ENV = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] a
 
 const REQUIRED_SQL = `create table if not exists public.drafts (
   id text primary key,
+  owner_id text not null,
+  tenant_id text not null,
   title text not null,
   body text not null default '',
   metadata jsonb not null default '{}'::jsonb,
   history jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default timezone('utc', now())
-);`;
+);
+
+create index if not exists drafts_owner_created_idx on public.drafts(owner_id, created_at desc);
+create index if not exists drafts_tenant_created_idx on public.drafts(tenant_id, created_at desc);`;
 
 const DEFAULT_LIST_LIMIT = 20;
 const MAX_LIST_LIMIT = 100;
@@ -160,6 +169,7 @@ function getDraftClientOrBlocked():
 export async function createDraftInTable(input: {
   title?: string;
   body?: string;
+  scope: DataScope;
 }): Promise<{ ok: true; draft: Draft } | { ok: false; blocked: DraftPersistenceBlocked }> {
   const draftClient = getDraftClientOrBlocked();
   if (!draftClient.ok) {
@@ -168,6 +178,8 @@ export async function createDraftInTable(input: {
 
   const payload = {
     id: randomUUID(),
+    owner_id: input.scope.ownerId,
+    tenant_id: input.scope.tenantId,
     title: input.title ?? "Untitled Draft",
     body: input.body ?? "",
   };
@@ -193,6 +205,7 @@ export async function createDraftInTable(input: {
 
 export async function readDraftFromTable(
   id: string,
+  scope: DataScope,
 ): Promise<{ ok: true; draft: Draft | null } | { ok: false; blocked: DraftPersistenceBlocked }> {
   const draftClient = getDraftClientOrBlocked();
   if (!draftClient.ok) {
@@ -203,6 +216,8 @@ export async function readDraftFromTable(
     .from("drafts")
     .select("id, title, body, created_at")
     .eq("id", id)
+    .eq("owner_id", scope.ownerId)
+    .eq("tenant_id", scope.tenantId)
     .maybeSingle();
 
   if (error) {
@@ -220,6 +235,7 @@ export async function readDraftFromTable(
 
 export async function listDraftsFromTable(
   query: DraftListQuery,
+  scope: DataScope,
 ): Promise<{ ok: true; result: DraftListResult } | { ok: false; blocked: DraftPersistenceBlocked }> {
   const draftClient = getDraftClientOrBlocked();
   if (!draftClient.ok) {
@@ -231,6 +247,8 @@ export async function listDraftsFromTable(
   let statement = draftClient.client
     .from("drafts")
     .select("id, title, body, created_at", { count: "exact" })
+    .eq("owner_id", scope.ownerId)
+    .eq("tenant_id", scope.tenantId)
     .order("created_at", { ascending: false })
     .range(normalized.offset, normalized.offset + normalized.limit - 1);
 
@@ -262,11 +280,18 @@ export async function listDraftsFromTable(
 export async function appendDraftRemediationAuditEvent(input: {
   draftId: string;
   event: DraftRemediationAuditEvent;
+  scope: DataScope;
 }): Promise<{ ok: true } | { ok: false; blocked: DraftPersistenceBlocked }> {
   const draftClient = getDraftClientOrBlocked();
   if (!draftClient.ok) return { ok: false, blocked: draftClient.blocked };
 
-  const { data, error } = await draftClient.client.from("drafts").select("metadata, history").eq("id", input.draftId).maybeSingle();
+  const { data, error } = await draftClient.client
+    .from("drafts")
+    .select("metadata, history")
+    .eq("id", input.draftId)
+    .eq("owner_id", input.scope.ownerId)
+    .eq("tenant_id", input.scope.tenantId)
+    .maybeSingle();
   if (error) return { ok: false, blocked: blockedTableAccess("read", error) };
   if (!data) return { ok: true };
 
@@ -277,7 +302,12 @@ export async function appendDraftRemediationAuditEvent(input: {
   const nextMetadata = { ...metadata, remediationAudit: { ...currentRemediationAudit, lastEventId: input.event.id, lastEventAt: input.event.timestampUtc, lastOutcome: input.event.outcome } };
   const nextHistory = [...history, input.event].slice(-200);
 
-  const { error: updateError } = await draftClient.client.from("drafts").update({ metadata: nextMetadata, history: nextHistory }).eq("id", input.draftId);
+  const { error: updateError } = await draftClient.client
+    .from("drafts")
+    .update({ metadata: nextMetadata, history: nextHistory })
+    .eq("id", input.draftId)
+    .eq("owner_id", input.scope.ownerId)
+    .eq("tenant_id", input.scope.tenantId);
   if (updateError) return { ok: false, blocked: blockedTableAccess("write", updateError) };
   return { ok: true };
 }

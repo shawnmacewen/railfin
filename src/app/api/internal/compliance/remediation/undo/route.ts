@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { applyUndoToken, RemediationAuditRecord } from "../../../../../../api/internal/compliance/remediation";
 import { consumeUndoRecordForSession } from "../../../../../../api/internal/compliance/remediation-undo-store";
 import { appendDraftRemediationAuditEvent } from "../../../../../../lib/supabase/drafts";
-import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuth } from "../../../_auth";
+import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuthContext } from "../../../_auth";
 
 type RemediationUndoRequestBody = { undoToken?: string; currentContent?: string };
 
@@ -13,8 +13,8 @@ function hashSnippet(value: string): string {
 }
 
 export async function POST(request: NextRequest) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) return unauthorized;
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const body = (await request.json().catch(() => ({}))) as RemediationUndoRequestBody;
   const undoToken = (body.undoToken || "").trim();
@@ -45,7 +45,11 @@ export async function POST(request: NextRequest) {
     context: { source: "api/internal/compliance/remediation/undo" },
   };
 
-  await appendDraftRemediationAuditEvent({ draftId: audit.draftContextId, event: { ...audit, type: "undo" } });
+  await appendDraftRemediationAuditEvent({
+    draftId: audit.draftContextId,
+    event: { ...audit, type: "undo" },
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
+  });
 
   return NextResponse.json({ ok: true, data: { ...result.data, audit } }, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }

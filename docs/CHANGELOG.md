@@ -662,3 +662,10 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added phased RLS strategy (phase-1 app-layer scoped queries, phase-2 DB-enforced tenant policies) and minimum safe-beta acceptance criteria.
 - Documented current risk hotspots from compat-mode and legacy fallback identities.
 - Captured verification matrix showing current tenant-scoped route/query posture is aligned, with launch-hardening blockers remaining for compat-off evidence and RLS verification.
+
+## 2026-03-13 — task-00225 auth/segmentation phase-1
+- Added `requireInternalApiAuthContext` with Supabase JWT identity resolution and compat fallback mode.
+- Added owner/tenant scoping foundation (`DataScope`) and enforced scoped reads/writes for drafts, contacts, and leads.
+- Updated internal routes to pass authenticated scope context for content/crm endpoints and remediation draft-audit writes.
+- Added migration/backfill SQL: `docs/auth_segmentation_phase1.sql`.
+- Updated `docs/API_BOUNDARY.md` and `docs/PRD_Railfin_v1.md` with auth + segmentation rules.

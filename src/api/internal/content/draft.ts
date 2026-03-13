@@ -3,6 +3,7 @@ import {
   listDraftsFromTable,
   readDraftFromTable,
 } from "../../../lib/supabase/drafts";
+import type { DataScope } from "../../../lib/supabase/scope";
 
 export async function internalContentDraft(request: {
   method: "GET" | "POST";
@@ -11,9 +12,10 @@ export async function internalContentDraft(request: {
   limit?: number;
   offset?: number;
   body?: { title?: string; body?: string };
+  scope: DataScope;
 }) {
   if (request.method === "POST") {
-    const created = await createDraftInTable(request.body ?? {});
+    const created = await createDraftInTable({ ...(request.body ?? {}), scope: request.scope });
 
     if (!created.ok) {
       return {
@@ -30,7 +32,7 @@ export async function internalContentDraft(request: {
   }
 
   if (request.id) {
-    const found = await readDraftFromTable(request.id);
+    const found = await readDraftFromTable(request.id, request.scope);
 
     if (!found.ok) {
       return {
@@ -53,11 +55,14 @@ export async function internalContentDraft(request: {
     };
   }
 
-  const listed = await listDraftsFromTable({
-    q: request.q,
-    limit: request.limit,
-    offset: request.offset,
-  });
+  const listed = await listDraftsFromTable(
+    {
+      q: request.q,
+      limit: request.limit,
+      offset: request.offset,
+    },
+    request.scope,
+  );
 
   if (!listed.ok) {
     return {

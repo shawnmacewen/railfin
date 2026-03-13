@@ -1,5 +1,6 @@
 import { createContactInTable, deleteContactFromTable, getContactFromTable, listContactsFromTable, updateContactInTable, type ContactStage } from "../../../lib/supabase/contacts";
 import { listLeadsFromTable } from "../../../lib/supabase/leads";
+import type { DataScope } from "../../../lib/supabase/scope";
 import { contactFromContactTable, contactFromLead, type ContactRecord } from "./normalization";
 
 type ValidationError = { field: string; message: string };
@@ -95,11 +96,12 @@ function validateContactBody(body: ContactBody | undefined):
   };
 }
 
-export async function internalContactsList(filters: { search?: string; stage?: string; source?: string } = {}) {
-  const listed = await listContactsFromTable();
+export async function internalContactsList(filters: { search?: string; stage?: string; source?: string; scope?: DataScope } = {}) {
+  const scope = filters.scope ?? { ownerId: process.env.INTERNAL_API_DEFAULT_OWNER_ID ?? "legacy-owner", tenantId: process.env.INTERNAL_API_DEFAULT_TENANT_ID ?? "legacy-tenant" };
+  const listed = await listContactsFromTable(scope);
   if (!listed.ok) {
     if (listed.blocked.error.includes("public.contacts table is missing")) {
-      const leadListed = await listLeadsFromTable();
+      const leadListed = await listLeadsFromTable(scope);
       if (!leadListed.ok) return { ok: false as const, error: leadListed.blocked.error, blocked: leadListed.blocked };
       const items = applyFilters(leadListed.leads.map((lead) => contactFromLead(lead)), filters);
       return { ok: true as const, data: { items, total: items.length } };
@@ -111,11 +113,11 @@ export async function internalContactsList(filters: { search?: string; stage?: s
   return { ok: true as const, data: { items, total: items.length } };
 }
 
-export async function internalContactsCreate(input: { body?: ContactBody }) {
+export async function internalContactsCreate(input: { body?: ContactBody; scope: DataScope }) {
   const validated = validateContactBody(input.body);
   if (!validated.ok) return validated;
 
-  const created = await createContactInTable(validated.data);
+  const created = await createContactInTable({ ...validated.data, scope: input.scope });
   if (!created.ok) {
     return { ok: false as const, error: created.blocked.error, blocked: created.blocked };
   }
@@ -123,7 +125,7 @@ export async function internalContactsCreate(input: { body?: ContactBody }) {
   return { ok: true as const, data: contactFromContactTable(created.contact) };
 }
 
-export async function internalContactsUpdate(input: { contactId: string; body?: ContactBody }) {
+export async function internalContactsUpdate(input: { contactId: string; body?: ContactBody; scope: DataScope }) {
   const contactId = normalizeString(input.contactId);
   if (!contactId) {
     return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
@@ -132,7 +134,7 @@ export async function internalContactsUpdate(input: { contactId: string; body?: 
   const validated = validateContactBody(input.body);
   if (!validated.ok) return validated;
 
-  const updated = await updateContactInTable({ id: contactId, ...validated.data });
+  const updated = await updateContactInTable({ id: contactId, ...validated.data, scope: input.scope });
   if (!updated.ok) {
     return { ok: false as const, error: updated.blocked.error, blocked: updated.blocked };
   }
@@ -145,13 +147,13 @@ export async function internalContactsUpdate(input: { contactId: string; body?: 
 }
 
 
-export async function internalContactsGet(input: { contactId: string }) {
+export async function internalContactsGet(input: { contactId: string; scope: DataScope }) {
   const contactId = normalizeString(input.contactId);
   if (!contactId) {
     return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
   }
 
-  const found = await getContactFromTable(contactId);
+  const found = await getContactFromTable(contactId, input.scope);
   if (!found.ok) {
     return { ok: false as const, error: found.blocked.error, blocked: found.blocked };
   }
@@ -163,13 +165,13 @@ export async function internalContactsGet(input: { contactId: string }) {
   return { ok: true as const, data: contactFromContactTable(found.contact) };
 }
 
-export async function internalContactsDelete(input: { contactId: string }) {
+export async function internalContactsDelete(input: { contactId: string; scope: DataScope }) {
   const contactId = normalizeString(input.contactId);
   if (!contactId) {
     return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
   }
 
-  const deleted = await deleteContactFromTable(contactId);
+  const deleted = await deleteContactFromTable(contactId, input.scope);
   if (!deleted.ok) {
     return { ok: false as const, error: deleted.blocked.error, blocked: deleted.blocked };
   }

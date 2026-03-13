@@ -2360,3 +2360,12 @@
   - Defined minimum acceptance criteria for a safe multi-user beta (compat-off, tenant claim fail-closed, RLS + cross-tenant deny tests).
   - Ran implementation verification pass on current code paths and recorded PASS/BLOCKED matrix in security baseline.
   - Build verification: **SKIPPED** (docs-only task; no runtime code changes).
+
+### task-00225 — Supabase auth + user/tenant segmentation foundation pass-1
+- Status: Done
+- Branch: `feat/dev/task-00225-auth-segmentation-pass1`
+- Implemented server-authoritative-first internal auth context (`supabase-jwt` primary, compat fallback).
+- Implemented owner/tenant scoped reads+writes for drafts, contacts, leads internal API paths.
+- Added deterministic idempotent migration/backfill SQL at `docs/auth_segmentation_phase1.sql`.
+- Updated API boundary + PRD v1 auth segmentation sections.
+- Validation: `npm run build` pass.

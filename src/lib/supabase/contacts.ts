@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { LeadStatus } from "./leads";
+import type { DataScope } from "./scope";
 
 export type ContactStage = LeadStatus;
 
@@ -40,6 +41,8 @@ const REQUIRED_ENV = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] a
 
 export const CONTACTS_REQUIRED_SQL = `create table if not exists public.contacts (
   id text primary key,
+  owner_id text not null,
+  tenant_id text not null,
   full_name text not null,
   primary_email text not null,
   primary_phone text,
@@ -49,7 +52,8 @@ export const CONTACTS_REQUIRED_SQL = `create table if not exists public.contacts
   updated_at timestamptz not null default timezone('utc', now())
 );
 
-create index if not exists contacts_created_at_idx on public.contacts(created_at desc);
+create index if not exists contacts_owner_created_at_idx on public.contacts(owner_id, created_at desc);
+create index if not exists contacts_tenant_created_at_idx on public.contacts(tenant_id, created_at desc);
 create index if not exists contacts_email_idx on public.contacts(lower(primary_email));
 create index if not exists contacts_stage_idx on public.contacts(stage);
 create index if not exists contacts_source_idx on public.contacts(source);
@@ -125,13 +129,14 @@ export async function createContactInTable(input: {
   primaryPhone: string | null;
   source: string | null;
   stage: ContactStage;
+  scope: DataScope;
 }): Promise<{ ok: true; contact: Contact } | { ok: false; blocked: ContactPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
 
   const { data, error } = await client.client
     .from("contacts")
-    .insert({ id: randomUUID(), full_name: input.fullName, primary_email: input.primaryEmail, primary_phone: input.primaryPhone, source: input.source, stage: input.stage })
+    .insert({ id: randomUUID(), owner_id: input.scope.ownerId, tenant_id: input.scope.tenantId, full_name: input.fullName, primary_email: input.primaryEmail, primary_phone: input.primaryPhone, source: input.source, stage: input.stage })
     .select("id, full_name, primary_email, primary_phone, source, stage, created_at, updated_at")
     .single();
 
@@ -146,6 +151,7 @@ export async function updateContactInTable(input: {
   primaryPhone: string | null;
   source: string | null;
   stage: ContactStage;
+  scope: DataScope;
 }): Promise<{ ok: true; contact: Contact | null } | { ok: false; blocked: ContactPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
@@ -154,6 +160,8 @@ export async function updateContactInTable(input: {
     .from("contacts")
     .update({ full_name: input.fullName, primary_email: input.primaryEmail, primary_phone: input.primaryPhone, source: input.source, stage: input.stage })
     .eq("id", input.id)
+    .eq("owner_id", input.scope.ownerId)
+    .eq("tenant_id", input.scope.tenantId)
     .select("id, full_name, primary_email, primary_phone, source, stage, created_at, updated_at")
     .maybeSingle();
 
@@ -161,7 +169,7 @@ export async function updateContactInTable(input: {
   return { ok: true, contact: data ? mapContact(data as ContactRow) : null };
 }
 
-export async function getContactFromTable(id: string): Promise<{ ok: true; contact: Contact | null } | { ok: false; blocked: ContactPersistenceBlocked }> {
+export async function getContactFromTable(id: string, scope: DataScope): Promise<{ ok: true; contact: Contact | null } | { ok: false; blocked: ContactPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
 
@@ -169,13 +177,15 @@ export async function getContactFromTable(id: string): Promise<{ ok: true; conta
     .from("contacts")
     .select("id, full_name, primary_email, primary_phone, source, stage, created_at, updated_at")
     .eq("id", id)
+    .eq("owner_id", scope.ownerId)
+    .eq("tenant_id", scope.tenantId)
     .maybeSingle();
 
   if (error) return { ok: false, blocked: blockedFromError(error) };
   return { ok: true, contact: data ? mapContact(data as ContactRow) : null };
 }
 
-export async function deleteContactFromTable(id: string): Promise<{ ok: true; deleted: boolean } | { ok: false; blocked: ContactPersistenceBlocked }> {
+export async function deleteContactFromTable(id: string, scope: DataScope): Promise<{ ok: true; deleted: boolean } | { ok: false; blocked: ContactPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
 
@@ -183,6 +193,8 @@ export async function deleteContactFromTable(id: string): Promise<{ ok: true; de
     .from("contacts")
     .delete()
     .eq("id", id)
+    .eq("owner_id", scope.ownerId)
+    .eq("tenant_id", scope.tenantId)
     .select("id")
     .maybeSingle();
 
@@ -190,13 +202,15 @@ export async function deleteContactFromTable(id: string): Promise<{ ok: true; de
   return { ok: true, deleted: Boolean(data?.id) };
 }
 
-export async function listContactsFromTable(): Promise<{ ok: true; contacts: Contact[] } | { ok: false; blocked: ContactPersistenceBlocked }> {
+export async function listContactsFromTable(scope: DataScope): Promise<{ ok: true; contacts: Contact[] } | { ok: false; blocked: ContactPersistenceBlocked }> {
   const client = getClientOrBlocked();
   if (!client.ok) return { ok: false, blocked: client.blocked };
 
   const { data, error } = await client.client
     .from("contacts")
     .select("id, full_name, primary_email, primary_phone, source, stage, created_at, updated_at")
+    .eq("owner_id", scope.ownerId)
+    .eq("tenant_id", scope.tenantId)
     .order("created_at", { ascending: false });
 
   if (error) return { ok: false, blocked: blockedFromError(error) };

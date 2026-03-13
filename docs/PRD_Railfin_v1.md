@@ -155,3 +155,26 @@ Railfin addresses this by integrating compliance feedback directly into creation
 - Current blockers
 - At-risk (24–72h)
 - Next actions by lane (dev/ui/sec)
+
+## Auth + Tenant Segmentation (phase-1, task-00225)
+
+### Decision
+- Railfin uses Supabase Auth user identity as the server-authoritative principal for protected internal APIs.
+- Tenant model in phase-1 is **single-org-per-user**:
+  - `tenantId = user.app_metadata.tenant_id` when present
+  - otherwise `tenantId = user.id`
+
+### Data isolation baseline
+- Core persisted entities in phase-1 include ownership columns:
+  - `owner_id` (required)
+  - `tenant_id` (required)
+- API read/write paths MUST scope by both keys.
+
+### Backward compatibility
+- Temporary compat mode (`INTERNAL_API_AUTH_COMPAT_MODE`) allows same-origin session-cookie fallback with legacy scope defaults while UI/session migration is completed.
+- Goal for next phase: disable compat mode and require Supabase JWT for all protected internal operations.
+
+### Operational migration
+- Manual idempotent migration script: `docs/auth_segmentation_phase1.sql`
+- Deterministic backfill defaults: `legacy-owner`, `legacy-tenant`
+- Rollback guidance included in script comments.

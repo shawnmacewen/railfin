@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { internalContentDraft } from "../../../../../api/internal/content/draft";
-import { requireInternalApiAuth, INTERNAL_SENSITIVE_NO_STORE_HEADERS } from "../../_auth";
+import { INTERNAL_SENSITIVE_NO_STORE_HEADERS, requireInternalApiAuthContext } from "../../_auth";
 
 type DraftPostBody = {
   title?: string;
@@ -16,10 +16,8 @@ function isValidDraftId(value: string): boolean {
 }
 
 export async function GET(request: NextRequest) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) {
-    return unauthorized;
-  }
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const url = new URL(request.url);
   const id = url.searchParams.get("id") ?? undefined;
@@ -53,6 +51,7 @@ export async function GET(request: NextRequest) {
   const result = await internalContentDraft({
     method: "GET",
     id,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
   });
 
   if (!result.ok) {
@@ -66,15 +65,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const unauthorized = requireInternalApiAuth(request);
-  if (unauthorized) {
-    return unauthorized;
-  }
+  const auth = await requireInternalApiAuthContext(request);
+  if (auth instanceof NextResponse) return auth;
 
   const body = (await request.json().catch(() => ({}))) as DraftPostBody;
   const result = await internalContentDraft({
     method: "POST",
     body,
+    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
   });
 
   if (!result.ok) {

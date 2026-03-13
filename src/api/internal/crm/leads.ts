@@ -1,5 +1,6 @@
 import { createContactInTable } from "../../../lib/supabase/contacts";
 import { createLeadInTable, listLeadsFromTable, type LeadStatus } from "../../../lib/supabase/leads";
+import type { DataScope } from "../../../lib/supabase/scope";
 import { internalContactsList } from "./contacts";
 import { leadFromContactRecord } from "./normalization";
 
@@ -35,14 +36,14 @@ function isLeadStatus(value: unknown): value is LeadStatus {
   return typeof value === "string" && ALLOWED_STATUSES.includes(value as LeadStatus);
 }
 
-export async function internalLeadsList() {
-  const contacts = await internalContactsList();
+export async function internalLeadsList(scope: DataScope) {
+  const contacts = await internalContactsList({ scope });
   if (contacts.ok) {
     const leads = contacts.data.items.map((item) => leadFromContactRecord(item));
     return { ok: true as const, data: { items: leads, total: leads.length } };
   }
 
-  const listed = await listLeadsFromTable();
+  const listed = await listLeadsFromTable(scope);
   if (!listed.ok) {
     return { ok: false as const, error: listed.blocked.error, blocked: listed.blocked };
   }
@@ -50,7 +51,7 @@ export async function internalLeadsList() {
   return { ok: true as const, data: { items: listed.leads, total: listed.leads.length } };
 }
 
-export async function internalLeadsCreate(input: { body?: CreateLeadBody }) {
+export async function internalLeadsCreate(input: { body?: CreateLeadBody; scope: DataScope }) {
   const body = input.body;
   if (!isPlainObject(body)) {
     return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." } satisfies ValidationError] };
@@ -87,6 +88,7 @@ export async function internalLeadsCreate(input: { body?: CreateLeadBody }) {
     primaryPhone: phone || null,
     source: source || null,
     stage: status as LeadStatus,
+    scope: input.scope,
   });
 
   if (contactCreated.ok) {
@@ -110,6 +112,7 @@ export async function internalLeadsCreate(input: { body?: CreateLeadBody }) {
     phone: phone || null,
     source: source || null,
     status: status as LeadStatus,
+    scope: input.scope,
   });
 
   if (!created.ok) {
