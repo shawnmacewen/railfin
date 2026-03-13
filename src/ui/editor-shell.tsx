@@ -1500,30 +1500,21 @@ export function EditorShell() {
         </div>
 
         <aside className={`rf-create-compliance ${isComplianceCollapsed ? "is-collapsed" : ""}`} aria-label="Compliance feedback panel">
-          {isComplianceCollapsed ? (
-            <div className="rf-create-compliance-minimized">
-              <button
-                type="button"
-                className="rf-create-compliance-toggle"
-                onClick={() => setIsComplianceCollapsed(false)}
-                aria-label="Open compliance panel"
-              >
-                ⇤ Open Compliance
-              </button>
-            </div>
-          ) : null}
+          <div className="rf-create-compliance-toggle-row">
+            <button
+              type="button"
+              className="rf-create-compliance-toggle"
+              onClick={() => setIsComplianceCollapsed((current) => !current)}
+              aria-label={isComplianceCollapsed ? "Open compliance panel" : "Minimize compliance panel"}
+              aria-expanded={!isComplianceCollapsed}
+            >
+              {isComplianceCollapsed ? "⇤ Open Compliance" : "⇥ Minimize Compliance"}
+            </button>
+          </div>
 
           <div className="rf-create-compliance-card" hidden={isComplianceCollapsed} aria-hidden={isComplianceCollapsed}>
             <div className="rf-create-compliance-card-header">
               <h3>Compliance Feedback</h3>
-              <button
-                type="button"
-                className="rf-create-compliance-toggle"
-                onClick={() => setIsComplianceCollapsed(true)}
-                aria-label="Minimize compliance panel"
-              >
-                ⇥ Minimize Panel
-              </button>
             </div>
             <CompliancePanel
               activePolicyContext={activePolicyContext}

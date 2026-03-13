@@ -1,3 +1,16 @@
+## task-00222 — UI — Create compliance toggle stabilization
+
+- Status: **Done**
+- Branch: `fix/ui/task-00222-create-compliance-toggle-button-fix`
+- Scope delivered:
+  - Kept Create compliance rail defaulted to **collapsed/minimized** on initial load.
+  - Replaced split open/minimize controls with a single stable toggle button in one consistent top-right location of the compliance rail.
+  - Toggle now flips label/state cleanly: `⇤ Open Compliance` / `⇥ Minimize Compliance`.
+  - Removed prior minimized wrapper/control path that caused right-side visual artifact.
+  - Preserved compliance panel mount/hidden behavior so cached findings/results continue to persist while minimized.
+  - Preserved responsive behavior and no-overlap layout in collapsed mode.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-00221 — UI — Configure nav version label
 
 - Status: **Done**

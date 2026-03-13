@@ -1345,9 +1345,10 @@ button:disabled {
   align-self: start;
 }
 
-.rf-create-compliance-minimized {
-  display: inline-flex;
-  align-items: center;
+.rf-create-compliance-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.4rem;
 }
 
 .rf-create-compliance-card-header {
@@ -1365,22 +1366,13 @@ button:disabled {
   padding: 0.34rem 0.62rem;
   font-size: 0.78rem;
   white-space: nowrap;
-}
-
-.rf-create-compliance-minimized .rf-create-compliance-toggle {
-  width: auto;
   min-width: 11.2rem;
   text-align: center;
 }
 
-.rf-create-compliance-card-header .rf-create-compliance-toggle {
-  min-width: 9.8rem;
-  text-align: center;
-}
-
 @media (max-width: 960px) {
-  .rf-create-compliance-minimized,
-  .rf-create-compliance-minimized .rf-create-compliance-toggle {
+  .rf-create-compliance-toggle-row,
+  .rf-create-compliance-toggle {
     width: 100%;
   }
 }
@@ -1389,10 +1381,6 @@ button:disabled {
   .rf-create-compliance-card-header {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .rf-create-compliance-card-header .rf-create-compliance-toggle {
-    width: 100%;
   }
 }
 
@@ -2169,7 +2157,7 @@ button:disabled {
     gap: 0.7rem;
   }
 
-  .rf-create-compliance-minimized .rf-create-compliance-toggle {
+  .rf-create-compliance-toggle {
     min-width: 10.4rem;
   }
 }
@@ -2259,8 +2247,8 @@ button:disabled {
     order: -1;
   }
 
-  .rf-create-compliance-minimized,
-  .rf-create-compliance-minimized .rf-create-compliance-toggle {
+  .rf-create-compliance-toggle-row,
+  .rf-create-compliance-toggle {
     width: 100%;
   }
 

@@ -1,3 +1,10 @@
+## 2026-03-13 04:35 UTC — task-00222 Create compliance toggle stabilization
+- Updated `src/ui/editor-shell.tsx` compliance rail controls to a single stable toggle button rendered in one location for both states.
+- Removed split control rendering (`minimized` wrapper + separate header minimize button) and replaced with one stateful toggle (`Open Compliance` / `Minimize Compliance`).
+- Kept default Create compliance state collapsed and retained hidden/mounted compliance panel behavior so cached findings persist through minimize/reopen.
+- Updated related Create compliance styles in `src/app/globals.css` to remove obsolete minimized selectors and unify responsive toggle sizing/placement.
+- Verified no compile/layout regressions with `npm run build` (pass).
+
 ## 2026-03-13 03:55 UTC — task-00221 Configure nav version label
 - Added a subtle version label under the Configure nav item in `src/ui/app-shell.tsx` using a new `rf-nav-entry` wrapper and `rf-nav-version-label` text node.
 - Wired app version from `package.json` via `src/app/app/layout.tsx` into `AppShell` as `appVersion` (no hardcoded value).

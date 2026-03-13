@@ -1,3 +1,13 @@
+## task-00222 — Create compliance toggle stabilization
+
+- `src/ui/editor-shell.tsx` now uses a **single compliance toggle control** rendered in one stable rail position (`.rf-create-compliance-toggle-row`) for both collapsed and expanded states.
+- Toggle behavior is state-driven via one handler (`setIsComplianceCollapsed((current) => !current)`), with state labels:
+  - collapsed: `⇤ Open Compliance`
+  - expanded: `⇥ Minimize Compliance`
+- Compliance card continues using `hidden`/`aria-hidden` while collapsed, preserving local compliance findings/run cache behavior from prior tasks.
+- `src/app/globals.css` removed split minimized/header toggle variants and now centralizes toggle sizing/placement through shared `.rf-create-compliance-toggle` rules to prevent right-edge artifacting and keep responsive continuity.
+- Existing collapsed-layout contracts remain intact (desktop right-side compact rail column, mobile reordered non-overlap flow).
+
 ## task-00219 — Campaign automation template packs (event-focused)
 
 - `src/app/app/campaigns/page.tsx` campaign create flow now includes an **Automation template packs** section ahead of sequence editing.

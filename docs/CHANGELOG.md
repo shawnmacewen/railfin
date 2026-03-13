@@ -1,3 +1,11 @@
+## 2026-03-13 — Create compliance toggle stabilization (task-00222)
+- Kept Create compliance rail default behavior collapsed/minimized on initial load.
+- Replaced separate open/minimize controls with one stable compliance toggle button in a consistent rail position.
+- Toggle now switches label/state (`Open Compliance` / `Minimize Compliance`) without layout jitter.
+- Removed obsolete minimized-control wrapper path that produced a broken right-side visual artifact.
+- Preserved compliance panel hidden/mounted caching behavior and responsive non-overlap layout.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-13 — Configure nav version label (task-00221)
 - Added a subtle `v<version>` label directly beneath the **Configure** item in the left navigation.
 - Version is now sourced from app/package version metadata (no hardcoded text).
