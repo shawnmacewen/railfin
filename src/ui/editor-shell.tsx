@@ -1513,9 +1513,6 @@ export function EditorShell() {
           </div>
 
           <div className="rf-create-compliance-card" hidden={isComplianceCollapsed} aria-hidden={isComplianceCollapsed}>
-            <div className="rf-create-compliance-card-header">
-              <h3>Compliance Feedback</h3>
-            </div>
             <CompliancePanel
               activePolicyContext={activePolicyContext}
               content={contentText}

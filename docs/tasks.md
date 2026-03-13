@@ -1,3 +1,15 @@
+## task-00223 — UI — Create compliance default collapsed + header copy removal
+
+- Status: **Done**
+- Branch: `fix/ui/task-00223-create-compliance-default-and-header-copy`
+- Scope delivered:
+  - Kept Create compliance rail defaulted to **collapsed/minimized** on first load (no expanded-default regression).
+  - Removed the top compliance panel header title text (`Compliance Feedback`) from the compliance card.
+  - Preserved the single stable top toggle control behavior from task-00222 (`⇤ Open Compliance` / `⇥ Minimize Compliance`).
+  - Preserved compliance results caching while toggling by keeping the compliance card mounted and only hidden when collapsed.
+  - Preserved responsive no-overlap behavior for collapsed and expanded layouts.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-00222 — UI — Create compliance toggle stabilization
 
 - Status: **Done**

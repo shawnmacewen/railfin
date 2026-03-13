@@ -1,3 +1,11 @@
+## 2026-03-13 — Create compliance default collapsed + header copy removal (task-00223)
+- Preserved Create compliance rail default as collapsed/minimized on first load.
+- Removed top compliance card title text (`Compliance Feedback`) to simplify panel chrome.
+- Kept single stable compliance toggle behavior from task-00222 (`Open Compliance` / `Minimize Compliance`).
+- Preserved compliance findings cache behavior while minimizing/reopening by continuing hidden/mounted panel behavior.
+- Preserved responsive no-overlap Create/compliance layout behavior.
+- Build verification: `npm run build` passed.
+
 ## 2026-03-13 — Create compliance toggle stabilization (task-00222)
 - Kept Create compliance rail default behavior collapsed/minimized on initial load.
 - Replaced separate open/minimize controls with one stable compliance toggle button in a consistent rail position.

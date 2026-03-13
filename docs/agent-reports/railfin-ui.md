@@ -1,3 +1,11 @@
+## 2026-03-13 04:42 UTC — task-00223 Create compliance default collapsed + header copy removal
+- Updated `src/ui/editor-shell.tsx` compliance card render to remove top `Compliance Feedback` heading text.
+- Kept Create compliance default state collapsed/minimized on initial load (`isComplianceCollapsed` remains true by default).
+- Preserved single stable compliance toggle control behavior from task-00222 (`⇤ Open Compliance` / `⇥ Minimize Compliance`).
+- Preserved compliance findings/results caching while toggling by keeping card mounted and using hidden-state collapse.
+- Responsive/no-overlap layout behavior unchanged.
+- Verified no compile regressions with `npm run build` (pass).
+
 ## 2026-03-13 04:35 UTC — task-00222 Create compliance toggle stabilization
 - Updated `src/ui/editor-shell.tsx` compliance rail controls to a single stable toggle button rendered in one location for both states.
 - Removed split control rendering (`minimized` wrapper + separate header minimize button) and replaced with one stateful toggle (`Open Compliance` / `Minimize Compliance`).

@@ -1,3 +1,11 @@
+## task-00223 — Create compliance default collapsed + header copy removal
+
+- `src/ui/editor-shell.tsx` preserves `isComplianceCollapsed` default state as `true`, so Create opens with compliance minimized by default.
+- Removed the compliance card heading text node (`<h3>Compliance Feedback</h3>`) from the Create compliance card to reduce redundant chrome.
+- Single stable toggle interaction from task-00222 remains unchanged (`.rf-create-compliance-toggle` in `.rf-create-compliance-toggle-row`).
+- Compliance cache contract remains intact: compliance panel stays mounted and uses `hidden`/`aria-hidden` for collapse, so run summary/findings persist across minimize/reopen.
+- Existing responsive collapsed-layout contracts remain unchanged and non-overlapping.
+
 ## task-00222 — Create compliance toggle stabilization
 
 - `src/ui/editor-shell.tsx` now uses a **single compliance toggle control** rendered in one stable rail position (`.rf-create-compliance-toggle-row`) for both collapsed and expanded states.
