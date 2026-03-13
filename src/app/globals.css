@@ -1005,6 +1005,10 @@ button:disabled {
   gap: 0.45rem;
 }
 
+.rf-create-compliance-card[hidden] {
+  display: none !important;
+}
+
 .rf-create-compliance-card h3 {
   margin: 0;
   font-size: 0.95rem;

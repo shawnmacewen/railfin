@@ -1,3 +1,16 @@
+## task-00224 — UI — Fix Create compliance toggle regression (collapsed state visibility mismatch)
+
+- Status: **Done**
+- Branch: `fix/ui/task-00224-create-compliance-toggle-regression-fix`
+- Scope delivered:
+  - Fixed Create compliance toggle state wiring so button label/`aria-expanded` and rendered panel visibility are derived from one shared flag (`isComplianceExpanded`).
+  - Kept a single stable compliance toggle control location in the existing top toggle row.
+  - Kept default initial state collapsed on first load.
+  - Ensured collapse targets the compliance body container directly and enforces hidden state with explicit CSS guard (`.rf-create-compliance-card[hidden] { display: none !important; }`).
+  - Preserved compliance findings/results cache continuity by keeping `CompliancePanel` mounted and only toggling container visibility.
+  - Added lightweight deterministic regression guard in `EditorShell` (dev warning if collapsed state and body hidden state diverge).
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-00223 — UI — Create compliance default collapsed + header copy removal
 
 - Status: **Done**
