@@ -656,3 +656,9 @@ This change log is written for humans. It tracks major shipped milestones and pr
 
 ## 2026-03-12 — CRM toolbar contact-count badge (task-0033)
 - Added a small contacts count badge in the CRM top-right toolbar next to actions.
+
+## 2026-03-13 — Supabase auth + tenant isolation security baseline (task-00226)
+- Added a security blueprint for multi-user data segmentation with Supabase auth context validation and tenant-scoped API guard requirements.
+- Added phased RLS strategy (phase-1 app-layer scoped queries, phase-2 DB-enforced tenant policies) and minimum safe-beta acceptance criteria.
+- Documented current risk hotspots from compat-mode and legacy fallback identities.
+- Captured verification matrix showing current tenant-scoped route/query posture is aligned, with launch-hardening blockers remaining for compat-off evidence and RLS verification.

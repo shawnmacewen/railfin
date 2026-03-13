@@ -1645,3 +1645,105 @@ Control intent:
 - Improve auditability by mapping task id -> worktree path -> branch -> commit SHA.
 
 Operator reminder: before each task, confirm `pwd`, branch name, and `HEAD` SHA in the assigned worktree, then post STARTED/COMPLETED lifecycle updates with ACK policy v1.
+
+## task-00226 — SEC — Supabase auth + tenant isolation security baseline and policy recommendations
+
+Review scope:
+- `src/app/api/internal/_auth.ts`
+- `src/app/api/internal/content/draft/route.ts`
+- `src/app/api/internal/content/list/route.ts`
+- `src/lib/supabase/drafts.ts`
+- `src/lib/supabase/contacts.ts`
+- `src/lib/supabase/leads.ts`
+- `src/api/internal/content/draft.ts`
+- `src/api/internal/content/list.ts`
+
+### 1) Security blueprint for multi-user auth + segmentation
+
+#### Recommended token/session validation path
+
+Phase-1 (beta-safe, minimal change):
+1. Require `requireInternalApiAuthContext(request)` on every `/api/internal/*` route (not `requireInternalApiAuth` cookie/heuristic only).
+2. Resolve user identity via Supabase JWT validation (`supabase.auth.getUser(token)`), where token comes from `Authorization: Bearer` or `sb-access-token` cookie.
+3. Derive `tenantId` from trusted claim (`app_metadata.tenant_id`) and fail closed when missing/invalid for multi-user routes.
+4. Build data scope server-side only: `{ ownerId: userId, tenantId }` and pass into all persistence helpers.
+5. Return deterministic `401` on unauthenticated and `403` on authenticated-but-not-tenant-authorized actions (phase-2).
+
+Phase-2 (production-hard):
+1. Disable compat mode globally (`INTERNAL_API_AUTH_COMPAT_MODE=off`).
+2. Remove fallback owner/tenant defaults (`legacy-owner`, `legacy-tenant`) from runtime paths.
+3. Enforce claim integrity: reject tokens with missing/blank tenant claim for tenant-scoped endpoints.
+4. Add route-class authorization matrix (below) and test each class for `401/403` + `no-store`.
+
+#### API guard requirements by route class
+
+- **Class A — Sensitive internal read/write (drafts, contacts, leads, compliance, configure):**
+  - Must call `requireInternalApiAuthContext`.
+  - Must derive server-side scope from auth context only.
+  - Must include `Cache-Control: no-store` on all responses.
+- **Class B — Privileged config/admin actions (configure policy writes, remediation controls, future admin APIs):**
+  - Class A controls + explicit role/claim guard (`admin`/operator claim) and deny-by-default `403`.
+- **Class C — Public/auth bootstrap (`/login`, auth callbacks):**
+  - No tenant data access.
+  - Strict redirect sanitization and anti-open-redirect checks.
+
+#### RLS policy strategy
+
+Phase-1 (compat + service-role bridge):
+- Keep explicit app-layer predicates in all queries: `.eq('owner_id', scope.ownerId)` and `.eq('tenant_id', scope.tenantId)`.
+- Add DB uniqueness/indexes for tenant isolation and replay resistance (e.g., unique keys on tenant-scoped entities where appropriate).
+- Treat service-role usage as temporary operational bridge; log and audit all privileged write paths.
+
+Phase-2 (target posture):
+- Enable RLS on tenant tables (`drafts`, `contacts`, `leads`, `campaign*`, `events*`).
+- Policies enforce `tenant_id` and user ownership/role constraints based on JWT claims.
+- Migrate internal APIs away from service-role where feasible to user-context clients; keep service-role only for strictly controlled admin jobs.
+
+### 2) Current risk hotspots (single-user assumptions + compat mode)
+
+1. **Compat fallback can collapse tenant boundaries (HIGH):**
+   - `_auth.ts` allows same-origin compat fallback with defaults (`legacy-owner`/`legacy-tenant`) when JWT resolution fails.
+   - Risk: cross-user data co-tenancy in fallback path.
+
+2. **Dual guard APIs create drift risk (MEDIUM):**
+   - Both `requireInternalApiAuth` and `requireInternalApiAuthContext` exist; only context variant is tenant-safe.
+   - Risk: future route may accidentally use weaker guard.
+
+3. **Tenant claim fallback to user id (MEDIUM):**
+   - Tenant currently falls back to `user.id` if claim missing.
+   - Risk: inconsistent tenancy model and migration ambiguity.
+
+4. **Service-role dependency remains broad (MEDIUM):**
+   - Data helpers use `SUPABASE_SERVICE_ROLE_KEY`.
+   - Risk: RLS bypass and larger blast radius if route auth regresses.
+
+### 3) Minimum acceptance criteria for safe multi-user beta
+
+All required before declaring safe multi-user beta:
+- [ ] `INTERNAL_API_AUTH_COMPAT_MODE=off` in beta/prod runtime.
+- [ ] No runtime use of `legacy-owner` / `legacy-tenant` fallback identities.
+- [ ] All tenant data routes use `requireInternalApiAuthContext` only.
+- [ ] Tenant claim validation is fail-closed (missing/invalid tenant => deny).
+- [ ] RLS enabled on `drafts`, `contacts`, and `leads` at minimum with tenant isolation policies.
+- [ ] Negative tests proving cross-tenant read/write denial (`401/403`) for each route class.
+- [ ] Route responses preserve `no-store` on success and error.
+
+### 4) Verification checks run in this cycle (implementation present)
+
+| Check | Result | Notes |
+|---|---|---|
+| Internal content routes use auth context + tenant scope | **PASS** | `content/draft` and `content/list` routes call `requireInternalApiAuthContext` and pass `{ ownerId, tenantId }` into data layer. |
+| Data-layer tenant predicates on drafts/contacts/leads | **PASS** | Helpers constrain queries by both `owner_id` and `tenant_id`. |
+| Compat fallback disabled in runtime | **BLOCKED** | Code still supports compat mode and default fallback IDs; runtime disable evidence not provided in this task. |
+| RLS tenant policies active and verified | **BLOCKED** | No RLS policy evidence captured in this task scope; app-layer scoping exists but DB policy verification is outstanding. |
+
+### Gate decision (task-00226)
+
+- **Overall status:** **PASS with BLOCKED launch-hardening items**
+- Rationale: implementation direction is aligned (auth-context + tenant-scoped queries), but safe multi-user beta requires compat-mode retirement and verified RLS activation.
+
+### Verification outcome (task-00226)
+
+- Outcome: **PASS (docs + verification pass complete; hardening blockers explicitly tracked)**
+- Code changes: none (docs-first security baseline/policy task)
+- Build: **SKIPPED** (docs-only)

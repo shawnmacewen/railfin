@@ -2349,3 +2349,14 @@
 - Scope delivered:
   - Added a compact contacts total badge in the CRM toolbar upper-right area.
   - Kept existing CRM actions/layout behavior unchanged.
+
+## task-00226 — SEC — Supabase auth + tenant isolation security baseline and policy recommendations
+
+- Status: **Done**
+- Branch: `chore/sec/task-00226-auth-tenant-baseline`
+- Scope delivered:
+  - Produced Supabase auth + tenant isolation blueprint for multi-user posture (token/session validation path, route-class guard requirements, and phased RLS strategy).
+  - Reviewed current hotspot risks from single-user assumptions and auth compat mode (`legacy-owner`/`legacy-tenant` fallback, dual guard drift risk, broad service-role dependence).
+  - Defined minimum acceptance criteria for a safe multi-user beta (compat-off, tenant claim fail-closed, RLS + cross-tenant deny tests).
+  - Ran implementation verification pass on current code paths and recorded PASS/BLOCKED matrix in security baseline.
+  - Build verification: **SKIPPED** (docs-only task; no runtime code changes).
