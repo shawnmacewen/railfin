@@ -1747,3 +1747,75 @@ All required before declaring safe multi-user beta:
 - Outcome: **PASS (docs + verification pass complete; hardening blockers explicitly tracked)**
 - Code changes: none (docs-first security baseline/policy task)
 - Build: **SKIPPED** (docs-only)
+
+## task-00226 (rerun 2026-03-19) — Auth/Segmentation baseline + verification pass (approved v1 model)
+
+Model constraints applied for this pass:
+- Individual users only (no shared tenant abstraction in v1)
+- Scope key: `owner_user_id`
+- Deletion model: soft delete via `deleted_at`
+
+### 1) Supabase-auth + per-user isolation baseline (v1)
+
+#### Route guard expectations
+- All internal data-bearing routes must use `requireInternalApiAuthContext(request)` and derive owner scope from resolved auth context.
+- Guard contract:
+  - `401` for unauthenticated requests (fail closed)
+  - `Cache-Control: no-store` on sensitive responses
+- `requireInternalApiAuth` (cookie/same-origin heuristic path) is not sufficient for v1-safe user isolation on scoped routes.
+
+#### RLS strategy
+- **Phase-1 minimum (required for beta):**
+  - App-layer enforcement: every read/write query on scoped tables includes `owner_user_id = scope.ownerUserId`.
+  - Soft-delete default: active reads must include `deleted_at is null`.
+  - Unique integrity protections for replay/duplication on scoped entities (see enrollment uniqueness below).
+- **Phase-2 hardening (target):**
+  - Enable DB RLS on scoped tables (`drafts`, `contacts`, `leads`, `campaign_enrollments`, and other owner-scoped entities).
+  - Policies enforce `owner_user_id` match to authenticated subject and preserve soft-delete visibility rules.
+  - Minimize broad service-role use to narrowly bounded admin/ops workflows.
+
+#### Compat-mode risk treatment + cutoff path
+- Current compat fallback in `_auth.ts` can map unresolved auth to default owner id (`00000000-0000-0000-0000-000000000001`) under same-origin heuristics.
+- Risk: boundary collapse/cross-user contamination if fallback path is hit in multi-user runtime.
+- Cutoff path:
+  1. Set `INTERNAL_API_AUTH_COMPAT_MODE=off` in beta/prod runtime.
+  2. Remove default owner fallback usage from runtime decision paths.
+  3. Keep only Supabase-auth-backed owner derivation for scoped endpoints.
+
+### 2) task-00225 implementation verification (landed) against v1
+
+Verification scope:
+- `src/app/api/internal/_auth.ts`
+- `src/app/api/internal/content/{draft,list}/route.ts`
+- `src/app/api/internal/crm/{contacts,leads}/**/route.ts`
+- `src/lib/supabase/{drafts,contacts,leads,scope}.ts`
+- `docs/auth_segmentation_phase1.sql`
+
+| Check | Result | Evidence |
+|---|---|---|
+| Auth guard coverage on scoped routes | **PASS** | Content/CRM scoped routes use `requireInternalApiAuthContext` and derive `ownerUserId` from auth context. |
+| Owner scoping correctness (`owner_user_id`) | **PASS** | Draft/contact/lead helpers constrain reads and writes by `owner_user_id = scope.ownerUserId`. |
+| Soft-delete handling expectations | **PASS (in-scope entities)** | Draft/contact/lead reads filter `deleted_at is null`; contacts delete path is soft-delete update. |
+| Duplicate enrollment uniqueness defense | **PASS (schema baseline) / WATCH (runtime mapping)** | `docs/auth_segmentation_phase1.sql` adds unique index `campaign_enrollments(owner_user_id, campaign_id, contact_id) where deleted_at is null`; runtime conflict mapping to deterministic 409/idempotent response is still recommended hardening. |
+
+### 3) Safe multi-user beta minimum acceptance (v1)
+
+- [ ] `INTERNAL_API_AUTH_COMPAT_MODE=off` in target runtime.
+- [ ] No default owner fallback traffic observed in production logs/telemetry.
+- [ ] All owner-scoped routes use context guard only.
+- [ ] RLS enabled and verified on core owner-scoped tables (`drafts`, `contacts`, `leads`, `campaign_enrollments`).
+- [ ] Cross-user negative tests demonstrate deny semantics (read/write isolation).
+- [ ] Enrollment duplicate conflicts produce deterministic safe contract (`409` or idempotent success), not generic blocked errors.
+
+### Gate decision (task-00226 rerun)
+
+- **Overall status:** **PASS with blockers**
+- Blockers to clear for safe multi-user beta:
+  1. Runtime compat-mode cutoff evidence (`INTERNAL_API_AUTH_COMPAT_MODE=off`)
+  2. Verified DB RLS activation/evidence for owner-scoped tables
+  3. Enrollment duplicate conflict contract hardening (deterministic app response)
+
+### Verification outcome (task-00226 rerun)
+
+- Outcome: **PASS (docs + verification complete; blockers explicitly tracked)**
+- Build: **SKIPPED** (docs-only; no runtime code changes in this SEC pass)

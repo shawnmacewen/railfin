@@ -677,3 +677,10 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Converted contacts delete behavior to soft delete.
 - Added deterministic migration/backfill script: `docs/auth_segmentation_phase1.sql`.
 - Added enrollment uniqueness hardening on `(owner_user_id, campaign_id, contact_id)` in migration/sql docs.
+
+## 2026-03-19 — Auth/Segmentation baseline rerun + task-00225 verification (task-00226)
+- Refreshed security baseline for approved v1 model: individual users, `owner_user_id` scoping, and soft-delete (`deleted_at`) expectations.
+- Added explicit route-guard expectations (`requireInternalApiAuthContext`) and phased RLS strategy (phase-1 minimum, phase-2 hardening).
+- Added compat-mode risk treatment and cutoff path (`INTERNAL_API_AUTH_COMPAT_MODE=off` before safe multi-user beta).
+- Verified task-00225 implementation posture: auth-context guard coverage + owner scoping + soft-delete filters are in place for drafts/contacts/leads.
+- Verified schema-level duplicate enrollment uniqueness defense exists; documented runtime conflict-response hardening follow-up.

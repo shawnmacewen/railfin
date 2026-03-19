@@ -2378,3 +2378,14 @@
 - Implemented soft delete semantics (`deleted_at`) for scoped reads/writes (active rows only by default).
 - Added deterministic idempotent migration SQL (`docs/auth_segmentation_phase1.sql`) including enrollment uniqueness hardening.
 - Build: `npm run build` PASS.
+
+## task-00226 — SEC — Auth/Segmentation security baseline + verification pass (rerun 2026-03-19)
+
+- Status: **Done**
+- Branch: `chore/sec/task-00226-auth-seg-v1-rerun`
+- Delivered:
+  - Refreshed Supabase-auth + per-user (`owner_user_id`) isolation baseline for approved v1 model (individual users, soft delete).
+  - Documented route guard expectations, phased RLS strategy (phase-1 minimum + phase-2 hardening), and compat-mode cutoff path.
+  - Verified landed task-00225 implementation coverage for auth-context guard usage, owner scoping, and soft-delete behavior on drafts/contacts/leads.
+  - Verified duplicate enrollment uniqueness defense exists at schema level (`campaign_enrollments(owner_user_id, campaign_id, contact_id)` unique partial index), with runtime conflict-mapping hardening still recommended.
+  - Build verification: **SKIPPED** (docs-only task; no runtime code changes).
