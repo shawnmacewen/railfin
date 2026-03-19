@@ -814,3 +814,31 @@ Includes:
 | Missing JWT + compat off | 401 Unauthorized |
 | Same-origin compat mode request | Allowed with legacy scope until full cutover |
 
+
+## task-00225 (locked) — Auth/Segmentation Phase-1 (Supabase owner scoping + soft delete)
+
+Locked product decisions implemented:
+- UUID ids: yes (phase-1 migration path with deterministic backfill)
+- Soft delete: yes (`deleted_at`)
+- Contacts model: single primary email + phone; `lead_stage` semantics preserved (`stage` in API contract)
+- Tenant model: individual users only (no org table in phase-1)
+
+Internal auth/scoping rules:
+- Protected internal endpoints resolve authenticated user id from Supabase Auth JWT (`supabase.auth.getUser(token)`).
+- Compat mode fallback remains available for same-origin cookie sessions while cutover completes.
+- Scoped persistence queries enforce `owner_user_id = auth.user.id`.
+- Default reads exclude soft-deleted records with `deleted_at is null`.
+- Validation behavior remains fail-closed with safe `fieldErrors` payloads.
+
+Phase-1 scoped routes implemented:
+- `GET/POST /api/internal/content/draft`
+- `GET /api/internal/content/list`
+- `GET/POST /api/internal/crm/contacts`
+- `GET/PATCH/PUT/DELETE /api/internal/crm/contacts/[contactId]`
+- `GET/POST /api/internal/crm/leads`
+- Draft remediation audit writes under `/api/internal/compliance/remediation/*`
+
+Migration source of truth:
+- `docs/auth_segmentation_phase1.sql`
+- Includes owner column + soft delete columns, deterministic backfill, active-scope indexes, and enrollment uniqueness hardening:
+  - unique `(owner_user_id, campaign_id, contact_id)` on `campaign_enrollments` (active rows).

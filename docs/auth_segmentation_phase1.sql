@@ -1,53 +1,57 @@
--- task-00225 phase-1 auth + user/tenant segmentation foundation
--- Idempotent migration + deterministic backfill
+-- task-00225 auth/segmentation phase-1
+-- idempotent schema + deterministic dev backfill
 
--- 1) Core ownership columns
-alter table if exists public.drafts add column if not exists owner_id text;
-alter table if exists public.drafts add column if not exists tenant_id text;
+create extension if not exists pgcrypto;
 
-alter table if exists public.contacts add column if not exists owner_id text;
-alter table if exists public.contacts add column if not exists tenant_id text;
+-- drafts
+alter table if exists public.drafts add column if not exists owner_user_id uuid;
+alter table if exists public.drafts add column if not exists deleted_at timestamptz null;
 
-alter table if exists public.leads add column if not exists owner_id text;
-alter table if exists public.leads add column if not exists tenant_id text;
+-- contacts
+alter table if exists public.contacts add column if not exists owner_user_id uuid;
+alter table if exists public.contacts add column if not exists deleted_at timestamptz null;
 
--- 2) Deterministic backfill for pre-existing rows
-update public.drafts
-set owner_id = coalesce(nullif(owner_id, ''), 'legacy-owner'),
-    tenant_id = coalesce(nullif(tenant_id, ''), 'legacy-tenant')
-where owner_id is null or owner_id = '' or tenant_id is null or tenant_id = '';
+-- leads
+alter table if exists public.leads add column if not exists owner_user_id uuid;
+alter table if exists public.leads add column if not exists deleted_at timestamptz null;
 
-update public.contacts
-set owner_id = coalesce(nullif(owner_id, ''), 'legacy-owner'),
-    tenant_id = coalesce(nullif(tenant_id, ''), 'legacy-tenant')
-where owner_id is null or owner_id = '' or tenant_id is null or tenant_id = '';
+-- campaigns + enrollments foundation ownership
+alter table if exists public.campaigns add column if not exists owner_user_id uuid;
+alter table if exists public.campaigns add column if not exists deleted_at timestamptz null;
+alter table if exists public.campaign_enrollments add column if not exists owner_user_id uuid;
+alter table if exists public.campaign_enrollments add column if not exists deleted_at timestamptz null;
 
-update public.leads
-set owner_id = coalesce(nullif(owner_id, ''), 'legacy-owner'),
-    tenant_id = coalesce(nullif(tenant_id, ''), 'legacy-tenant')
-where owner_id is null or owner_id = '' or tenant_id is null or tenant_id = '';
+-- deterministic backfill for existing/dev rows
+-- uses fixed sentinel uuid to keep migration deterministic for disposable data
+-- 00000000-0000-0000-0000-000000000001
+update public.drafts set owner_user_id = coalesce(owner_user_id, '00000000-0000-0000-0000-000000000001'::uuid) where owner_user_id is null;
+update public.contacts set owner_user_id = coalesce(owner_user_id, '00000000-0000-0000-0000-000000000001'::uuid) where owner_user_id is null;
+update public.leads set owner_user_id = coalesce(owner_user_id, '00000000-0000-0000-0000-000000000001'::uuid) where owner_user_id is null;
+update public.campaigns set owner_user_id = coalesce(owner_user_id, '00000000-0000-0000-0000-000000000001'::uuid) where owner_user_id is null;
+update public.campaign_enrollments set owner_user_id = coalesce(owner_user_id, '00000000-0000-0000-0000-000000000001'::uuid) where owner_user_id is null;
 
--- 3) Enforce not-null after backfill
-alter table if exists public.drafts alter column owner_id set not null;
-alter table if exists public.drafts alter column tenant_id set not null;
+-- enforce owner not null
+alter table if exists public.drafts alter column owner_user_id set not null;
+alter table if exists public.contacts alter column owner_user_id set not null;
+alter table if exists public.leads alter column owner_user_id set not null;
+alter table if exists public.campaigns alter column owner_user_id set not null;
+alter table if exists public.campaign_enrollments alter column owner_user_id set not null;
 
-alter table if exists public.contacts alter column owner_id set not null;
-alter table if exists public.contacts alter column tenant_id set not null;
+-- indexing for scoped active reads
+create index if not exists drafts_owner_active_idx on public.drafts(owner_user_id, created_at desc) where deleted_at is null;
+create index if not exists contacts_owner_active_idx on public.contacts(owner_user_id, created_at desc) where deleted_at is null;
+create index if not exists leads_owner_active_idx on public.leads(owner_user_id, created_at desc) where deleted_at is null;
+create index if not exists campaigns_owner_active_idx on public.campaigns(owner_user_id, created_at desc) where deleted_at is null;
 
-alter table if exists public.leads alter column owner_id set not null;
-alter table if exists public.leads alter column tenant_id set not null;
+-- uniqueness hardening
+create unique index if not exists campaign_enrollments_owner_campaign_contact_uidx
+  on public.campaign_enrollments(owner_user_id, campaign_id, contact_id)
+  where deleted_at is null;
 
--- 4) Indexes for scoped reads
-create index if not exists drafts_owner_created_idx on public.drafts(owner_id, created_at desc);
-create index if not exists drafts_tenant_created_idx on public.drafts(tenant_id, created_at desc);
-
-create index if not exists contacts_owner_created_at_idx on public.contacts(owner_id, created_at desc);
-create index if not exists contacts_tenant_created_at_idx on public.contacts(tenant_id, created_at desc);
-
-create index if not exists leads_owner_created_at_idx on public.leads(owner_id, created_at desc);
-create index if not exists leads_tenant_created_at_idx on public.leads(tenant_id, created_at desc);
-
--- 5) Optional rollback (manual)
--- alter table public.drafts drop column if exists owner_id, drop column if exists tenant_id;
--- alter table public.contacts drop column if exists owner_id, drop column if exists tenant_id;
--- alter table public.leads drop column if exists owner_id, drop column if exists tenant_id;
+-- rollback safety notes (manual)
+-- drop index if exists campaign_enrollments_owner_campaign_contact_uidx;
+-- alter table public.drafts drop column if exists owner_user_id, drop column if exists deleted_at;
+-- alter table public.contacts drop column if exists owner_user_id, drop column if exists deleted_at;
+-- alter table public.leads drop column if exists owner_user_id, drop column if exists deleted_at;
+-- alter table public.campaigns drop column if exists owner_user_id, drop column if exists deleted_at;
+-- alter table public.campaign_enrollments drop column if exists owner_user_id, drop column if exists deleted_at;

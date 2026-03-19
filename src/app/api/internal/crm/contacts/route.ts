@@ -12,13 +12,10 @@ export async function GET(request: NextRequest) {
     search: searchParams.get("search") ?? undefined,
     stage: searchParams.get("stage") ?? undefined,
     source: searchParams.get("source") ?? undefined,
-    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
+    scope: { ownerUserId: auth.userId },
   });
 
-  if (!result.ok) {
-    return NextResponse.json(result, { status: 500, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
-  }
-
+  if (!result.ok) return NextResponse.json(result, { status: 500, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
   return NextResponse.json(result, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }
 
@@ -30,10 +27,7 @@ export async function POST(request: NextRequest) {
     | { fullName?: unknown; primaryEmail?: unknown; primaryPhone?: unknown; source?: unknown; stage?: unknown }
     | null;
 
-  const result = await internalContactsCreate({
-    body: body ?? undefined,
-    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
-  });
+  const result = await internalContactsCreate({ body: body ?? undefined, scope: { ownerUserId: auth.userId } });
   if (!result.ok) {
     const status = result.error === "Validation failed" ? 400 : 500;
     return NextResponse.json(result, { status, headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });

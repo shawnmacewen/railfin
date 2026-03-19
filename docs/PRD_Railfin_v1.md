@@ -178,3 +178,23 @@ Railfin addresses this by integrating compliance feedback directly into creation
 - Manual idempotent migration script: `docs/auth_segmentation_phase1.sql`
 - Deterministic backfill defaults: `legacy-owner`, `legacy-tenant`
 - Rollback guidance included in script comments.
+
+## Auth & Segmentation — Phase 1 (task-00225)
+
+### Scope lock
+- Identity source: Supabase Auth user id.
+- Segmentation: user-owned data (`owner_user_id`) only.
+- Org/tenant tables: deferred; not in phase-1.
+- Soft delete policy: `deleted_at` on user-owned tables.
+
+### Data model baseline
+- User-owned entities carry:
+  - `owner_user_id uuid not null`
+  - `deleted_at timestamptz null`
+- Enrollment hardening includes uniqueness on `(owner_user_id, campaign_id, contact_id)`.
+- IDs are UUID-safe in v1 migration path.
+
+### API guardrails
+- Internal API reads/writes are scoped by authenticated owner id.
+- Default list/read operations exclude soft-deleted rows.
+- Validation remains strict/fail-closed with safe operator errors.

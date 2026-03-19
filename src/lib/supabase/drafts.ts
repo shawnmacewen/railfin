@@ -7,11 +7,13 @@ import type { DataScope } from "./scope";
 
 type DraftRow = {
   id: string;
-  owner_id: string;
-  tenant_id: string;
+  owner_user_id: string;
   title: string;
   body: string;
+  metadata: unknown;
+  history: unknown;
   created_at: string;
+  deleted_at: string | null;
 };
 
 export type Draft = {
@@ -28,19 +30,8 @@ export type DraftPersistenceBlocked = {
   requiredSql?: string;
 };
 
-export type DraftListQuery = {
-  q?: string;
-  limit?: number;
-  offset?: number;
-};
-
-export type DraftListResult = {
-  items: Draft[];
-  total: number;
-  limit: number;
-  offset: number;
-  q: string;
-};
+export type DraftListQuery = { q?: string; limit?: number; offset?: number };
+export type DraftListResult = { items: Draft[]; total: number; limit: number; offset: number; q: string };
 
 export type DraftRemediationAuditEvent = {
   id: string;
@@ -60,195 +51,94 @@ export type DraftRemediationAuditEvent = {
 
 const REQUIRED_ENV = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
-const REQUIRED_SQL = `create table if not exists public.drafts (
-  id text primary key,
-  owner_id text not null,
-  tenant_id text not null,
+const REQUIRED_SQL = `create extension if not exists pgcrypto;
+create table if not exists public.drafts (
+  id uuid primary key default gen_random_uuid(),
+  owner_user_id uuid not null,
   title text not null,
   body text not null default '',
   metadata jsonb not null default '{}'::jsonb,
   history jsonb not null default '[]'::jsonb,
-  created_at timestamptz not null default timezone('utc', now())
+  created_at timestamptz not null default timezone('utc', now()),
+  deleted_at timestamptz null
 );
-
-create index if not exists drafts_owner_created_idx on public.drafts(owner_id, created_at desc);
-create index if not exists drafts_tenant_created_idx on public.drafts(tenant_id, created_at desc);`;
+create index if not exists drafts_owner_created_idx on public.drafts(owner_user_id, created_at desc);
+create index if not exists drafts_owner_deleted_idx on public.drafts(owner_user_id, deleted_at);`;
 
 const DEFAULT_LIST_LIMIT = 20;
 const MAX_LIST_LIMIT = 100;
 
-type DraftOperation = "write" | "read" | "list";
-type DraftTableError = { code?: string | null } | null;
-
-function formatErrorContext(error: DraftTableError): string {
-  if (!error) {
-    return "";
-  }
-
-  if (error.code === "42P01") {
-    return " Root cause: public.drafts table is missing in the connected database.";
-  }
-
-  if (error.code === "42501") {
-    return " Root cause: service role lacks required permission on public.drafts.";
-  }
-
-  return error.code ? ` Root cause code: ${error.code}.` : "";
+function blocked(error: string, requiredSql = REQUIRED_SQL): DraftPersistenceBlocked {
+  return { kind: "BLOCKED", error, requiredSql };
 }
 
-function blockedTableAccess(operation: DraftOperation, error: DraftTableError): DraftPersistenceBlocked {
-  const preposition = operation === "write" ? "to" : "from";
+function getClientOrBlocked(): { ok: true; client: SupabaseClient } | { ok: false; blocked: DraftPersistenceBlocked } {
+  const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name]);
+  if (missingEnv.length > 0) {
+    return { ok: false, blocked: { kind: "BLOCKED", error: `Missing required Supabase environment variables: ${missingEnv.join(", ")}`, missingEnv, requiredSql: REQUIRED_SQL } };
+  }
 
   return {
-    kind: "BLOCKED",
-    error:
-      `Draft persistence blocked: unable to ${operation} ${preposition} public.drafts. Ensure table exists and service role has access.` +
-      formatErrorContext(error),
-    requiredSql: REQUIRED_SQL,
+    ok: true,
+    client: createClient(process.env.NEXT_PUBLIC_SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    }),
   };
 }
 
 function mapDraftRow(row: DraftRow): Draft {
-  return {
-    id: row.id,
-    title: row.title,
-    body: row.body,
-    createdAt: row.created_at,
-  };
+  return { id: row.id, title: row.title, body: row.body, createdAt: row.created_at };
 }
 
 function normalizeListQuery(query: DraftListQuery): Required<DraftListQuery> {
-  const normalizedQ = (query.q ?? "").trim();
-  const normalizedLimit = Math.min(
-    MAX_LIST_LIMIT,
-    Math.max(1, Number.isFinite(query.limit) ? Math.floor(query.limit as number) : DEFAULT_LIST_LIMIT),
-  );
-  const normalizedOffset = Math.max(
-    0,
-    Number.isFinite(query.offset) ? Math.floor(query.offset as number) : 0,
-  );
-
   return {
-    q: normalizedQ,
-    limit: normalizedLimit,
-    offset: normalizedOffset,
+    q: (query.q ?? "").trim(),
+    limit: Math.min(MAX_LIST_LIMIT, Math.max(1, Number.isFinite(query.limit) ? Math.floor(query.limit as number) : DEFAULT_LIST_LIMIT)),
+    offset: Math.max(0, Number.isFinite(query.offset) ? Math.floor(query.offset as number) : 0),
   };
 }
 
-function getDraftClientOrBlocked():
-  | { ok: true; client: SupabaseClient }
-  | { ok: false; blocked: DraftPersistenceBlocked } {
-  const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name]);
+export async function createDraftInTable(input: { title?: string; body?: string; scope: DataScope }) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
 
-  if (missingEnv.length > 0) {
-    return {
-      ok: false,
-      blocked: {
-        kind: "BLOCKED",
-        error: `Missing required Supabase environment variables: ${missingEnv.join(", ")}`,
-        missingEnv,
-        requiredSql: REQUIRED_SQL,
-      },
-    };
-  }
-
-  const client = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.SUPABASE_SERVICE_ROLE_KEY as string,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    },
-  );
-
-  return { ok: true, client };
-}
-
-export async function createDraftInTable(input: {
-  title?: string;
-  body?: string;
-  scope: DataScope;
-}): Promise<{ ok: true; draft: Draft } | { ok: false; blocked: DraftPersistenceBlocked }> {
-  const draftClient = getDraftClientOrBlocked();
-  if (!draftClient.ok) {
-    return { ok: false, blocked: draftClient.blocked };
-  }
-
-  const payload = {
-    id: randomUUID(),
-    owner_id: input.scope.ownerId,
-    tenant_id: input.scope.tenantId,
-    title: input.title ?? "Untitled Draft",
-    body: input.body ?? "",
-  };
-
-  const { data, error } = await draftClient.client
+  const { data, error } = await client.client
     .from("drafts")
-    .insert(payload)
-    .select("id, title, body, created_at")
+    .insert({ id: randomUUID(), owner_user_id: input.scope.ownerUserId, title: input.title ?? "Untitled Draft", body: input.body ?? "", deleted_at: null })
+    .select("id, owner_user_id, title, body, metadata, history, created_at, deleted_at")
     .single();
 
-  if (error || !data) {
-    return {
-      ok: false,
-      blocked: blockedTableAccess("write", error),
-    };
-  }
-
-  return {
-    ok: true,
-    draft: mapDraftRow(data as DraftRow),
-  };
+  if (error || !data) return { ok: false as const, blocked: blocked("Draft persistence blocked: unable to write to public.drafts.") };
+  return { ok: true as const, draft: mapDraftRow(data as DraftRow) };
 }
 
-export async function readDraftFromTable(
-  id: string,
-  scope: DataScope,
-): Promise<{ ok: true; draft: Draft | null } | { ok: false; blocked: DraftPersistenceBlocked }> {
-  const draftClient = getDraftClientOrBlocked();
-  if (!draftClient.ok) {
-    return { ok: false, blocked: draftClient.blocked };
-  }
+export async function readDraftFromTable(id: string, scope: DataScope) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
 
-  const { data, error } = await draftClient.client
+  const { data, error } = await client.client
     .from("drafts")
-    .select("id, title, body, created_at")
+    .select("id, owner_user_id, title, body, metadata, history, created_at, deleted_at")
     .eq("id", id)
-    .eq("owner_id", scope.ownerId)
-    .eq("tenant_id", scope.tenantId)
+    .eq("owner_user_id", scope.ownerUserId)
+    .is("deleted_at", null)
     .maybeSingle();
 
-  if (error) {
-    return {
-      ok: false,
-      blocked: blockedTableAccess("read", error),
-    };
-  }
-
-  return {
-    ok: true,
-    draft: data ? mapDraftRow(data as DraftRow) : null,
-  };
+  if (error) return { ok: false as const, blocked: blocked("Draft persistence blocked: unable to read from public.drafts.") };
+  return { ok: true as const, draft: data ? mapDraftRow(data as DraftRow) : null };
 }
 
-export async function listDraftsFromTable(
-  query: DraftListQuery,
-  scope: DataScope,
-): Promise<{ ok: true; result: DraftListResult } | { ok: false; blocked: DraftPersistenceBlocked }> {
-  const draftClient = getDraftClientOrBlocked();
-  if (!draftClient.ok) {
-    return { ok: false, blocked: draftClient.blocked };
-  }
+export async function listDraftsFromTable(query: DraftListQuery, scope: DataScope) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
 
   const normalized = normalizeListQuery(query);
 
-  let statement = draftClient.client
+  let statement = client.client
     .from("drafts")
-    .select("id, title, body, created_at", { count: "exact" })
-    .eq("owner_id", scope.ownerId)
-    .eq("tenant_id", scope.tenantId)
+    .select("id, owner_user_id, title, body, metadata, history, created_at, deleted_at", { count: "exact" })
+    .eq("owner_user_id", scope.ownerUserId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .range(normalized.offset, normalized.offset + normalized.limit - 1);
 
@@ -257,16 +147,10 @@ export async function listDraftsFromTable(
   }
 
   const { data, error, count } = await statement;
-
-  if (error) {
-    return {
-      ok: false,
-      blocked: blockedTableAccess("list", error),
-    };
-  }
+  if (error) return { ok: false as const, blocked: blocked("Draft persistence blocked: unable to list from public.drafts.") };
 
   return {
-    ok: true,
+    ok: true as const,
     result: {
       items: (data ?? []).map((row) => mapDraftRow(row as DraftRow)),
       total: count ?? 0,
@@ -277,39 +161,35 @@ export async function listDraftsFromTable(
   };
 }
 
-export async function appendDraftRemediationAuditEvent(input: {
-  draftId: string;
-  event: DraftRemediationAuditEvent;
-  scope: DataScope;
-}): Promise<{ ok: true } | { ok: false; blocked: DraftPersistenceBlocked }> {
-  const draftClient = getDraftClientOrBlocked();
-  if (!draftClient.ok) return { ok: false, blocked: draftClient.blocked };
+export async function appendDraftRemediationAuditEvent(input: { draftId: string; event: DraftRemediationAuditEvent; scope: DataScope }) {
+  const client = getClientOrBlocked();
+  if (!client.ok) return { ok: false as const, blocked: client.blocked };
 
-  const { data, error } = await draftClient.client
+  const { data, error } = await client.client
     .from("drafts")
     .select("metadata, history")
     .eq("id", input.draftId)
-    .eq("owner_id", input.scope.ownerId)
-    .eq("tenant_id", input.scope.tenantId)
+    .eq("owner_user_id", input.scope.ownerUserId)
+    .is("deleted_at", null)
     .maybeSingle();
-  if (error) return { ok: false, blocked: blockedTableAccess("read", error) };
-  if (!data) return { ok: true };
+
+  if (error) return { ok: false as const, blocked: blocked("Draft persistence blocked: unable to read audit context.") };
+  if (!data) return { ok: true as const };
 
   const metadata = data.metadata && typeof data.metadata === "object" ? (data.metadata as Record<string, unknown>) : {};
   const history = Array.isArray(data.history) ? data.history : [];
-  const currentRemediationAudit = metadata.remediationAudit && typeof metadata.remediationAudit === "object" ? (metadata.remediationAudit as Record<string, unknown>) : {};
-
-  const nextMetadata = { ...metadata, remediationAudit: { ...currentRemediationAudit, lastEventId: input.event.id, lastEventAt: input.event.timestampUtc, lastOutcome: input.event.outcome } };
+  const nextMetadata = { ...metadata, remediationAudit: { lastEventId: input.event.id, lastEventAt: input.event.timestampUtc, lastOutcome: input.event.outcome } };
   const nextHistory = [...history, input.event].slice(-200);
 
-  const { error: updateError } = await draftClient.client
+  const { error: updateError } = await client.client
     .from("drafts")
     .update({ metadata: nextMetadata, history: nextHistory })
     .eq("id", input.draftId)
-    .eq("owner_id", input.scope.ownerId)
-    .eq("tenant_id", input.scope.tenantId);
-  if (updateError) return { ok: false, blocked: blockedTableAccess("write", updateError) };
-  return { ok: true };
+    .eq("owner_user_id", input.scope.ownerUserId)
+    .is("deleted_at", null);
+
+  if (updateError) return { ok: false as const, blocked: blocked("Draft persistence blocked: unable to write audit event.") };
+  return { ok: true as const };
 }
 
 export const DRAFTS_REQUIRED_SQL = REQUIRED_SQL;

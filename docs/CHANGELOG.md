@@ -669,3 +669,11 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Updated internal routes to pass authenticated scope context for content/crm endpoints and remediation draft-audit writes.
 - Added migration/backfill SQL: `docs/auth_segmentation_phase1.sql`.
 - Updated `docs/API_BOUNDARY.md` and `docs/PRD_Railfin_v1.md` with auth + segmentation rules.
+
+## 2026-03-19 — task-00225 auth/segmentation phase-1 (locked decisions)
+- Enforced Supabase-auth-backed owner identity for scoped internal routes.
+- Added owner scoping key `owner_user_id` and soft-delete baseline `deleted_at` in phase-1 migration docs.
+- Updated drafts/contacts/leads persistence to scope by owner and exclude soft-deleted rows by default.
+- Converted contacts delete behavior to soft delete.
+- Added deterministic migration/backfill script: `docs/auth_segmentation_phase1.sql`.
+- Added enrollment uniqueness hardening on `(owner_user_id, campaign_id, contact_id)` in migration/sql docs.

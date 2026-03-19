@@ -240,3 +240,10 @@
 - Scoped persistence for drafts/contacts/leads by `owner_id` + `tenant_id`.
 - Added deterministic migration/backfill SQL (`docs/auth_segmentation_phase1.sql`) and documented manual execution/rollback notes.
 - Build verification: `npm run build` passed.
+
+## 2026-03-19 — task-00225 (auth-seg-001) locked implementation
+- Applied phase-1 Supabase auth + owner scoping with individual-user model (no org table).
+- Implemented `owner_user_id` scoped reads/writes for drafts/contacts/leads + draft remediation audit append.
+- Implemented soft delete (`deleted_at`) defaults for reads; converted contact delete route to soft delete behavior.
+- Added deterministic idempotent SQL migration/backfill (`docs/auth_segmentation_phase1.sql`) including enrollment uniqueness hardening.
+- Validation/build: `npm run build` passed.

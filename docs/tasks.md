@@ -2369,3 +2369,12 @@
 - Added deterministic idempotent migration/backfill SQL at `docs/auth_segmentation_phase1.sql`.
 - Updated API boundary + PRD v1 auth segmentation sections.
 - Validation: `npm run build` pass.
+
+### task-00225 — Auth/Segmentation phase-1 implementation (Supabase auth + owner scoping + soft delete)
+- Status: Done
+- Run ID: `auth-seg-001`
+- Branch: `chore/sec/task-00226-auth-tenant-baseline`
+- Implemented Supabase-auth-backed owner scoping at internal API layer for content/crm + remediation draft-audit writes.
+- Implemented soft delete semantics (`deleted_at`) for scoped reads/writes (active rows only by default).
+- Added deterministic idempotent migration SQL (`docs/auth_segmentation_phase1.sql`) including enrollment uniqueness hardening.
+- Build: `npm run build` PASS.

@@ -3,12 +3,14 @@
 
 create table if not exists public.campaigns (
   id text primary key,
+  owner_user_id uuid not null,
   name text not null,
   objective text,
   status text not null check (status in ('draft', 'active', 'paused', 'archived')),
   targeting_json jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default timezone('utc', now()),
-  updated_at timestamptz not null default timezone('utc', now())
+  updated_at timestamptz not null default timezone('utc', now()),
+  deleted_at timestamptz null
 );
 
 create table if not exists public.campaign_sequences (
@@ -53,6 +55,7 @@ create table if not exists public.campaign_steps (
 
 create table if not exists public.campaign_enrollments (
   id text primary key,
+  owner_user_id uuid not null,
   campaign_id text not null references public.campaigns(id) on delete cascade,
   contact_id text not null,
   enrollment_status text not null check (enrollment_status in ('pending', 'active', 'paused', 'completed', 'exited')),
@@ -60,7 +63,9 @@ create table if not exists public.campaign_enrollments (
   active_step_id text,
   next_eligible_at timestamptz,
   enrolled_at timestamptz not null default timezone('utc', now()),
-  last_transition_at timestamptz not null default timezone('utc', now())
+  last_transition_at timestamptz not null default timezone('utc', now()),
+  deleted_at timestamptz null,
+  constraint campaign_enrollments_owner_campaign_contact_unique unique (owner_user_id, campaign_id, contact_id)
 );
 
 create table if not exists public.campaign_enrollment_events (
@@ -102,11 +107,12 @@ create table if not exists public.contacts (
   source text,
   lead_stage text not null check (lead_stage in ('new', 'contacted', 'qualified', 'closed')),
   lead_score integer,
-  owner_user_id text,
+  owner_user_id uuid not null,
   tags text[] not null default '{}',
   metadata_json jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default timezone('utc', now()),
-  updated_at timestamptz not null default timezone('utc', now())
+  updated_at timestamptz not null default timezone('utc', now()),
+  deleted_at timestamptz null
 );
 
 create table if not exists public.segments (

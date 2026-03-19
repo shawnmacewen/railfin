@@ -32,12 +32,6 @@ export async function POST(request: NextRequest) {
     findingId: result.data.audit.findingId,
   });
 
-  await appendDraftRemediationAuditEvent({
-    draftId: result.data.audit.draftContextId,
-    event: { ...result.data.audit, type: "apply" },
-    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
-  });
-  console.info("[remediation-apply]", result.data.audit);
-
+  await appendDraftRemediationAuditEvent({ draftId: result.data.audit.draftContextId, event: { ...result.data.audit, type: "apply" }, scope: { ownerUserId: auth.userId } });
   return NextResponse.json({ ok: true, data: result.data }, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }

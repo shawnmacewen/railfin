@@ -45,11 +45,7 @@ export async function POST(request: NextRequest) {
     context: { source: "api/internal/compliance/remediation/undo" },
   };
 
-  await appendDraftRemediationAuditEvent({
-    draftId: audit.draftContextId,
-    event: { ...audit, type: "undo" },
-    scope: { ownerId: auth.userId, tenantId: auth.tenantId },
-  });
+  await appendDraftRemediationAuditEvent({ draftId: audit.draftContextId, event: { ...audit, type: "undo" }, scope: { ownerUserId: auth.userId } });
 
   return NextResponse.json({ ok: true, data: { ...result.data, audit } }, { headers: INTERNAL_SENSITIVE_NO_STORE_HEADERS });
 }

@@ -45,9 +45,7 @@ function applyFilters(items: ContactRecord[], filters: { search?: string; stage?
     if (source && (item.source ?? "").toLowerCase() !== source) return false;
 
     if (!search) return true;
-    const haystack = [item.fullName, item.primaryEmail, item.primaryPhone ?? "", item.source ?? "", item.lead.stage]
-      .join(" ")
-      .toLowerCase();
+    const haystack = [item.fullName, item.primaryEmail, item.primaryPhone ?? "", item.source ?? "", item.lead.stage].join(" ").toLowerCase();
     return haystack.includes(search);
   });
 }
@@ -55,13 +53,8 @@ function applyFilters(items: ContactRecord[], filters: { search?: string; stage?
 function validateContactBody(body: ContactBody | undefined):
   | { ok: true; data: { fullName: string; primaryEmail: string; primaryPhone: string | null; source: string | null; stage: ContactStage } }
   | { ok: false; error: string; fieldErrors: ValidationError[] } {
-  if (!isPlainObject(body)) {
-    return { ok: false, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." }] };
-  }
-
-  if (!hasOnlyKeys(body, ["fullName", "primaryEmail", "primaryPhone", "source", "stage"])) {
-    return { ok: false, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported fields in request body." }] };
-  }
+  if (!isPlainObject(body)) return { ok: false, error: "Validation failed", fieldErrors: [{ field: "body", message: "body must be a JSON object." }] };
+  if (!hasOnlyKeys(body, ["fullName", "primaryEmail", "primaryPhone", "source", "stage"])) return { ok: false, error: "Validation failed", fieldErrors: [{ field: "body", message: "Unsupported fields in request body." }] };
 
   const fullName = normalizeString(body.fullName);
   const primaryEmail = normalizeString(body.primaryEmail).toLowerCase();
@@ -80,24 +73,13 @@ function validateContactBody(body: ContactBody | undefined):
   if (source && source.length > 80) fieldErrors.push({ field: "source", message: "source must be 80 characters or fewer." });
   if (!isStage(stage)) fieldErrors.push({ field: "stage", message: "stage must be one of new, contacted, qualified, closed." });
 
-  if (fieldErrors.length > 0) {
-    return { ok: false, error: "Validation failed", fieldErrors };
-  }
+  if (fieldErrors.length > 0) return { ok: false, error: "Validation failed", fieldErrors };
 
-  return {
-    ok: true,
-    data: {
-      fullName,
-      primaryEmail,
-      primaryPhone: primaryPhone || null,
-      source: source || null,
-      stage: stage as ContactStage,
-    },
-  };
+  return { ok: true, data: { fullName, primaryEmail, primaryPhone: primaryPhone || null, source: source || null, stage: stage as ContactStage } };
 }
 
 export async function internalContactsList(filters: { search?: string; stage?: string; source?: string; scope?: DataScope } = {}) {
-  const scope = filters.scope ?? { ownerId: process.env.INTERNAL_API_DEFAULT_OWNER_ID ?? "legacy-owner", tenantId: process.env.INTERNAL_API_DEFAULT_TENANT_ID ?? "legacy-tenant" };
+  const scope = filters.scope ?? { ownerUserId: process.env.INTERNAL_API_DEFAULT_OWNER_ID ?? "legacy-owner" };
   const listed = await listContactsFromTable(scope);
   if (!listed.ok) {
     if (listed.blocked.error.includes("public.contacts table is missing")) {
@@ -118,67 +100,39 @@ export async function internalContactsCreate(input: { body?: ContactBody; scope:
   if (!validated.ok) return validated;
 
   const created = await createContactInTable({ ...validated.data, scope: input.scope });
-  if (!created.ok) {
-    return { ok: false as const, error: created.blocked.error, blocked: created.blocked };
-  }
-
+  if (!created.ok) return { ok: false as const, error: created.blocked.error, blocked: created.blocked };
   return { ok: true as const, data: contactFromContactTable(created.contact) };
 }
 
 export async function internalContactsUpdate(input: { contactId: string; body?: ContactBody; scope: DataScope }) {
   const contactId = normalizeString(input.contactId);
-  if (!contactId) {
-    return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
-  }
+  if (!contactId) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
 
   const validated = validateContactBody(input.body);
   if (!validated.ok) return validated;
 
   const updated = await updateContactInTable({ id: contactId, ...validated.data, scope: input.scope });
-  if (!updated.ok) {
-    return { ok: false as const, error: updated.blocked.error, blocked: updated.blocked };
-  }
-
-  if (!updated.contact) {
-    return { ok: false as const, error: "Contact not found" };
-  }
-
+  if (!updated.ok) return { ok: false as const, error: updated.blocked.error, blocked: updated.blocked };
+  if (!updated.contact) return { ok: false as const, error: "Contact not found" };
   return { ok: true as const, data: contactFromContactTable(updated.contact) };
 }
 
-
 export async function internalContactsGet(input: { contactId: string; scope: DataScope }) {
   const contactId = normalizeString(input.contactId);
-  if (!contactId) {
-    return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
-  }
+  if (!contactId) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
 
   const found = await getContactFromTable(contactId, input.scope);
-  if (!found.ok) {
-    return { ok: false as const, error: found.blocked.error, blocked: found.blocked };
-  }
-
-  if (!found.contact) {
-    return { ok: false as const, error: "Contact not found" };
-  }
-
+  if (!found.ok) return { ok: false as const, error: found.blocked.error, blocked: found.blocked };
+  if (!found.contact) return { ok: false as const, error: "Contact not found" };
   return { ok: true as const, data: contactFromContactTable(found.contact) };
 }
 
 export async function internalContactsDelete(input: { contactId: string; scope: DataScope }) {
   const contactId = normalizeString(input.contactId);
-  if (!contactId) {
-    return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
-  }
+  if (!contactId) return { ok: false as const, error: "Validation failed", fieldErrors: [{ field: "contactId", message: "contactId is required." }] };
 
   const deleted = await deleteContactFromTable(contactId, input.scope);
-  if (!deleted.ok) {
-    return { ok: false as const, error: deleted.blocked.error, blocked: deleted.blocked };
-  }
-
-  if (!deleted.deleted) {
-    return { ok: false as const, error: "Contact not found" };
-  }
-
+  if (!deleted.ok) return { ok: false as const, error: deleted.blocked.error, blocked: deleted.blocked };
+  if (!deleted.deleted) return { ok: false as const, error: "Contact not found" };
   return { ok: true as const, data: { id: contactId, deleted: true } };
 }
