@@ -842,3 +842,16 @@ Migration source of truth:
 - `docs/auth_segmentation_phase1.sql`
 - Includes owner column + soft delete columns, deterministic backfill, active-scope indexes, and enrollment uniqueness hardening:
   - unique `(owner_user_id, campaign_id, contact_id)` on `campaign_enrollments` (active rows).
+
+## task-00227 hotfix — no-login compatibility auth gate consistency
+
+Current product mode runs without a mandatory sign-in flow. To preserve UX while migration is in-flight:
+
+- `requireInternalApiAuthContext` now uses the same compat acceptance envelope as `requireInternalApiAuth`:
+  - allow request when `INTERNAL_API_AUTH_COMPAT_MODE != off` and request is either:
+    - same-origin trusted request, **or**
+    - carries known internal session cookie
+- Compat context resolves deterministic owner fallback user id:
+  - `INTERNAL_API_DEFAULT_OWNER_ID` or sentinel `00000000-0000-0000-0000-000000000001`
+
+This keeps CRM/Events/Campaigns behavior aligned in no-login mode while retaining Supabase JWT-first scaffolding for future sign-in enforcement.

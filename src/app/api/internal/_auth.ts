@@ -57,7 +57,7 @@ export async function requireInternalApiAuthContext(request: NextRequest): Promi
   const resolvedUser = await resolveSupabaseUser(request);
   if (resolvedUser) return resolvedUser;
 
-  if (INTERNAL_API_AUTH_COMPAT_MODE && hasInternalSessionCookie(request) && isTrustedSameOriginRequest(request)) {
+  if (INTERNAL_API_AUTH_COMPAT_MODE && (hasInternalSessionCookie(request) || isTrustedSameOriginRequest(request))) {
     return { userId: DEFAULT_COMPAT_OWNER_ID, source: "compat" };
   }
 
