@@ -247,3 +247,11 @@
 - Implemented soft delete (`deleted_at`) defaults for reads; converted contact delete route to soft delete behavior.
 - Added deterministic idempotent SQL migration/backfill (`docs/auth_segmentation_phase1.sql`) including enrollment uniqueness hardening.
 - Validation/build: `npm run build` passed.
+
+## 2026-05-06 — task-00227 hotfix-auth-compat-001
+- Root cause isolated to auth guard mismatch:
+  - `requireInternalApiAuthContext` required `(same-origin AND cookie)` in compat fallback.
+  - `requireInternalApiAuth` allowed `(same-origin OR cookie)`.
+- CRM routes use auth-context and were failing 401 in no-login mode; campaigns/events core routes using simpler gate often passed.
+- Hotfix applied by aligning auth-context compat condition to OR semantics, preserving deterministic fallback owner id and Supabase JWT-first path.
+- Build verification completed (`npm run build` pass).

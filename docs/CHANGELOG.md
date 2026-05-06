@@ -684,3 +684,8 @@ This change log is written for humans. It tracks major shipped milestones and pr
 - Added compat-mode risk treatment and cutoff path (`INTERNAL_API_AUTH_COMPAT_MODE=off` before safe multi-user beta).
 - Verified task-00225 implementation posture: auth-context guard coverage + owner scoping + soft-delete filters are in place for drafts/contacts/leads.
 - Verified schema-level duplicate enrollment uniqueness defense exists; documented runtime conflict-response hardening follow-up.
+
+## 2026-05-06 — task-00227 no-login auth compat hotfix
+- Fixed internal auth consistency bug where auth-context routes (CRM) returned 401 in no-login mode while campaigns routes succeeded.
+- Updated compat behavior in `requireInternalApiAuthContext` to accept same-origin **or** recognized internal session cookies (matching existing compat gate semantics).
+- Preserved Supabase JWT-first auth path and deterministic owner fallback id for no-login mode.

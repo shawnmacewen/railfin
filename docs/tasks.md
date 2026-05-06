@@ -2389,3 +2389,10 @@
   - Verified landed task-00225 implementation coverage for auth-context guard usage, owner scoping, and soft-delete behavior on drafts/contacts/leads.
   - Verified duplicate enrollment uniqueness defense exists at schema level (`campaign_enrollments(owner_user_id, campaign_id, contact_id)` unique partial index), with runtime conflict-mapping hardening still recommended.
   - Build verification: **SKIPPED** (docs-only task; no runtime code changes).
+
+### task-00227 — Hotfix auth consistency for no-login mode
+- Status: Done
+- Branch: `fix/dev/task-00227-auth-compat-no-login`
+- Root cause: auth-context compat gate required both same-origin and cookie, while other internal routes accepted same-origin-only in compat mode. CRM routes using auth-context 401'd; Campaigns using simpler auth gate continued working.
+- Fix: align `requireInternalApiAuthContext` compat acceptance with `requireInternalApiAuth` (`same-origin OR internal cookie`) with deterministic default owner fallback id.
+- Validation: build pass; no-login internal CRM/Events/Campaigns requests now share consistent compat behavior.
