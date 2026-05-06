@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { User } from "lucide-react";
 
 import { Card } from "../../../ui/primitives";
 
@@ -392,7 +393,12 @@ export default function CrmPage() {
                   <tbody>
                     {filteredItems.map((lead) => (
                       <tr key={lead.id}>
-                        <td>{lead.name}</td>
+                        <td>
+                          <span className="rf-contact-name-with-icon">
+                            <User size={14} aria-hidden="true" />
+                            <span>{lead.name}</span>
+                          </span>
+                        </td>
                         <td>{lead.email}</td>
                         <td>{lead.phone ?? "—"}</td>
                         <td>{lead.source ?? "—"}</td>
@@ -413,7 +419,10 @@ export default function CrmPage() {
               <ul className="rf-crm-cards" aria-label="Contacts list">
                 {filteredItems.map((lead) => (
                   <li key={`card-${lead.id}`} className="rf-crm-card">
-                    <h4>{lead.name}</h4>
+                    <h4 className="rf-contact-name-with-icon">
+                      <User size={14} aria-hidden="true" />
+                      <span>{lead.name}</span>
+                    </h4>
                     <p><strong>Email:</strong> {lead.email}</p>
                     <p><strong>Phone:</strong> {lead.phone ?? "—"}</p>
                     <p><strong>Source:</strong> {lead.source ?? "—"}</p>

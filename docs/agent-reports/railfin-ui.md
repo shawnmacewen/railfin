@@ -405,3 +405,10 @@
 - Added event editor prefill + update mode support.
 - Added delete confirmation + reload behavior.
 - Build verified pass.
+
+### task-00228b — Contacts UI quick test (person icon)
+- Added person icon to the left of contact names in CRM Contacts table rows.
+- Added matching person icon treatment to CRM contact card/mobile titles.
+- Kept spacing/alignment clean with shared `rf-contact-name-with-icon` styling.
+- No behavior/API changes.
+- Build verified pass.

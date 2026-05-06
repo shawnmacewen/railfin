@@ -1,3 +1,15 @@
+## task-00228b — UI — Contacts quick test: person icon left of name
+
+- Status: **Done**
+- Branch: `feat/ui/task-00228b-contacts-person-icon`
+- Scope delivered:
+  - Added a person icon to the left of each contact name in CRM Contacts table rows.
+  - Added the same person icon treatment in CRM mobile/card view contact titles.
+  - Used existing project icon system (`lucide-react`) for consistent style.
+  - Applied light alignment/spacing styles to keep icon+name clean in both views.
+  - No behavior/API changes.
+  - Updated docs and verified with `npm run build` (pass).
+
 ## task-00224 — UI — Fix Create compliance toggle regression (collapsed state visibility mismatch)
 
 - Status: **Done**

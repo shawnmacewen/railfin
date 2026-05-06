@@ -2152,6 +2152,17 @@ button:disabled {
   color: #2f3a5f;
 }
 
+.rf-contact-name-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rf-contact-name-with-icon svg {
+  color: #4e5879;
+  flex: 0 0 auto;
+}
+
 @media (max-width: 1100px) {
   .rf-content {
     padding: 0.85rem;
