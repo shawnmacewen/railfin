@@ -245,60 +245,68 @@ button:disabled {
 }
 
 
-.rf-nav-icon-create {
+.rf-nav-item-icon {
+  color: #4a5568;
+}
+
+.rf-nav-item.is-active .rf-nav-icon-create {
   color: #e46a0c;
 }
 
-.rf-nav-icon-library {
+.rf-nav-item.is-active .rf-nav-icon-library {
   color: #0664b5;
 }
 
-.rf-nav-icon-campaigns {
+.rf-nav-item.is-active .rf-nav-icon-campaigns {
   color: #0298b8;
 }
 
-.rf-nav-icon-crm {
+.rf-nav-item.is-active .rf-nav-icon-crm {
   color: #0483b7;
 }
 
-.rf-nav-icon-events {
+.rf-nav-item.is-active .rf-nav-icon-events {
   color: #b95616;
 }
 
-.rf-nav-icon-help {
+.rf-nav-item.is-active .rf-nav-icon-help {
   color: #0476a6;
 }
 
-.rf-nav-icon-configure {
+.rf-nav-item.is-active .rf-nav-icon-configure {
   color: #137fa0;
 }
 
 @media (prefers-color-scheme: dark) {
-  .rf-nav-icon-create {
+  .rf-nav-item-icon {
+    color: #667289;
+  }
+
+  .rf-nav-item.is-active .rf-nav-icon-create {
     color: #f08f3f;
   }
 
-  .rf-nav-icon-library {
+  .rf-nav-item.is-active .rf-nav-icon-library {
     color: #3b8bd0;
   }
 
-  .rf-nav-icon-campaigns {
+  .rf-nav-item.is-active .rf-nav-icon-campaigns {
     color: #3db3cc;
   }
 
-  .rf-nav-icon-crm {
+  .rf-nav-item.is-active .rf-nav-icon-crm {
     color: #57a7ce;
   }
 
-  .rf-nav-icon-events {
+  .rf-nav-item.is-active .rf-nav-icon-events {
     color: #ef8a43;
   }
 
-  .rf-nav-icon-help {
+  .rf-nav-item.is-active .rf-nav-icon-help {
     color: #58a9d0;
   }
 
-  .rf-nav-icon-configure {
+  .rf-nav-item.is-active .rf-nav-icon-configure {
     color: #63b8d2;
   }
 
