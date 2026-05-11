@@ -203,11 +203,11 @@ button:disabled {
   justify-content: flex-start;
   gap: 0.48rem;
   box-sizing: border-box;
-  border-radius: 8px;
+  border-radius: 10px;
   height: 2.2rem;
   min-height: 2.2rem;
   max-height: 2.2rem;
-  padding: 0 0.5rem;
+  padding: 0 0.56rem;
   margin: 0;
   color: #3b4259;
   font-size: 1.13rem;
@@ -348,6 +348,7 @@ button:disabled {
 .rf-header-title {
   margin: 0;
   font-size: 1rem;
+  letter-spacing: -0.01em;
 }
 
 .rf-header-actions {
@@ -671,8 +672,8 @@ button:disabled {
 }
 
 .rf-library-subtitle {
-  margin: 0.3rem 0 0.9rem;
-  color: #4e5879;
+  margin: 0.34rem 0 0.95rem;
+  color: #5f6886;
 }
 
 .rf-library-subtitle-standalone {
@@ -898,11 +899,12 @@ button:disabled {
 
 .rf-page-title {
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .rf-page-subtitle {
-  margin: 0.3rem 0 0;
-  color: #4e5879;
+  margin: 0.34rem 0 0;
+  color: #5f6886;
 }
 
 .rf-page-subtitle-standalone {
