@@ -77,22 +77,6 @@ button:disabled {
   grid-template-columns: 4.5rem 1fr;
 }
 
-.rf-build-sha-badge {
-  position: fixed;
-  top: 0.35rem;
-  right: 0.55rem;
-  z-index: 30;
-  font-size: 0.64rem;
-  line-height: 1;
-  letter-spacing: 0.03em;
-  color: #9ca3af;
-  background: rgba(247, 248, 252, 0.9);
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  padding: 0.12rem 0.38rem;
-  pointer-events: none;
-  user-select: none;
-}
 
 .rf-sidebar {
   border-right: 1px solid var(--rf-border);
@@ -180,6 +164,20 @@ button:disabled {
   transition: opacity 120ms ease, clip-path 180ms ease;
 }
 
+.rf-nav-sha-label {
+  margin-left: 2.42rem;
+  margin-top: 0.14rem;
+  font-size: 0.58rem;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: #a2aac1;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0.9;
+  clip-path: inset(0 0 0 0);
+  transition: opacity 120ms ease, clip-path 180ms ease;
+}
+
 .rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-brand-text {
   opacity: 0;
   clip-path: inset(0 100% 0 0);
@@ -192,7 +190,8 @@ button:disabled {
   pointer-events: none;
 }
 
-.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-version-label {
+.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-version-label,
+.rf-shell.is-sidebar-collapsed:not(.is-mobile-nav-open) .rf-nav-sha-label {
   opacity: 0;
   clip-path: inset(0 100% 0 0);
   pointer-events: none;
@@ -1793,7 +1792,8 @@ button:disabled {
 }
 
 .rf-campaigns-table-scroll .rf-crm-table tbody tr.is-active {
-  background: #f2f6ff;
+  background: #eef2ff;
+  box-shadow: inset 0 0 0 1px #dfe5ff;
 }
 
 .rf-campaigns-detail-grid {
@@ -1814,10 +1814,11 @@ button:disabled {
 }
 
 .rf-campaigns-sequence-card {
-  border: 1px solid #e4e8f5;
-  border-radius: 8px;
-  background: #fafbff;
-  padding: 0.6rem;
+  border: 1px solid #e6e9f7;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  box-shadow: 0 8px 20px rgba(20, 29, 63, 0.05);
+  padding: 0.75rem;
 }
 
 .rf-campaigns-sequence-card h4 {
@@ -1833,10 +1834,11 @@ button:disabled {
 }
 
 .rf-campaigns-targeting-stub {
-  border: 1px solid #dbe4ff;
-  border-radius: 8px;
-  background: #f8faff;
-  padding: 0.6rem;
+  border: 1px solid #dee5ff;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbfcff 0%, #f6f8ff 100%);
+  box-shadow: 0 6px 16px rgba(20, 29, 63, 0.04);
+  padding: 0.7rem;
 }
 
 .rf-campaigns-targeting-stub h4 {

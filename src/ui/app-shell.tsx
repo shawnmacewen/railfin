@@ -135,7 +135,6 @@ export function AppShell({ children, buildSha, appVersion }: { children: ReactNo
 
   return (
     <div className={`rf-shell ${isSidebarExpanded ? "" : "is-sidebar-collapsed"} ${isMobileNavOpen ? "is-mobile-nav-open" : ""}`}>
-      {buildSha ? <div className="rf-build-sha-badge" aria-label="Build version">{buildSha}</div> : null}
       <aside
         className="rf-sidebar"
         aria-label="Primary navigation"
@@ -175,10 +174,19 @@ export function AppShell({ children, buildSha, appVersion }: { children: ReactNo
                 active={isActive(pathname, item.href)}
                 onNavigateAttempt={onNavigateAttempt}
               />
-              {item.label === "Configure" && appVersion ? (
-                <div className="rf-nav-version-label" aria-label={`Railfin version ${appVersion}`}>
-                  v{appVersion}
-                </div>
+              {item.label === "Configure" ? (
+                <>
+                  {appVersion ? (
+                    <div className="rf-nav-version-label" aria-label={`Railfin version ${appVersion}`}>
+                      v{appVersion}
+                    </div>
+                  ) : null}
+                  {buildSha ? (
+                    <div className="rf-nav-sha-label" aria-label={`Build ${buildSha}`}>
+                      {buildSha}
+                    </div>
+                  ) : null}
+                </>
               ) : null}
             </div>
           ))}
