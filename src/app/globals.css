@@ -787,6 +787,10 @@ button:disabled {
   flex-wrap: wrap;
   gap: 0.8rem;
   font-size: 0.84rem;
+  border: 1px solid #e3e8fa;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+  padding: 0.55rem 0.65rem;
 }
 
 .rf-generate-mode label {
@@ -1150,13 +1154,13 @@ button:disabled {
 .rf-status-pill {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #c7d5ff;
-  border-radius: 8px;
-  padding: 0.2rem 0.6rem;
-  background: #eef2ff;
-  color: #1b378a;
+  border: 1px solid #d5ddfb;
+  border-radius: 999px;
+  padding: 0.24rem 0.66rem;
+  background: linear-gradient(180deg, #f3f6ff 0%, #eaf0ff 100%);
+  color: #2743a3;
   font-size: 0.76rem;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -1655,7 +1659,12 @@ button:disabled {
 
 .rf-help-card {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  border: 1px solid #e6e9f7;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  box-shadow: 0 8px 20px rgba(20, 29, 63, 0.05);
+  padding: 0.8rem;
 }
 
 .rf-help-card h4 {
@@ -2142,6 +2151,7 @@ button:disabled {
   gap: 0.45rem;
   padding-top: 0.6rem;
   border-top: 1px solid #e8ecf8;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fafbff 100%);
 }
 
 .rf-sidebar-control-button,
